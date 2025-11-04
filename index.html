@@ -31,7 +31,7 @@
             margin: 0;
             background: var(--bg);
             color: var(--ink);
-            font: 16px/1.45 -apple-system, BlinkSystemFont, Inter, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font: 16px/1.45 -apple-system, BlinkMacSystemFont, Inter, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
         
         .wrap {
@@ -49,7 +49,45 @@
             background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.86) 60%, rgba(255,255,255,.70));
             border-bottom: 1px solid var(--line);
             padding: 12px 24px;
-            margin: 0 -24px 12px;
+            margin: 0 -24px 24px;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-shrink: 0;
+            margin-right: 24px;
+        }
+        
+        .logo-symbol {
+            flex-shrink: 0;
+            width: 48px;
+            height: 48px;
+        }
+        
+        .logo-text {
+            font-size: 28px;
+            font-weight: 900;
+            letter-spacing: .08em;
+            font-style: italic;
+            color: var(--ink);
+            text-transform: uppercase;
+            line-height: 1;
+        }
+        
+        .title {
+            font-size: 32px;
+            font-weight: 800;
+            line-height: 1.1;
+            margin: 4px 0 8px;
+        }
+        
+        .subtitle {
+            color: var(--muted);
+            font-size: 14px;
+            max-width: 960px;
+            line-height: 1.4;
         }
         
         .hdr-inner {
@@ -59,26 +97,16 @@
             justify-content: space-between;
         }
         
-        .kicker {
-            letter-spacing: .22em;
-            text-transform: uppercase;
-            color: var(--muted);
-            font-weight: 700;
-            font-size: 12px;
-        }
-        
-        .title {
-            font-size: 32px;
+        .section-title {
+            font-size: 20px;
             font-weight: 800;
-            line-height: 1.1;
-            margin: 8px 0 6px;
+            margin-top: 40px;
+            margin-bottom: 16px;
+            color: var(--ink);
         }
         
-        .subtitle {
-            color: var(--muted);
-            font-size: 14px;
-            max-width: 960px;
-            line-height: 1.5;
+        .section-title:first-of-type {
+            margin-top: 0;
         }
         
         .dashboard-grid {
@@ -175,23 +203,15 @@
             font-size: 8px;
         }
         
-        .section-title {
-            font-size: 20px;
-            font-weight: 800;
-            margin-top: 40px;
-            margin-bottom: 16px;
-            color: var(--ink);
-        }
-        
-        .footer {
-            margin-top: 48px;
-            padding-top: 24px;
-            border-top: 1px solid var(--line);
+        .foot {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 12px;
+            margin-top: 48px;
+            padding-top: 24px;
+            border-top: 1px solid var(--line);
             color: var(--muted);
+            font-size: 12px;
         }
         
         .brandmark {
@@ -200,12 +220,49 @@
         }
         
         @media (max-width: 768px) {
-            .dashboard-grid {
-                grid-template-columns: 1fr;
+            .wrap {
+                padding: 18px;
+            }
+            
+            .hdr {
+                padding: 12px;
+                margin: 0 -12px 12px;
+            }
+            
+            .logo-container {
+                margin-right: 12px;
+                gap: 10px;
+            }
+            
+            .logo-symbol {
+                width: 36px;
+                height: 36px;
+            }
+            
+            .logo-text {
+                font-size: 20px;
             }
             
             .title {
                 font-size: 24px;
+            }
+            
+            .subtitle {
+                font-size: 13px;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+                margin-top: 24px;
+            }
+            
+            .dashboard-card {
+                padding: 18px;
+            }
+            
+            .dashboard-card h2 {
+                font-size: 20px;
             }
         }
     </style>
@@ -213,10 +270,20 @@
 <body>
     <div class="hdr">
         <div class="wrap hdr-inner">
-            <div style="flex: 1 1 auto; min-width: 0;">
-                <div class="kicker">SALES OPS • ANALYTICS</div>
-                <div class="title">Sales Ops Analytics</div>
-                <div class="subtitle">Real-time analytics dashboards for sales operations. Select a dashboard below to view detailed metrics and insights.</div>
+            <div style="flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 16px;">
+                <!-- Innovative Logo -->
+                <div class="logo-container">
+                    <svg class="logo-symbol" viewBox="0 0 48 48" width="48" height="48" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Abstract symbol: two overlapping rounded rectangles (rotated) -->
+                        <rect x="8" y="8" width="32" height="32" rx="6" fill="none" stroke="#101418" stroke-width="2.5" transform="rotate(-8 24 24)"/>
+                        <rect x="12" y="12" width="24" height="24" rx="4" fill="none" stroke="#101418" stroke-width="2.5" transform="rotate(8 24 24)"/>
+                    </svg>
+                    <span class="logo-text">INNOVATIVE</span>
+                </div>
+                <div style="flex: 1;">
+                    <div class="title">Sales Ops Analytics</div>
+                    <div class="subtitle">Real-time analytics dashboards for sales operations. Select a dashboard below to view detailed metrics and insights.</div>
+                </div>
             </div>
         </div>
     </div>
@@ -300,7 +367,7 @@
             </a>
         </div>
         
-        <div class="footer">
+        <div class="foot">
             <div>Report generated automatically • Refresh page to update metrics</div>
             <div class="brandmark">INNOVATIVE • SALES OPS</div>
         </div>

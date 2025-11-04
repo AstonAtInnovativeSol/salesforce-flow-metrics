@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Touchpoint Intelligence Report</title>
+<style>
+  :root{
+    --bg:#ffffff;--ink:#101418;--muted:#6b7280;--line:#e5e7eb;--panel:#fafafa;
+    --brand:#4b7bec; --brand-2:#6b5af9; --accent:#f8fafc; --border:#e2e8f0;
+    --glass: rgba(255,255,255,.65);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 -apple-system,BlinkMacSystemFont,Inter,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+
+  .wrap{max-width:1400px;margin:0 auto;padding:24px;width:100%}
+
+  .hdr{
+    position:sticky;top:0;z-index:20;backdrop-filter:saturate(180%) blur(8px);
+    background:linear-gradient(180deg,rgba(255,255,255,.92),rgba(255,255,255,.86) 60%,rgba(255,255,255,.70));
+    border-bottom:1px solid var(--line); padding:12px 24px; margin:0 -24px 12px;
+  }
+  .hdr-inner{display:flex;gap:18px;align-items:flex-start;justify-content:space-between}
+  .kicker{letter-spacing:.22em;text-transform:uppercase;color:var(--muted);font-weight:700;font-size:12px}
+  .title{font-size:24px;font-weight:800;line-height:1.1;margin:4px 0 3px}
+  .subtitle{color:var(--muted);font-size:13px;max-width:960px;line-height:1.4}
+
+  /* ---------- Data Lineage Capsule (new Powered By) ---------- */
+  .lineage{
+    --g1:#6b5af9; --g2:#4b7bec;
+    position:relative; isolation:isolate;
+    border-radius:14px; padding:12px 14px;
+    background: var(--glass);
+    backdrop-filter: blur(10px) saturate(130%);
+    box-shadow: 0 8px 20px rgba(16,24,40,.08), inset 0 1px 0 rgba(255,255,255,.4);
+  }
+  /* gradient border without heavy paints */
+  .lineage::before{
+    content:""; position:absolute; inset:0; border-radius:14px;
+    padding:1px; background:linear-gradient(135deg, var(--g1), var(--g2));
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor; mask-composite: exclude;
+    pointer-events:none;
+  }
+  .lineage-head{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+  }
+  .lineage-title{
+    font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+    color:#7c8aa5; font-weight:800;
+  }
+  .lineage-cta{
+    border:1px solid rgba(98,113,255,.25); background:#fff; color:#334155;
+    border-radius:999px; padding:6px 10px; font-size:12px; font-weight:700; cursor:pointer;
+    transition:.18s; box-shadow:0 1px 2px rgba(0,0,0,.06);
+  }
+  .lineage-cta:hover{transform:translateY(-1px); box-shadow:0 3px 8px rgba(0,0,0,.10)}
+  .sources{
+    display:flex; gap:14px; align-items:center; flex-wrap:wrap; margin-top:8px;
+  }
+  .source{
+    display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:10px;
+    background:#fff; border:1px solid var(--border); box-shadow:0 1px 2px rgba(0,0,0,.04);
+    transition:.2s;
+  }
+  .source:hover{transform:translateY(-1px); box-shadow:0 3px 8px rgba(0,0,0,.10); border-color:#c7cff6}
+  .glyph{
+    width:18px; height:18px; display:inline-block; opacity:.85;
+    transition:opacity .2s, transform .2s, filter .2s;
+  }
+  .source:hover .glyph{opacity:1; filter:none; transform:scale(1.04)}
+  .src-name{font-size:12px; font-weight:700; color:#2b3441; letter-spacing:.01em; white-space:nowrap}
+  .sig{font-size:11px; color:#6b7280}
+
+  /* ---------- Modal (Details Drawer) ---------- */
+  .pb-modal{
+    position:fixed; inset:0; background:rgba(15,23,42,.35);
+    display:none; align-items:flex-start; justify-content:center; padding:40px 16px; z-index:60;
+  }
+  .pb-modal.open{display:flex}
+  .pb-card{
+    width:min(960px, 92vw); background:#fff; border:1px solid var(--border); border-radius:16px;
+    box-shadow:0 24px 60px rgba(2,6,23,.18); overflow:hidden; animation:rise .22s ease;
+  }
+  @keyframes rise{from{opacity:0; transform:translateY(6px)}to{opacity:1; transform:translateY(0)}}
+  .pb-head{display:flex; justify-content:space-between; align-items:center; padding:16px 18px; border-bottom:1px solid var(--line)}
+  .pb-title{font-weight:800}
+  .pb-close{border:1px solid var(--border); background:#fff; border-radius:10px; padding:8px 10px; cursor:pointer}
+  .pb-grid{display:grid; grid-template-columns:repeat(5,1fr); gap:12px; padding:16px}
+  .pb-tile{border:1px solid var(--border); border-radius:12px; padding:12px; background:#fafafa}
+  .pb-row{display:flex; align-items:center; gap:8px; margin-bottom:8px}
+  .pb-mono{font-variant-numeric:tabular-nums}
+  .bar{height:6px; border-radius:999px; background:linear-gradient(90deg,#ecfdf5,#bbf7d0)}
+  .meta{font-size:12px; color:#64748b}
+  @media (max-width:980px){ .pb-grid{grid-template-columns:1fr 1fr} }
+
+  /* ---------- Common components (table etc. unchanged) ---------- */
+  .pill{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;border:1px solid #e6eaf5;border-radius:999px;padding:6px 10px;background:#f7f9ff}
+  .dot{width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,var(--brand),var(--brand-2))}
+  .bar8{height:8px;border-radius:999px;background:linear-gradient(90deg,var(--brand),var(--brand-2))}
+  .tools{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
+  .input,select{appearance:none;border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:14px;background:#fff}
+  .btn{border:1px solid var(--border);background:#fff;border-radius:10px;padding:10px 12px;font-size:14px;cursor:pointer}
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,.05),0 1px 2px rgba(0,0,0,.08)}
+  .callout{display:flex;align-items:center;gap:12px;border-left:4px solid var(--brand);background:linear-gradient(135deg,#f6f9ff,#f0f4ff);border-radius:10px;padding:14px 16px;font-size:14px}
+  .callout .strong{font-weight:800}
+  .table-container{border-radius:12px;border:1px solid var(--border);box-shadow:0 1px 2px rgba(0,0,0,.05);overflow:hidden}
+  table{width:100%;border-collapse:separate;border-spacing:0}
+  thead th{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--line);color:#334155;padding:10px 10px;vertical-align:bottom}
+  .th{display:flex;flex-direction:column;line-height:1.05;gap:2px}
+  .th .h{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}
+  .th .s{font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.08em}
+  tbody td{border-bottom:1px solid var(--line);padding:12px 10px;font-size:14px;vertical-align:middle}
+  tbody tr:hover{background:var(--accent)}
+  .rank{width:40px;text-align:right;color:#6b7280;font-weight:700}
+  .company{font-weight:700}
+  .owner{color:#374151}
+  .right{text-align:right}
+  .mono{font-variant-numeric:tabular-nums}
+  .heat{display:inline-block;height:18px;min-width:34px;padding:0 8px;border-radius:6px;color:#064e3b;font-weight:700;background:linear-gradient(90deg,#ecfdf5,#bbf7d0)}
+  .note{color:#6b7280;font-size:12px;margin-top:8px}
+  .foot{display:flex;justify-content:space-between;align-items:center;margin-top:14px;color:#6b7280;font-size:12px}
+  .brandmark{font-weight:900;letter-spacing:.08em}
+  .sort{cursor:pointer;user-select:none}
+  .chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;border:1px solid var(--border);border-radius:999px;padding:6px 10px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+  .kpis{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px}
+  .kpi{display:flex;gap:8px;align-items:center;font-size:12px}
+  .kpi .swatch{width:9px;height:9px;border-radius:50%;background:#d1fae5}
+  @media (max-width:1080px){ .wrap{padding:18px} .title{font-size:22px} .lineage{display:none} .hide-sm{display:none} .th .h{font-size:11px} .th .s{font-size:9px} }
+</style>
+</head>
+<body>
+  <div class="hdr">
+    <div class="wrap hdr-inner">
+      <div style="flex:1 1 auto;min-width:0">
+        <div class="kicker">Sales Ops • Early-Signal Detection</div>
+        <div class="title">Touchpoint Intelligence Report</div>
+        <div class="subtitle">Highlights high-signal accounts (multiple active touchpoints + recent engagement) <strong>before</strong> opportunities are created.</div>
+
+        <div class="tools">
+          <span class="pill"><span class="dot"></span> Early-Signal Detection</span>
+          <div class="chip"><strong class="mono" id="accountCount">0</strong> accounts</div>
+          <div class="chip"><span class="mono" id="updatedAt">—</span> updated</div>
+        </div>
+        <div class="tools">
+          <input id="q" class="input" placeholder="Search company or owner…" />
+          <select id="age" title="Created in last...">
+            <option value="365">Created in last 12 months</option>
+            <option value="180">Created in last 6 months</option>
+            <option value="90">Created in last 90 days</option>
+            <option value="all">All time (debug)</option>
+          </select>
+          <select id="minContacts" title="Min active touchpoints">
+            <option value="4">Min 4 active touchpoints</option>
+            <option value="3">Min 3 active touchpoints</option>
+            <option value="2">Min 2 active touchpoints</option>
+          </select>
+          <button id="reset" class="btn">Reset Filters</button>
+        </div>
+        <div class="kpis">
+          <div class="kpi"><span class="swatch"></span> Target: convert <strong>5–10</strong> opps/mo from this pool with exec sponsorship</div>
+          <div class="kpi hide-sm"><span class="swatch"></span> Excludes: <strong>Innovative Solutions</strong>, <strong>AWS Sellers</strong></div>
+        </div>
+      </div>
+
+      <!-- NEW: Data Lineage Capsule -->
+      <aside class="lineage" aria-label="Data lineage">
+        <div class="lineage-head">
+          <div class="lineage-title">Powered by</div>
+          <button class="lineage-cta" id="pbOpen" aria-haspopup="dialog" aria-controls="pbModal">View details</button>
+        </div>
+        <div class="sources" role="list">
+          <!-- Minimal, handmade glyphs: envelope, pin/loop, dialer rotor, cloud, python -->
+          <div class="source" role="listitem" title="Email signals (headers, thread depth, recipients)">
+            <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="1.8"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 8l9 7 9-7"/></svg>
+            <div>
+              <div class="src-name">Microsoft Outlook</div>
+              <div class="sig">email threads • last touch</div>
+            </div>
+          </div>
+          <div class="source" role="listitem" title="Sequencing & touchpoint metadata">
+            <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="1.8"><circle cx="6" cy="6" r="2.6"/><circle cx="18" cy="12" r="2.6"/><circle cx="6" cy="18" r="2.6"/><path d="M8.5 6 H15.5 M8.5 18 H15.5 M15.4 12 h2"/></svg>
+            <div>
+              <div class="src-name">Outreach</div>
+              <div class="sig">series • replies • steps</div>
+            </div>
+          </div>
+          <div class="source" role="listitem" title="Dialer outcomes & connect rates">
+            <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="1.8"><path d="M6 3h12a3 3 0 0 1 3 3v5a9 9 0 0 1-9 9H9a3 3 0 0 1-3-3v-2"/><path d="M7 6l5 5M12 11l5-5"/></svg>
+            <div>
+              <div class="src-name">Orum</div>
+              <div class="sig">connects • outcomes</div>
+            </div>
+          </div>
+          <div class="source" role="listitem" title="Account & contact graph of record">
+            <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="1.8"><path d="M4 7a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/><path d="M14 7h6m-3 -3v6"/><path d="M3 20c0-3 3-5 6-5s6 2 6 5"/></svg>
+            <div>
+              <div class="src-name">Salesforce</div>
+              <div class="sig">owners • age • hygiene</div>
+            </div>
+          </div>
+          <div class="source" role="listitem" title="Scoring, detection, and rendering">
+            <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="1.8"><path d="M12 3l7.5 4.5v9L12 21 4.5 16.5v-9L12 3z"/><path d="M12 7v10M8 9l8 6"/></svg>
+            <div>
+              <div class="src-name">Python</div>
+              <div class="sig">scoring • transforms</div>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="panel" style="margin-bottom:14px">
+      <div class="callout">
+        <div class="bar8" style="width:32px"></div>
+        <div>
+          <span class="strong">What this is:</span> an evidence-based shortlist where <strong>engagement is happening</strong> (multiple active touchpoints + recent activity) but <strong>no Opportunity exists yet</strong>.
+          Use it to sponsor intros, tighten handoffs, and create pipeline <em>on purpose</em>.
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="table-container">
+        <table id="tbl" aria-label="Touchpoint Intelligence table">
+          <thead>
+            <tr>
+              <th class="rank sort" data-key="rank"><div class="th"><span class="h">#</span></div></th>
+              <th class="sort" data-key="company"><div class="th"><span class="h">Company</span></div></th>
+              <th class="sort" data-key="segment"><div class="th"><span class="h">Segment</span></div></th>
+              <th class="sort hide-sm" data-key="industry"><div class="th"><span class="h">Industry</span></div></th>
+              <th class="right sort" data-key="contacts"><div class="th"><span class="h">Active TPs</span><span class="s">count</span></div></th>
+              <th class="sort hide-sm" data-key="account_owner"><div class="th"><span class="h">Acct Owner</span></div></th>
+              <th class="sort hide-sm" data-key="contact_owner"><div class="th"><span class="h">Assigned DGR</span></div></th>
+              <th class="right sort" data-key="avg_recipients"><div class="th"><span class="h">Avg Recips</span><span class="s">per series</span></div></th>
+              <th class="right sort" data-key="avg_internal_recipients"><div class="th"><span class="h">Avg Internal</span><span class="s">per series</span></div></th>
+              <th class="right sort hide-sm" data-key="zi_aer"><div class="th"><span class="h">ZI AER</span><span class="s">$</span></div></th>
+              <th class="right sort hide-sm" data-key="zi_fte"><div class="th"><span class="h">ZI FTE</span><span class="s">employees</span></div></th>
+              <th class="right sort" data-key="last_touch_days"><div class="th"><span class="h">Last Touch</span><span class="s">days</span></div></th>
+              <th class="right hide-sm sort" data-key="created_days"><div class="th"><span class="h">Acct Age</span><span class="s">days</span></div></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="foot">
+        <div class="note">
+          “Active TPs” = recent engagement events (email, meeting, task, case, note) in the rolling window.
+          “Avg Recips / Series” = avg unique external recipients per series.
+          “Avg Internal / Series” = avg unique internal participants (domain-matched). ZI = ZoomInfo.
+          This report focuses on <strong>detection</strong>, not “big brother.”
+        </div>
+        <div class="brandmark">INNOVATIVE • TIR</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="pb-modal" id="pbModal" role="dialog" aria-modal="true" aria-labelledby="pbTitle">
+    <div class="pb-card">
+      <div class="pb-head">
+        <div>
+          <div class="kicker" id="pbTitle">Data lineage</div>
+          <div class="pb-title">Where these early-signal detections come from</div>
+        </div>
+        <button class="pb-close" id="pbClose" aria-label="Close">Close</button>
+      </div>
+      <div class="pb-grid">
+        <div class="pb-tile">
+          <div class="pb-row">
+            <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1.8"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 8l9 7 9-7"/></svg>
+            <strong>Microsoft Outlook</strong>
+          </div>
+          <div class="meta">Threads, reply depth, recipients, last activity</div>
+          <div class="bar" style="margin-top:8px"></div>
+          <div class="meta" style="margin-top:6px">Last sync: <span class="pb-mono" id="syncOutlook">—</span></div>
+        </div>
+        <div class="pb-tile">
+          <div class="pb-row">
+            <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1.8"><circle cx="6" cy="6" r="2.6"/><circle cx="18" cy="12" r="2.6"/><circle cx="6" cy="18" r="2.6"/><path d="M8.5 6 H15.5 M8.5 18 H15.5 M15.4 12 h2"/></svg>
+            <strong>Outreach</strong>
+          </div>
+          <div class="meta">Sequences, steps, reply state, touchpoint timing</div>
+          <div class="bar" style="margin-top:8px"></div>
+          <div class="meta" style="margin-top:6px">Last sync: <span class="pb-mono" id="syncOutreach">—</span></div>
+        </div>
+        <div class="pb-tile">
+          <div class="pb-row">
+            <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1.8"><path d="M6 3h12a3 3 0 0 1 3 3v5a9 9 0 0 1-9 9H9a3 3 0 0 1-3-3v-2"/><path d="M7 6l5 5M12 11l5-5"/></svg>
+            <strong>Orum</strong>
+          </div>
+          <div class="meta">Connects, call outcomes, attempt density</div>
+          <div class="bar" style="margin-top:8px"></div>
+          <div class="meta" style="margin-top:6px">Last sync: <span class="pb-mono" id="syncOrum">—</span></div>
+        </div>
+        <div class="pb-tile">
+          <div class="pb-row">
+            <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1.8"><path d="M4 7a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/><path d="M14 7h6m-3 -3v6"/><path d="M3 20c0-3 3-5 6-5s6 2 6 5"/></svg>
+            <strong>Salesforce</strong>
+          </div>
+          <div class="meta">Owners, account age, hygiene, exclusions</div>
+          <div class="bar" style="margin-top:8px"></div>
+          <div class="meta" style="margin-top:6px">Last sync: <span class="pb-mono" id="syncSFDC">—</span></div>
+        </div>
+        <div class="pb-tile">
+          <div class="pb-row">
+            <svg class="glyph" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1.8"><path d="M12 3l7.5 4.5v9L12 21 4.5 16.5v-9L12 3z"/><path d="M12 7v10M8 9l8 6"/></svg>
+            <strong>Python</strong>
+          </div>
+          <div class="meta">Scoring, aggregation, rendering</div>
+          <div class="bar" style="margin-top:8px"></div>
+          <div class="meta" style="margin-top:6px">Last run: <span class="pb-mono" id="syncPy">—</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* ========= DATA (same shape as your last version) ========= */
+window.TIR_DATA = window.TIR_DATA || [
+  {"company":"Account 1","segment":"SUP","industry":"Media & Info","contacts":8,"avg_recipients":3.6,"avg_internal_recipients":2.1,"account_owner":"Curran Tryka","contact_owner":"Andrew Candido","zi_aer":1850000,"zi_fte":1300,"last_touch_days":2,"created_at":"2025-02-18"},
+  {"company":"Account 2","segment":"SUP","industry":"Healthcare","contacts":5,"avg_recipients":2.9,"avg_internal_recipients":1.7,"account_owner":"Shannon Solano","contact_owner":"Shannon Solano","zi_aer":720000,"zi_fte":950,"last_touch_days":3,"created_at":"2025-07-12"},
+  {"company":"Account 3","segment":"SMB","industry":"Manufacturing","contacts":4,"avg_recipients":2.2,"avg_internal_recipients":1.3,"account_owner":"AJ Rivera","contact_owner":"Andrew Candido","zi_aer":240000,"zi_fte":210,"last_touch_days":6,"created_at":"2025-03-02"},
+  {"company":"Account 4","segment":"SUP","industry":"Life Sciences","contacts":4,"avg_recipients":4.1,"avg_internal_recipients":2.6,"account_owner":"Curran Tryka","contact_owner":"Curran Tryka","zi_aer":1650000,"zi_fte":600,"last_touch_days":10,"created_at":"2025-01-21"},
+  {"company":"Account 5","segment":"SMB","industry":"Entertainment","contacts":4,"avg_recipients":3.3,"avg_internal_recipients":2.0,"account_owner":"Curran Tryka","contact_owner":"Curran Tryka","zi_aer":310000,"zi_fte":800,"last_touch_days":14,"created_at":"2024-12-09"},
+  {"company":"Account 6","segment":"SUP","industry":"Chemicals","contacts":4,"avg_recipients":2.7,"avg_internal_recipients":1.5,"account_owner":"Sean Magin","contact_owner":"Carlen Auguste","zi_aer":980000,"zi_fte":1200,"last_touch_days":5,"created_at":"2025-06-30"}
+];
+
+const EXCLUDES = new Set(["innovative solutions","aws sellers"]);
+const dayDiff = (iso) => { if(!iso) return 9999; const a=new Date(iso+"T00:00:00Z"), b=new Date(); return Math.max(0, Math.round((b-a)/86400000)); };
+const esc = (s)=>String(s??"").replace(/[&<>"'`]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;","`":"&#96;"}[c]));
+const clamp = (n,min,max)=>Math.min(max,Math.max(min,n));
+const fmtInt = (n)=> (n==null||isNaN(n)) ? "—" : Number(n).toLocaleString();
+const fmtUSD = (n)=> (n==null||isNaN(n)) ? "—" : "$" + Number(n).toLocaleString();
+
+let state = { sortKey:"contacts", sortDir:"desc", minContacts:4, ageDays:365, query:"" };
+const $ = (id)=>document.getElementById(id);
+const tbody = document.querySelector("tbody");
+
+function compute(rows){
+  return rows
+    .filter(r => !EXCLUDES.has(String(r.company||"").toLowerCase()))
+    .map(r => ({...r, created_days: dayDiff(r.created_at || null)}))
+    .filter(r => state.ageDays==="all" ? true : r.created_days <= state.ageDays)
+    .filter(r => (r.contacts||0) >= state.minContacts)
+    .filter(r => {
+      if(!state.query) return true;
+      const q = state.query.toLowerCase();
+      return [r.company,r.account_owner,r.contact_owner,r.segment,r.industry].some(x=>String(x||"").toLowerCase().includes(q));
+    })
+}
+
+function heatShade(n, min=1, max=10){
+  const t = (clamp(n,min,max)-min)/(max-min || 1);
+  return `linear-gradient(90deg, rgba(236,253,245,1), rgba(187,247,208,1) ${Math.round(30+70*t)}%, rgba(255,255,255,0) ${Math.round(30+70*t)}%)`;
+}
+
+function render(){
+  const rows = compute(window.TIR_DATA.slice());
+  rows.sort((a,b)=>{
+    const k=state.sortKey,dir=state.sortDir==="asc"?1:-1;
+    const va=a[k]??"", vb=b[k]??"";
+    if(typeof va==="number" && typeof vb==="number") return (va-vb)*dir;
+    return String(va).localeCompare(String(vb))*dir;
+  });
+
+  tbody.innerHTML = "";
+  rows.forEach((r, i)=>{
+    const tpBg = heatShade(r.contacts||0, 2, 10);
+    const arBg = r.avg_recipients!=null ? heatShade(r.avg_recipients, 1, 8) : null;
+    const aiBg = r.avg_internal_recipients!=null ? heatShade(r.avg_internal_recipients, 1, 8) : null;
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td class="rank mono">${i+1}</td>
+      <td class="company">${esc(r.company)}</td>
+      <td>${esc(r.segment || "—")}</td>
+      <td class="hide-sm">${esc(r.industry || "—")}</td>
+      <td class="right mono"><span class="heat" style="background:${tpBg}">${esc(r.contacts)}</span></td>
+      <td class="owner hide-sm">${esc(r.account_owner||"—")}</td>
+      <td class="owner hide-sm">${esc(r.contact_owner||"—")}</td>
+      <td class="right mono">${r.avg_recipients!=null ? `<span class="heat" style="background:${arBg}">${Number(r.avg_recipients).toFixed(1)}</span>` : "—"}</td>
+      <td class="right mono">${r.avg_internal_recipients!=null ? `<span class="heat" style="background:${aiBg}">${Number(r.avg_internal_recipients).toFixed(1)}</span>` : "—"}</td>
+      <td class="right mono hide-sm">${fmtUSD(r.zi_aer)}</td>
+      <td class="right mono hide-sm">${fmtInt(r.zi_fte)}</td>
+      <td class="right mono">${esc(r.last_touch_days!=null ? r.last_touch_days : "—")}</td>
+      <td class="right mono hide-sm">${esc(r.created_days)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  $("accountCount").textContent = rows.length.toLocaleString();
+  $("updatedAt").textContent = new Date().toLocaleString();
+}
+
+/* modal controls + faux sync times */
+function modal(){
+  const m = $("pbModal"), open = $("pbOpen"), close = $("pbClose");
+  const set = (id, minsAgo)=>$(id).textContent = new Date(Date.now()-minsAgo*60000).toLocaleString();
+  set("syncOutlook", 18);
+  set("syncOutreach", 22);
+  set("syncOrum", 29);
+  set("syncSFDC", 35);
+  set("syncPy", 4);
+  const esc = (e)=>{ if(e.key==="Escape"){ m.classList.remove("open"); document.body.style.overflow=""; } };
+  open.addEventListener("click", ()=>{ m.classList.add("open"); document.body.style.overflow="hidden"; m.focus(); });
+  close.addEventListener("click", ()=>{ m.classList.remove("open"); document.body.style.overflow=""; });
+  m.addEventListener("click", (e)=>{ if(e.target===m){ m.classList.remove("open"); document.body.style.overflow=""; }});
+  document.addEventListener("keydown", esc);
+}
+
+function bind(){
+  document.querySelectorAll("th.sort").forEach(th=>{
+    th.addEventListener("click", ()=>{
+      const key = th.dataset.key;
+      if(state.sortKey===key){ state.sortDir = state.sortDir==="asc" ? "desc" : "asc"; }
+      else { state.sortKey = key; state.sortDir = "asc"; }
+      render();
+    });
+  });
+  $("minContacts").addEventListener("change", (e)=>{ state.minContacts = Number(e.target.value); render(); });
+  $("age").addEventListener("change", (e)=>{ state.ageDays = e.target.value==="all" ? "all" : Number(e.target.value); render(); });
+  $("q").addEventListener("input", (e)=>{ state.query = e.target.value.trim(); render(); });
+  $("reset").addEventListener("click", ()=>{
+    state = {sortKey:"contacts",sortDir:"desc",minContacts:4,ageDays:365,query:""};
+    $("q").value=""; $("age").value="365"; $("minContacts").value="4"; render();
+  });
+}
+
+bind(); modal(); render();
+</script>
+</body>
+</html>

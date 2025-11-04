@@ -1,0 +1,52 @@
+name: Run Sales Ops Scripts
+
+on:
+  schedule:
+    # Run daily at 8:00 AM UTC
+    - cron: '0 8 * * *'
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  run-scripts:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        cd "Live and migrated to GitHub"
+        pip install -r requirements.txt
+    
+    - name: Run velocity migration
+      env:
+        SF_USERNAME: ${{ secrets.SF_USERNAME }}
+        SF_CONSUMER_KEY: ${{ secrets.SF_CONSUMER_KEY }}
+        SF_DOMAIN: ${{ secrets.SF_DOMAIN }}
+        SF_PRIVATE_KEY: ${{ secrets.SF_PRIVATE_KEY }}
+      run: |
+        cd "Live and migrated to GitHub"
+        python run_velocity_migration.py
+    
+    - name: Run executive dashboard
+      env:
+        SF_USERNAME: ${{ secrets.SF_USERNAME }}
+        SF_CONSUMER_KEY: ${{ secrets.SF_CONSUMER_KEY }}
+        SF_DOMAIN: ${{ secrets.SF_DOMAIN }}
+        SF_PRIVATE_KEY: ${{ secrets.SF_PRIVATE_KEY }}
+      run: |
+        cd "Live and migrated to GitHub"
+        python run_executive_dashboard.py
+    
+    - name: Upload HTML artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: dashboards
+        path: "Live and migrated to GitHub/*.html"
+        retention-days: 30

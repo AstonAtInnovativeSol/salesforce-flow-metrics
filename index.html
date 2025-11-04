@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salesforce Flow Metrics Dashboard</title>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --ink: #101418;
+            --muted: #6b7280;
+            --line: #e5e7eb;
+            --panel: #fafafa;
+            --brand: #4b7bec;
+            --brand-2: #6b5af9;
+            --accent: #f8fafc;
+            --border: #e2e8f0;
+            --glass: rgba(255,255,255,.65);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--ink);
+            font: 16px/1.45 -apple-system, BlinkMacSystemFont, Inter, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+        
+        .wrap {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+            width: 100%;
+        }
+        
+        .hdr {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            backdrop-filter: saturate(180%) blur(8px);
+            background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.86) 60%, rgba(255,255,255,.70));
+            border-bottom: 1px solid var(--line);
+            padding: 12px 24px;
+            margin: 0 -24px 24px;
+        }
+        
+        .kicker {
+            letter-spacing: .22em;
+            text-transform: uppercase;
+            color: var(--muted);
+            font-weight: 700;
+            font-size: 12px;
+        }
+        
+        .title {
+            font-size: 32px;
+            font-weight: 800;
+            line-height: 1.1;
+            margin: 4px 0 8px;
+        }
+        
+        .subtitle {
+            color: var(--muted);
+            font-size: 14px;
+            max-width: 960px;
+            line-height: 1.4;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 24px;
+            margin-top: 32px;
+        }
+        
+        .dashboard-card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,.05), 0 1px 2px rgba(0,0,0,.08);
+            transition: transform .2s, box-shadow .2s;
+            text-decoration: none;
+            color: var(--ink);
+            display: block;
+        }
+        
+        .dashboard-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,.12), 0 2px 4px rgba(0,0,0,.08);
+        }
+        
+        .dashboard-card h2 {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 12px;
+            color: var(--ink);
+        }
+        
+        .dashboard-card .description {
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+        
+        .dashboard-card .meta {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--line);
+        }
+        
+        .dashboard-card .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 6px 10px;
+            background: #fff;
+            box-shadow: 0 1px 2px rgba(0,0,0,.05);
+            color: var(--muted);
+        }
+        
+        .dashboard-card .chip strong {
+            color: var(--ink);
+            font-weight: 700;
+        }
+        
+        .icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+        
+        .foot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 48px;
+            padding-top: 24px;
+            border-top: 1px solid var(--line);
+            color: var(--muted);
+            font-size: 12px;
+        }
+        
+        .brandmark {
+            font-weight: 900;
+            letter-spacing: .08em;
+        }
+        
+        @media (max-width: 768px) {
+            .wrap {
+                padding: 18px;
+            }
+            
+            .hdr {
+                padding: 12px;
+                margin: 0 -12px 12px;
+            }
+            
+            .title {
+                font-size: 24px;
+            }
+            
+            .subtitle {
+                font-size: 13px;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+                margin-top: 24px;
+            }
+            
+            .dashboard-card {
+                padding: 18px;
+            }
+            
+            .dashboard-card h2 {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="hdr">
+        <div class="wrap">
+            <div class="kicker">Sales Ops • Flow Metrics</div>
+            <div class="title">Salesforce Flow Metrics Dashboard</div>
+            <div class="subtitle">Real-time metrics for Slack alerts configured via Salesforce Flow Builder. Select a dashboard below to view detailed metrics.</div>
+        </div>
+    </div>
+    
+    <div class="wrap">
+        <div class="dashboard-grid">
+            <a href="flow_slack_metrics_ghost_pipeline_latest.html" class="dashboard-card">
+                <div class="icon">👻</div>
+                <h2>Ghost Pipeline</h2>
+                <div class="description">
+                    Track opportunities that have been in the pipeline for extended periods without activity. 
+                    Monitor alerts sent, response times, and closed-out value to identify and address stalled deals.
+                </div>
+                <div class="meta">
+                    <div class="chip">📊 <strong>Flow ID:</strong> 301PQ00000iX6QRYA0</div>
+                    <div class="chip">📈 <strong>Status:</strong> Active</div>
+                </div>
+            </a>
+            
+            <a href="flow_slack_metrics_past_due_closed_date_latest.html" class="dashboard-card">
+                <div class="icon">📅</div>
+                <h2>Past Due Closed Date</h2>
+                <div class="description">
+                    Monitor opportunities with past due close dates. Track compliance metrics, 
+                    alert frequency, and response times to ensure timely deal closure.
+                </div>
+                <div class="meta">
+                    <div class="chip">📊 <strong>Flow ID:</strong> 301PQ00000iMEFuYAO</div>
+                    <div class="chip">📈 <strong>Status:</strong> Active</div>
+                </div>
+            </a>
+        </div>
+        
+        <div class="foot">
+            <div>Report generated automatically • Refresh page to update metrics</div>
+            <div class="brandmark">INNOVATIVE • FLOW METRICS</div>
+        </div>
+    </div>
+</body>
+</html>
+

@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Past Due Closed Date - Salesforce Flow Slack Alert Metrics</title>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --ink: #101418;
+            --muted: #6b7280;
+            --line: #e5e7eb;
+            --panel: #fafafa;
+            --brand: #4b7bec;
+            --brand-2: #6b5af9;
+            --accent: #f8fafc;
+            --border: #e2e8f0;
+            --glass: rgba(255,255,255,.65);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--ink);
+            font: 16px/1.45 -apple-system, BlinkMacSystemFont, Inter, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+        
+        .wrap {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+            width: 100%;
+        }
+        
+        .hdr {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            backdrop-filter: saturate(180%) blur(8px);
+            background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.86) 60%, rgba(255,255,255,.70));
+            border-bottom: 1px solid var(--line);
+            padding: 12px 24px;
+            margin: 0 -24px 12px;
+        }
+        
+        .hdr-inner {
+            display: flex;
+            gap: 18px;
+            align-items: flex-start;
+            justify-content: space-between;
+        }
+        
+        .kicker {
+            letter-spacing: .22em;
+            text-transform: uppercase;
+            color: var(--muted);
+            font-weight: 700;
+            font-size: 12px;
+        }
+        
+        .title {
+            font-size: 24px;
+            font-weight: 800;
+            line-height: 1.1;
+            margin: 4px 0 3px;
+        }
+        
+        .subtitle {
+            color: var(--muted);
+            font-size: 13px;
+            max-width: 960px;
+            line-height: 1.4;
+        }
+        
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 18px;
+            box-shadow: 0 1px 3px rgba(0,0,0,.05), 0 1px 2px rgba(0,0,0,.08);
+            margin-bottom: 14px;
+        }
+        
+        .metric-section {
+            margin-bottom: 24px;
+        }
+        
+        .metric-section h3 {
+            color: var(--ink);
+            font-size: 14px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+        
+        .metric-box {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            transition: transform .2s, box-shadow .2s;
+        }
+        
+        .metric-box:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(0,0,0,.10);
+        }
+        
+        .metric-box[style*="border-left-color"] {
+            border-left-width: 4px;
+            border-left-style: solid;
+        }
+        
+        .metric-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+        
+        .metric-value {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--ink);
+            font-variant-numeric: tabular-nums;
+        }
+        
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--line);
+        }
+        
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+        
+        .stat-label {
+            color: var(--muted);
+            font-size: 13px;
+        }
+        
+        .stat-value {
+            font-weight: 700;
+            color: var(--ink);
+            font-variant-numeric: tabular-nums;
+        }
+        
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 6px 10px;
+            background: #fff;
+            box-shadow: 0 1px 2px rgba(0,0,0,.05);
+        }
+        
+        .foot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 14px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+        
+        .brandmark {
+            font-weight: 900;
+            letter-spacing: .08em;
+        }
+        
+        .note {
+            color: var(--muted);
+            font-size: 12px;
+            margin-top: 8px;
+        }
+        
+        .callout {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-left: 4px solid var(--brand);
+            background: linear-gradient(135deg, #f6f9ff, #f0f4ff);
+            border-radius: 10px;
+            padding: 14px 16px;
+            font-size: 14px;
+        }
+        
+        .callout .strong {
+            font-weight: 800;
+        }
+        
+        code {
+            background: var(--accent);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 0.9em;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, monospace;
+        }
+        
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+        
+        @media (max-width: 1080px) {
+            .wrap {
+                padding: 18px;
+            }
+            .title {
+                font-size: 22px;
+            }
+            .metric-grid {
+                grid-template-columns: 1fr;
+            }
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .wrap {
+                padding: 12px;
+            }
+            
+            .hdr {
+                padding: 12px;
+                margin: 0 -12px 12px;
+            }
+            
+            .hdr-inner {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .header-content-wrapper {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .header-flow-info {
+                width: 100%;
+            }
+            
+            .title {
+                font-size: 20px;
+            }
+            
+            .subtitle {
+                font-size: 12px;
+            }
+            
+            .kicker {
+                font-size: 10px;
+            }
+            
+            .metric-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .metric-box {
+                padding: 12px;
+            }
+            
+            .metric-value {
+                font-size: 20px;
+            }
+            
+            .chip {
+                font-size: 11px;
+                padding: 5px 8px;
+            }
+            
+            .panel {
+                padding: 12px;
+                border-radius: 12px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .wrap {
+                padding: 10px;
+            }
+            
+            .hdr {
+                padding: 10px;
+                margin: 0 -10px 10px;
+            }
+            
+            .title {
+                font-size: 18px;
+            }
+            
+            .subtitle {
+                font-size: 11px;
+            }
+            
+            .metric-value {
+                font-size: 18px;
+            }
+            
+            .metric-label {
+                font-size: 10px;
+            }
+            
+            .chip {
+                font-size: 10px;
+                padding: 4px 6px;
+            }
+        }
+        
+        .count-up {
+            font-variant-numeric: tabular-nums;
+        }
+    </style>
+    <script>
+        // Animation: Count up numbers from 0
+        function animateValue(element, start, end, duration, formatFn) {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                const value = Math.floor(progress * (end - start) + start);
+                element.textContent = formatFn ? formatFn(value) : value;
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+        
+        function initAnimations() {
+            // Set zoom to 80% only on desktop (not mobile)
+            if (window.innerWidth > 768) {
+                document.body.style.zoom = '0.8';
+            }
+            
+            // Find all metric values and animate them
+            document.querySelectorAll('.metric-value').forEach(el => {
+                const originalText = el.textContent.trim();
+                
+                // Extract numbers from text
+                let match = originalText.match(/[\$]?([\d,]+\.?\d*)/);
+                if (match) {
+                    let numStr = match[1].replace(/,/g, '');
+                    let num = parseFloat(numStr);
+                    
+                    if (!isNaN(num) && num > 0) {
+                        // Store original text for formatting reference
+                        el.dataset.originalText = originalText;
+                        
+                        // Determine format
+                        let formatFn;
+                        if (originalText.includes('$')) {
+                            formatFn = (val) => {
+                                if (originalText.includes('.')) {
+                                    return '$' + val.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                                } else {
+                                    return '$' + val.toLocaleString('en-US');
+                                }
+                            };
+                        } else if (originalText.includes('%')) {
+                            formatFn = (val) => val.toFixed(1) + '%';
+                        } else {
+                            formatFn = (val) => val.toLocaleString('en-US');
+                        }
+                        
+                        // Set initial value to 0
+                        el.textContent = formatFn(0);
+                        el.classList.add('count-up');
+                        
+                        // Animate with slight random delay for visual effect
+                        setTimeout(() => {
+                            animateValue(el, 0, num, 1500, formatFn);
+                        }, Math.random() * 200);
+                    }
+                }
+            });
+            
+            // Animate stat values
+            document.querySelectorAll('.stat-value').forEach(el => {
+                const originalText = el.textContent.trim();
+                
+                // Check if it contains hours format
+                if (originalText.includes('hours') && originalText.includes('days')) {
+                    let match = originalText.match(/([\d,]+\.?\d*)\s+hours/);
+                    if (match) {
+                        let numStr = match[1].replace(/,/g, '');
+                        let num = parseFloat(numStr);
+                        
+                        if (!isNaN(num) && num > 0) {
+                            el.dataset.originalText = originalText;
+                            el.textContent = '0.00 hours (0.0 days)';
+                            
+                            setTimeout(() => {
+                                animateValue(el, 0, num, 1500, (val) => {
+                                    const hours = val.toFixed(2);
+                                    const days = (val / 24).toFixed(1);
+                                    return hours + ' hours (' + days + ' days)';
+                                });
+                            }, 300);
+                        }
+                    }
+                } else {
+                    // Regular number
+                    let match = originalText.match(/([\d,]+\.?\d*)/);
+                    if (match) {
+                        let numStr = match[1].replace(/,/g, '');
+                        let num = parseFloat(numStr);
+                        
+                        if (!isNaN(num) && num > 0) {
+                            el.dataset.originalText = originalText;
+                            el.textContent = '0';
+                            
+                            setTimeout(() => {
+                                animateValue(el, 0, num, 1500, (val) => {
+                                    if (originalText.includes('.')) {
+                                        return val.toFixed(2);
+                                    } else {
+                                        return val.toLocaleString('en-US');
+                                    }
+                                });
+                            }, 300);
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Run animations when page loads
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initAnimations);
+        } else {
+            initAnimations();
+        }
+    </script>
+</head>
+<body>
+    <div class="hdr">
+        <div class="wrap hdr-inner">
+            <div class="header-content-wrapper" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; flex-wrap: wrap;">
+                <div style="flex: 1 1 auto; min-width: 0;">
+                    <div class="kicker">Sales Ops • Flow Metrics</div>
+                    <div class="title">Past Due Closed Date</div>
+                    <div class="subtitle">Real-time metrics for Slack alerts configured via Salesforce Flow Builder</div>
+                    <div style="display: flex; gap: 8px; align-items: center; margin-top: 8px; flex-wrap: wrap;">
+                        <div class="chip"><strong style="font-variant-numeric: tabular-nums;">1</strong> alerts sent</div>
+                        <div class="chip"><strong style="font-variant-numeric: tabular-nums;">$1</strong> closed value</div>
+                        <div class="chip"><strong style="font-variant-numeric: tabular-nums;">0.0%</strong> win rate</div>
+                        <div class="chip"><span style="font-variant-numeric: tabular-nums;">2025-11-03 19:56:50</span> updated</div>
+                    </div>
+                </div>
+                
+                <div class="header-flow-info" style="background: var(--glass); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; backdrop-filter: blur(10px); flex: 0 0 auto;">
+                    <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: 4px;">Flow ID</div>
+                    <div style="font-weight: 700; font-family: 'SF Mono', Monaco, monospace; font-size: 11px; color: var(--ink); margin-bottom: 12px; word-break: break-all;">301PQ00000iMEFuYAO</div>
+                    <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: 4px;">📤 Alerts Sent</div>
+                    <div style="font-size: 20px; font-weight: 800; color: var(--ink); font-variant-numeric: tabular-nums;">1</div>
+                    <div style="font-size: 10px; color: var(--muted); line-height: 1.3; margin-top: 6px;">ℹ️ <code style="font-size: 9px;">Overdue_Alert_Sent_Date__c</code></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="wrap">
+
+        <div class="panel">
+            <div class="metric-section">
+                <h3>📊 Current Status</h3>
+                <div class="metric-box" style="border-left-color: #ff9500;">
+                    <div class="metric-label">Current Past Due Count (Report Criteria - EXACT MATCH)</div>
+                    <div class="metric-value" style="color: #ff9500;">⚠️ 1</div>
+                    <div class="note" style="margin-top: 12px;">
+                        📌 Action needed to bring count to 0
+                        
+                    </div>
+
+        <div class="panel">
+            <div class="metric-section">
+                <h3>💰 Closed Out Value</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+                    <div class="metric-box">
+                        <div class="metric-label">Total Value</div>
+                        <div class="metric-value">$1.00</div>
+                    </div>
+                    <div class="metric-box" style="border-left-color: var(--success);">
+                        <div class="metric-label">✅ Won Value</div>
+                        <div class="metric-value" style="color: var(--success);">$0.00</div>
+                    </div>
+                    <div class="metric-box" style="border-left-color: var(--warning);">
+                        <div class="metric-label">❌ Lost Value</div>
+                        <div class="metric-value" style="color: var(--warning);">$1.00</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">Closed Count</div>
+                        <div class="metric-value">1</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">Win Rate</div>
+                        <div class="metric-value">0.0%</div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid var(--line);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; cursor: pointer;" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'; this.querySelector('.toggle-icon').textContent = this.nextElementSibling.style.display === 'none' ? '▶' : '▼';">
+                        <h4 style="color: var(--ink); margin: 0; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em;">📋 Closed Opportunities (Result of Alerts) - 1 total</h4>
+                        <span class="toggle-icon" style="font-size: 12px; color: var(--muted);">▼</span>
+                    </div>
+                    <div style="max-height: 400px; overflow-y: auto;">
+
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #ff9500; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        1. Presales Test opp
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Test Account1 | 
+                                        <span style="font-weight: 600;">Stage:</span> Disqualified | 
+                                        <span style="color: #ff9500; font-weight: 700;">❌ Lost</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$1.00</span> | 
+                                        <span style="font-weight: 600;">📅 Alert Sent:</span> 2025-10-07 | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-10-14
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000X4ECfYAN/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="metric-section">
+                <h3>⏱️ Response Time</h3>
+                <div class="metric-grid">
+                    <div class="metric-box">
+                        <div class="metric-label">Average Response</div>
+                        <div class="metric-value">168.00 hours</div>
+                        <div class="note" style="margin-top: 4px;">(7.0 days)</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">Median Response</div>
+                        <div class="metric-value">168.00 hours</div>
+                        <div class="note" style="margin-top: 4px;">(7.0 days)</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">Responses Tracked</div>
+                        <div class="metric-value">1</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+            <div class="metric-section">
+                <h3>🔧 Flow Setup Analysis</h3>
+                <div class="metric-box" style="border-left-color: #ff3b30;">
+                    <div class="metric-label">Efficiency Score</div>
+                    <div class="metric-value" style="color: #ff3b30;">0%</div>
+                    <p style="font-size: 0.85em; color: #666; margin-top: 10px;">
+                        Status: <strong>⚠️ Needs Improvement</strong> | 
+                        Type: <strong>Unknown</strong>
+                    </p>
+
+                    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e0e0e0;">
+                        <div style="font-weight: 600; margin-bottom: 8px; color: #333;">💡 Recommendations:</div>
+                        <ul style="margin: 0; padding-left: 20px; font-size: 0.85em; color: #666;">
+
+                            <li style="margin-bottom: 8px;">
+                                <span style="color: #0176d3; font-weight: 600;">[MEDIUM]</span> Optimal Flow Setup Recommendations
+
+                                <ul style="margin-top: 4px; padding-left: 20px; color: #666;">
+
+                                    <li style="margin-bottom: 2px;">Flow Type: Use Scheduled Flow (runs daily) OR Record-Triggered Flow (runs on update)</li>
+
+                                    <li style="margin-bottom: 2px;">Entry Criteria: Match report criteria exactly (CloseDate < Today, Stage IN list, etc.)</li>
+
+                                    <li style="margin-bottom: 2px;">Alert Field: Set Overdue_Alert_Sent_Date__c to TODAY() when alert is sent</li>
+
+                                    <li style="margin-bottom: 2px;">Clear Logic: Only clear alert field when CloseDate is updated to future date</li>
+
+                                    <li style="margin-bottom: 2px;">Field History: Enable Field History Tracking for Overdue_Alert_Sent_Date__c to track cleared alerts</li>
+
+                                </ul>
+
+                            </li>
+
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+
+        <div class="foot">
+            <div class="note">Report generated automatically • Refresh page to update metrics</div>
+            <div class="brandmark">INNOVATIVE • FLOW METRICS</div>
+        </div>
+    </div>
+</body>
+</html>

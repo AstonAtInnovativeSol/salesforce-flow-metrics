@@ -1,0 +1,27 @@
+# Core Dependencies for Salesforce Analytics Scripts
+# Install with: pip install -r requirements.txt
+
+# Salesforce Integration
+simple-salesforce>=1.12.0
+PyJWT>=2.8.0
+cryptography>=41.0.0
+
+# Data Processing
+pandas>=2.0.0
+numpy>=1.24.0
+
+# HTTP Requests
+requests>=2.31.0
+
+# Visualization (optional - for dealSizeWinRate.py)
+plotly>=5.17.0
+
+# Date/Time Utilities (built-in, but listed for clarity)
+# datetime - built-in
+# timedelta - built-in
+
+# Additional utilities (if used)
+# structlog - for advanced logging (if highlevel_upgraded.py is used)
+# aiohttp - for async requests (if highlevel_upgraded.py is used)
+# tenacity - for retry logic (if highlevel_upgraded.py is used)
+# pydantic - for data validation (if highlevel_upgraded.py is used)

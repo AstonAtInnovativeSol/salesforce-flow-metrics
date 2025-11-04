@@ -1,0 +1,56 @@
+# Sensitive Configuration Files
+sf_config.py
+config.py
+*.key
+*.pem
+.env
+*.env
+
+# Private Keys
+**/salesforce_private_key.pem
+**/*private_key*.pem
+
+# Output Files (CSV, HTML dashboards)
+*.csv
+*.html
+outputs/
+dashboards/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Jupyter Notebooks (if any)
+.ipynb_checkpoints/
+*.ipynb
+
+# OS
+.DS_Store
+Thumbs.db
+

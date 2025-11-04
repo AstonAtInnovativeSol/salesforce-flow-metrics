@@ -1,0 +1,211 @@
+[
+  {
+    "week_key": "2025-43",
+    "period_start": "2025-10-26",
+    "generated_at": "2025-11-04T15:57:19.492847",
+    "data": {
+      "period": {
+        "last_week": {
+          "start": "2025-10-26",
+          "end": "2025-11-01"
+        },
+        "prior_week": {
+          "start": "2025-10-19",
+          "end": "2025-10-25"
+        }
+      },
+      "data": {
+        "Alec Goldman": {
+          "meetings": {
+            "last": 3.0,
+            "prior": 1.0,
+            "6w_avg": 1.0,
+            "wow_pct": 200.0
+          },
+          "opp_dollars": {
+            "last": 19800.0,
+            "prior": 9900.0,
+            "6w_avg": 6600.0,
+            "wow_pct": 100.0
+          },
+          "closed_won": {
+            "last": 0,
+            "prior": 0,
+            "wow_pct": 0
+          }
+        },
+        "Avalon Sollie": {
+          "meetings": {
+            "last": 4.0,
+            "prior": 6.0,
+            "6w_avg": 4.833333333333333,
+            "wow_pct": -33.33333333333333
+          },
+          "opp_dollars": {
+            "last": 34900.0,
+            "prior": 19800.0,
+            "6w_avg": 23966.666666666668,
+            "wow_pct": 76.26262626262627
+          },
+          "closed_won": {
+            "last": 19800.0,
+            "prior": 9900.0,
+            "wow_pct": 100.0
+          }
+        },
+        "Blaine Phoenix-Allen": {
+          "meetings": {
+            "last": 3.0,
+            "prior": 5.0,
+            "6w_avg": 4.5,
+            "wow_pct": -40.0
+          },
+          "opp_dollars": {
+            "last": 9900.0,
+            "prior": 19800.0,
+            "6w_avg": 17366.666666666668,
+            "wow_pct": -50.0
+          },
+          "closed_won": {
+            "last": 0,
+            "prior": 29700.0,
+            "wow_pct": -100.0
+          }
+        },
+        "Caleb Hager": {
+          "meetings": {
+            "last": 6.0,
+            "prior": 7.0,
+            "6w_avg": 7.0,
+            "wow_pct": -14.285714285714285
+          },
+          "opp_dollars": {
+            "last": 40000.0,
+            "prior": 29700.0,
+            "6w_avg": 109083.33333333333,
+            "wow_pct": 34.68013468013468
+          },
+          "closed_won": {
+            "last": 214900.0,
+            "prior": 39600.0,
+            "wow_pct": 442.67676767676767
+          }
+        },
+        "Hunter Kitchens": {
+          "meetings": {
+            "last": 9.0,
+            "prior": 2.0,
+            "6w_avg": 5.5,
+            "wow_pct": 350.0
+          },
+          "opp_dollars": {
+            "last": 19800.0,
+            "prior": 0,
+            "6w_avg": 6600.0,
+            "wow_pct": 0
+          },
+          "closed_won": {
+            "last": 0,
+            "prior": 0,
+            "wow_pct": 0
+          }
+        },
+        "Justin Chabrier": {
+          "meetings": {
+            "last": 9.0,
+            "prior": 2.0,
+            "6w_avg": 6.0,
+            "wow_pct": 350.0
+          },
+          "opp_dollars": {
+            "last": 79200.0,
+            "prior": 29700.0,
+            "6w_avg": 66950.0,
+            "wow_pct": 166.66666666666669
+          },
+          "closed_won": {
+            "last": 19800.0,
+            "prior": 0,
+            "wow_pct": 0
+          }
+        },
+        "Leah Connelly": {
+          "meetings": {
+            "last": 4.0,
+            "prior": 4.0,
+            "6w_avg": 4.166666666666667,
+            "wow_pct": 0.0
+          },
+          "opp_dollars": {
+            "last": 104700.0,
+            "prior": 9900.0,
+            "6w_avg": 33950.0,
+            "wow_pct": 957.5757575757576
+          },
+          "closed_won": {
+            "last": 59400.0,
+            "prior": 0,
+            "wow_pct": 0
+          }
+        },
+        "Max Comeau": {
+          "meetings": {
+            "last": 4.0,
+            "prior": 2.0,
+            "6w_avg": 1.8333333333333333,
+            "wow_pct": 100.0
+          },
+          "opp_dollars": {
+            "last": 39600.0,
+            "prior": 9900.0,
+            "6w_avg": 14850.0,
+            "wow_pct": 300.0
+          },
+          "closed_won": {
+            "last": 0,
+            "prior": 0,
+            "wow_pct": 0
+          }
+        },
+        "Peyton Moxam": {
+          "meetings": {
+            "last": 0,
+            "prior": 0,
+            "6w_avg": 0.8333333333333334,
+            "wow_pct": 0
+          },
+          "opp_dollars": {
+            "last": 0,
+            "prior": 29700.0,
+            "6w_avg": 19866.666666666668,
+            "wow_pct": -100.0
+          },
+          "closed_won": {
+            "last": 0,
+            "prior": 0,
+            "wow_pct": 0
+          }
+        },
+        "Olivia Akinwande": {
+          "meetings": {
+            "last": 0,
+            "prior": 1.0,
+            "6w_avg": 0.6666666666666666,
+            "wow_pct": -100.0
+          },
+          "opp_dollars": {
+            "last": 25000.0,
+            "prior": 50000.0,
+            "6w_avg": 12500.0,
+            "wow_pct": -50.0
+          },
+          "closed_won": {
+            "last": 0,
+            "prior": 0,
+            "wow_pct": 0
+          }
+        }
+      }
+    }
+  }
+]

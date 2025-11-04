@@ -1,0 +1,49 @@
+# Salesforce JWT Configuration Template
+# ==========================================
+# IMPORTANT: Copy this file to sf_config.py and fill in your actual values
+# DO NOT commit sf_config.py to version control! It's gitignored for security.
+#
+# This file is used by all scripts that connect to Salesforce via JWT authentication.
+# Your actual sf_config.py should NEVER be committed to GitHub.
+# ==========================================
+
+# Your Salesforce username (email address)
+SF_USERNAME = 'your-username@example.com'
+
+# Connected App Consumer Key from Salesforce
+# Found in: Setup → App Manager → Your Connected App → View → Consumer Key
+SF_CONSUMER_KEY = 'your-consumer-key-here'
+
+# Your Salesforce instance URL (optional, typically auto-detected)
+SF_INSTANCE_URL = 'https://your-instance.lightning.force.com'
+
+# Salesforce login domain
+# - 'login' for production
+# - 'test' for sandbox
+SF_DOMAIN = 'login'
+
+# Path to your RSA private key file (.pem)
+# This private key must match the certificate uploaded to your Connected App
+# Example: '/Users/yourname/Desktop/Salesforce_Reports/salesforce_private_key.pem'
+PRIVATE_KEY_FILE = '/path/to/your/salesforce_private_key.pem'
+
+# ==========================================
+# JWT Setup Instructions:
+# ==========================================
+# 1. Create a Connected App in Salesforce:
+#    - Setup → App Manager → New Connected App
+#    - Enable OAuth Settings
+#    - Enable "Use digital signatures"
+#    - Upload your public certificate (.crt file)
+#    - Note the Consumer Key (use as SF_CONSUMER_KEY above)
+#
+# 2. Generate RSA key pair:
+#    openssl genrsa -out server.key 2048
+#    openssl req -new -x509 -key server.key -out server.crt -days 365
+#    (Use server.key as PRIVATE_KEY_FILE, upload server.crt to Connected App)
+#
+# 3. Copy this file to sf_config.py and fill in your values
+#
+# 4. Ensure your private key file is secure and NOT in the repository
+# ==========================================
+

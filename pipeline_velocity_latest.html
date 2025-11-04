@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Pipeline Velocity Report</title>
+<style>
+
+  :root{
+    --bg:#ffffff;--ink:#101418;--muted:#6b7280;--line:#e5e7eb;--panel:#fafafa;
+    --brand:#4b7bec; --brand-2:#6b5af9; --accent:#f8fafc; --border:#e2e8f0;
+    --glass: rgba(255,255,255,.65);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 -apple-system,BlinkMacSystemFont,Inter,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+
+  .wrap{max-width:1400px;margin:0 auto;padding:24px;width:100%}
+
+  .hdr{
+    position:sticky;top:0;z-index:20;backdrop-filter:saturate(180%) blur(8px);
+    background:linear-gradient(180deg,rgba(255,255,255,.92),rgba(255,255,255,.86) 60%,rgba(255,255,255,.70));
+    border-bottom:1px solid var(--line); padding:12px 24px; margin:0 -24px 12px;
+  }
+  .hdr-inner{display:flex;gap:18px;align-items:flex-start;justify-content:space-between}
+  .kicker{letter-spacing:.22em;text-transform:uppercase;color:var(--muted);font-weight:700;font-size:12px}
+  .title{font-size:24px;font-weight:800;line-height:1.1;margin:4px 0 3px}
+  .subtitle{color:var(--muted);font-size:13px;max-width:960px;line-height:1.4}
+
+  /* ---------- Data Lineage Capsule ---------- */
+  .lineage{
+    --g1:#6b5af9; --g2:#4b7bec;
+    position:relative; isolation:isolate;
+    border-radius:14px; padding:12px 14px;
+    background: var(--glass);
+    backdrop-filter: blur(10px) saturate(130%);
+    box-shadow: 0 8px 20px rgba(16,24,40,.08), inset 0 1px 0 rgba(255,255,255,.4);
+  }
+  .lineage::before{
+    content:""; position:absolute; inset:0; border-radius:14px;
+    padding:1px; background:linear-gradient(135deg, var(--g1), var(--g2));
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor; mask-composite: exclude;
+    pointer-events:none;
+  }
+  .lineage-head{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+  }
+  .lineage-title{
+    font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+    color:#7c8aa5; font-weight:800;
+  }
+  .lineage-cta{
+    border:1px solid rgba(98,113,255,.25); background:#fff; color:#334155;
+    border-radius:999px; padding:6px 10px; font-size:12px; font-weight:700; cursor:pointer;
+    transition:.18s; box-shadow:0 1px 2px rgba(0,0,0,.06);
+  }
+  .lineage-cta:hover{transform:translateY(-1px); box-shadow:0 3px 8px rgba(0,0,0,.10)}
+  .sources{
+    display:flex; gap:14px; align-items:center; flex-wrap:wrap; margin-top:8px;
+  }
+  .source{
+    display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:10px;
+    background:#fff; border:1px solid var(--border); box-shadow:0 1px 2px rgba(0,0,0,.04);
+    transition:.2s;
+  }
+  .source:hover{transform:translateY(-1px); box-shadow:0 3px 8px rgba(0,0,0,.10); border-color:#c7cff6}
+  .glyph{
+    width:18px; height:18px; display:inline-block; opacity:.85;
+    transition:opacity .2s, transform .2s, filter .2s;
+  }
+  .source:hover .glyph{opacity:1; filter:none; transform:scale(1.04)}
+  .src-name{font-size:12px; font-weight:700; color:#2b3441; letter-spacing:.01em; white-space:nowrap}
+  .sig{font-size:11px; color:#6b7280}
+
+  /* ---------- Common components ---------- */
+  .pill{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;border:1px solid #e6eaf5;border-radius:999px;padding:6px 10px;background:#f7f9ff}
+  .dot{width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,var(--brand),var(--brand-2))}
+  .bar8{height:8px;border-radius:999px;background:linear-gradient(90deg,var(--brand),var(--brand-2))}
+  .tools{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
+  .input,select{appearance:none;border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:14px;background:#fff}
+  .btn{border:1px solid var(--border);background:#fff;border-radius:10px;padding:10px 12px;font-size:14px;cursor:pointer}
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,.05),0 1px 2px rgba(0,0,0,.08)}
+  .callout{display:flex;align-items:center;gap:12px;border-left:4px solid var(--brand);background:linear-gradient(135deg,#f6f9ff,#f0f4ff);border-radius:10px;padding:14px 16px;font-size:14px}
+  .callout .strong{font-weight:800}
+  .table-container{border-radius:12px;border:1px solid var(--border);box-shadow:0 1px 2px rgba(0,0,0,.05);overflow:hidden}
+  table{width:100%;border-collapse:separate;border-spacing:0}
+  thead th{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--line);color:#334155;padding:10px 10px;vertical-align:bottom}
+  .th{display:flex;flex-direction:column;line-height:1.05;gap:2px}
+  .th .h{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}
+  .th .s{font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.08em}
+  tbody td{border-bottom:1px solid var(--line);padding:12px 10px;font-size:14px;vertical-align:middle}
+  tbody tr:hover{background:var(--accent)}
+  .rank{width:40px;text-align:right;color:#6b7280;font-weight:700}
+  .company{font-weight:700}
+  .owner{color:#374151}
+  .right{text-align:right}
+  .mono{font-variant-numeric:tabular-nums}
+  .heat{display:inline-block;height:18px;min-width:34px;padding:0 8px;border-radius:6px;color:#064e3b;font-weight:700;background:linear-gradient(90deg,#ecfdf5,#bbf7d0)}
+  .note{color:#6b7280;font-size:12px;margin-top:8px}
+  .foot{display:flex;justify-content:space-between;align-items:center;margin-top:14px;color:#6b7280;font-size:12px}
+  .brandmark{font-weight:900;letter-spacing:.08em}
+  .sort{cursor:pointer;user-select:none}
+  .chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;border:1px solid var(--border);border-radius:999px;padding:6px 10px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+  .kpis{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px}
+  .kpi{display:flex;gap:8px;align-items:center;font-size:12px}
+  .kpi .swatch{width:9px;height:9px;border-radius:50%;background:#d1fae5}
+  @media (max-width:1080px){ .wrap{padding:18px} .title{font-size:22px} .lineage{display:none} .hide-sm{display:none} .th .h{font-size:11px} .th .s{font-size:9px} }
+
+</style>
+</head>
+<body>
+
+  <div class="hdr">
+    <div class="wrap hdr-inner">
+      <div style="flex:1 1 auto;min-width:0">
+        <div class="kicker">Sales Ops</div>
+        <div class="title">Pipeline Velocity Report</div>
+        <div class="subtitle">Pipeline Velocity - Last Week: 2025-10-26 to 2025-11-01 | Prior Week: 2025-10-19 to 2025-10-25</div>
+      </div>
+    </div>
+  </div>
+
+<div class="wrap">
+  <div class="panel">
+    
+    <div class="table-container">
+      <table id="tbl" aria-label="tbl">
+        <thead><tr><th class="sort" data-key="rep"><div class="th"><span class="h">Rep</span></div></th><th class="sort right" data-key="last_week"><div class="th"><span class="h">Pipeline Created<br/>Last Week</span></div></th><th class="sort right" data-key="prior_week"><div class="th"><span class="h">Pipeline Created<br/>Prior Week</span></div></th><th class="sort right" data-key="6w_avg"><div class="th"><span class="h">Pipeline Created<br/>6W Avg</span></div></th><th class="sort right" data-key="wow"><div class="th"><span class="h">WoW</span></div></th><th class="sort right" data-key="vs_avg"><div class="th"><span class="h">Vs Avg</span></div></th><th class="sort right" data-key="accts"><div class="th"><span class="h">Accts<br/>Owned</span></div></th><th class="sort right" data-key="open_opps"><div class="th"><span class="h">Open<br/>Opps</span></div></th><th class="sort right" data-key="win_rate"><div class="th"><span class="h">Win<br/>Rate</span></div></th><th class="sort right" data-key="avg_deal"><div class="th"><span class="h">Avg<br/>Deal</span></div></th><th class="sort right" data-key="avg_age"><div class="th"><span class="h">Avg Opp<br/>Age</span></div></th></tr></thead>
+        <tbody><tr><td>AJ Rivera</td><td class="right">$220,000</td><td class="right">$120,000</td><td class="right">$166,833</td><td class="right">+83.3%</td><td class="right">+31.9%</td><td class="right">93</td><td class="right">30</td><td class="right">38.6%</td><td class="right">$138,323</td><td class="right">52</td></tr><tr><td>Chloe Lium</td><td class="right">$29,700</td><td class="right">$26,022</td><td class="right">$59,687</td><td class="right">+14.1%</td><td class="right">-50.2%</td><td class="right">109</td><td class="right">75</td><td class="right">21.9%</td><td class="right">$19,483</td><td class="right">14</td></tr><tr><td>Chris Fello</td><td class="right">$792,000</td><td class="right">$342,000</td><td class="right">$229,000</td><td class="right">+131.6%</td><td class="right">+245.9%</td><td class="right">150</td><td class="right">82</td><td class="right">26.5%</td><td class="right">$33,502</td><td class="right">29</td></tr><tr><td>Michael Clinton</td><td class="right">$32,775</td><td class="right">$128,500</td><td class="right">$65,265</td><td class="right">-74.5%</td><td class="right">-49.8%</td><td class="right">72</td><td class="right">29</td><td class="right">66.0%</td><td class="right">$3,700</td><td class="right">12</td></tr><tr><td>Mike Meyer</td><td class="right">$500,000</td><td class="right">$64,000</td><td class="right">$175,350</td><td class="right">+681.2%</td><td class="right">+185.1%</td><td class="right">71</td><td class="right">90</td><td class="right">29.9%</td><td class="right">$37,684</td><td class="right">34</td></tr><tr><td>Nick Errigo</td><td class="right">$35,760</td><td class="right">$-784</td><td class="right">$16,879</td><td class="right">-4661.2%</td><td class="right">+111.9%</td><td class="right">89</td><td class="right">21</td><td class="right">71.9%</td><td class="right">$4,558</td><td class="right">29</td></tr><tr><td>Taylor Copie</td><td class="right">$90,000</td><td class="right">$27,400</td><td class="right">$52,067</td><td class="right">+228.5%</td><td class="right">+72.9%</td><td class="right">100</td><td class="right">36</td><td class="right">26.5%</td><td class="right">$37,419</td><td class="right">28</td></tr></tbody>
+      </table>
+    </div>
+
+    <div class="foot">
+      <div class="note">Generated: 2025-11-04 15:57:28</div>
+      <div class="brandmark">INNOVATIVE • SALES OPS</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const tbody = document.querySelector('tbody');
+  const headers = document.querySelectorAll('th.sort');
+  let sortKey = 'rep';
+  let sortDir = 'asc';
+  
+  function render() {
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    rows.sort((a, b) => {
+      const aVal = a.querySelector(`td:nth-child(${getColumnIndex(sortKey)})`).textContent.trim();
+      const bVal = b.querySelector(`td:nth-child(${getColumnIndex(sortKey)})`).textContent.trim();
+      const aNum = parseFloat(aVal.replace(/[^0-9.-]/g, ''));
+      const bNum = parseFloat(bVal.replace(/[^0-9.-]/g, ''));
+      if (!isNaN(aNum) && !isNaN(bNum)) {
+        return (aNum - bNum) * (sortDir === 'asc' ? 1 : -1);
+      }
+      return aVal.localeCompare(bVal) * (sortDir === 'asc' ? 1 : -1);
+    });
+    rows.forEach(r => tbody.appendChild(r));
+  }
+  
+  function getColumnIndex(key) {
+    const cols = ['rep', 'last_week', 'prior_week', '6w_avg', 'wow', 'vs_avg', 
+                  'accts', 'open_opps', 'win_rate', 'avg_deal', 'avg_age'];
+    return cols.indexOf(key) + 1;
+  }
+  
+  headers.forEach(th => {
+    th.addEventListener('click', () => {
+      sortKey = th.dataset.key;
+      sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+      render();
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

@@ -56,12 +56,12 @@
   }
   .lineage-cta:hover{transform:translateY(-1px); box-shadow:0 3px 8px rgba(0,0,0,.10)}
   .sources{
-    display:flex; gap:14px; align-items:center; flex-wrap:wrap; margin-top:8px;
+    display:flex; gap:10px; align-items:center; flex-wrap:nowrap; margin-top:8px;
   }
   .source{
-    display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:10px;
+    display:flex; align-items:center; gap:6px; padding:6px 8px; border-radius:10px;
     background:#fff; border:1px solid var(--border); box-shadow:0 1px 2px rgba(0,0,0,.04);
-    transition:.2s;
+    transition:.2s; flex-shrink:0; white-space:nowrap;
   }
   .source:hover{transform:translateY(-1px); box-shadow:0 3px 8px rgba(0,0,0,.10); border-color:#c7cff6}
   .glyph{
@@ -69,8 +69,8 @@
     transition:opacity .2s, transform .2s, filter .2s;
   }
   .source:hover .glyph{opacity:1; filter:none; transform:scale(1.04)}
-  .src-name{font-size:12px; font-weight:700; color:#2b3441; letter-spacing:.01em; white-space:nowrap}
-  .sig{font-size:11px; color:#6b7280}
+  .src-name{font-size:11px; font-weight:700; color:#2b3441; letter-spacing:.01em; white-space:nowrap}
+  .sig{font-size:10px; color:#6b7280; white-space:nowrap}
 
   /* ---------- Modal (Details Drawer) ---------- */
   .pb-modal{

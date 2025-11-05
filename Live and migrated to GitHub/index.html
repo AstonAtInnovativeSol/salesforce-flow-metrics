@@ -1,286 +1,694 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Sales Ops Analytics</title>
-<style>
-  /* -------------------------------------------------------
-     Design Tokens
-  ------------------------------------------------------- */
-  :root{
-    --bg:#ffffff; --ink:#1d1d1f; --muted:#86868b; --line:#d2d2d7; --panel:#f5f5f7;
-    --brand:#007aff; --accent:#f5f5f7; --border:#e5e5ea; --glass:rgba(255,255,255,.8);
-    --success:#34c759; --warning:#ff9500; --error:#ff3b30;
-    --hdr-h:88px;                 /* generous header height for premium feel */
-    --card-pad:20px;              /* generous card padding */
-    --title-size:32px;            /* prominent title size */
-    --spacing-xs:4px; --spacing-sm:8px; --spacing-md:16px; --spacing-lg:24px; --spacing-xl:32px;
-  }
-  [data-theme="dark"]{
-    --bg:#000000; --ink:#f5f5f7; --muted:#86868b; --line:#1d1d1f; --panel:#1c1c1e;
-    --brand:#0a84ff; --accent:#1c1c1e; --border:#2c2c2e; --glass:rgba(0,0,0,.8);
-    --success:#30d158; --warning:#ff9f0a; --error:#ff453a;
-  }
-
-  /* -------------------------------------------------------
-     Base - Apple SF Pro Typography
-  ------------------------------------------------------- */
-  *{box-sizing:border-box;transition:background-color .25s cubic-bezier(.4,0,.2,1),
-    color .25s cubic-bezier(.4,0,.2,1),border-color .25s cubic-bezier(.4,0,.2,1),
-    transform .25s cubic-bezier(.4,0,.2,1),box-shadow .25s cubic-bezier(.4,0,.2,1)}
-  html,body{margin:0;background:var(--bg);color:var(--ink);
-    font:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue',Helvetica,Arial,sans-serif;
-    font-size:15px;line-height:1.46667;font-weight:400;-webkit-font-smoothing:antialiased;
-    -moz-osx-font-smoothing:grayscale}
-  body{overflow:hidden;}
-  @media (max-width:768px){ body{overflow:auto;} }
-
-  .wrap{max-width:1440px;margin:0 auto;padding:var(--spacing-lg) var(--spacing-xl);width:100%}
-
-  /* -------------------------------------------------------
-     Header / Command Bar - Premium Spacing
-  ------------------------------------------------------- */
-  .hdr{position:sticky;top:0;z-index:100;backdrop-filter:saturate(180%) blur(20px);
-       -webkit-backdrop-filter:saturate(180%) blur(20px);background:var(--glass);
-       border-bottom:0.5px solid var(--line);height:var(--hdr-h);display:flex;align-items:center;
-       box-shadow:0 1px 0 rgba(0,0,0,.04)}
-  [data-theme="dark"] .hdr{background:rgba(0,0,0,.8);border-bottom-color:rgba(255,255,255,.1)}
-  .hdr-inner{display:flex;gap:var(--spacing-xl);align-items:center;justify-content:space-between;width:100%}
-
-  .logo-container{display:flex;align-items:center;gap:var(--spacing-md);flex-shrink:0}
-  .logo-img{height:56px;width:auto;object-fit:contain;display:block}
-  .logo-text{font-size:24px;font-weight:700;letter-spacing:-.02em;font-style:italic;color:var(--ink)}
-  .hdr-title-group{flex:1;min-width:0;padding-right:var(--spacing-lg);padding-left:var(--spacing-md)}
-  .title{font-size:32px;font-weight:700;line-height:1.1;margin:0 0 var(--spacing-sm);
-    letter-spacing:-.01em;color:var(--ink)}
-  .subtitle{color:var(--muted);font-size:14px;max-width:600px;line-height:1.42857;margin:0;
-    font-weight:400}
-
-
-  /* theme toggle - Refined */
-  .theme-toggle{flex-shrink:0;width:36px;height:36px;border-radius:10px;border:0.5px solid var(--border);
-                background:var(--panel);display:flex;align-items:center;justify-content:center;
-                cursor:pointer;position:relative;transition:all .2s cubic-bezier(.4,0,.2,1)}
-  .theme-toggle:hover{background:var(--accent);border-color:var(--brand)}
-  .theme-toggle-icon{width:18px;height:18px;position:absolute;transition:opacity .2s,transform .2s}
-  .theme-toggle .moon{opacity:0;transform:rotate(-90deg)}
-  [data-theme="dark"] .theme-toggle .sun{opacity:0;transform:rotate(90deg)}
-  [data-theme="dark"] .theme-toggle .moon{opacity:1;transform:rotate(0deg)}
-
-
-  /* -------------------------------------------------------
-     Dashboard Sections - Original layout
-  ------------------------------------------------------- */
-  .viewport{height:calc(100vh - var(--hdr-h) - var(--spacing-md));display:flex;flex-direction:column;
-            overflow-y:auto;padding:var(--spacing-lg) 0}
-  .section-title{font-size:20px;font-weight:700;margin-top:var(--spacing-xl);margin-bottom:var(--spacing-md);
-                 color:var(--ink);letter-spacing:-.01em}
-  .section-title:first-child{margin-top:0}
-  .dashboard-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--spacing-lg);
-                  margin-bottom:var(--spacing-xl)}
-  @media (max-width:1200px){ .dashboard-grid{grid-template-columns:repeat(2,1fr)} }
-  @media (max-width:768px){ .viewport{height:auto;padding:var(--spacing-md) 0}
-                           .dashboard-grid{grid-template-columns:1fr;gap:var(--spacing-md);
-                                         margin-bottom:var(--spacing-lg)} }
-
-  /* -------------------------------------------------------
-     Cards - Apple-level polish
-  ------------------------------------------------------- */
-  .dashboard-card{background:var(--panel);border:0.5px solid var(--border);border-radius:16px;
-                  padding:var(--card-pad);box-shadow:0 1px 3px rgba(0,0,0,.04),0 0 0 0.5px rgba(0,0,0,.02);
-                  transition:all .3s cubic-bezier(.4,0,.2,1);border-color:var(--border);
-                  color:inherit;text-decoration:none;display:block;position:relative;overflow:hidden}
-  .dashboard-card::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;
-                         background:linear-gradient(90deg,var(--brand),transparent);
-                         opacity:0;transition:opacity .3s}
-  .dashboard-card:hover{transform:translateY(-4px) scale(1.01);
-                        box-shadow:0 8px 24px rgba(0,0,0,.12),0 2px 8px rgba(0,0,0,.08);
-                        border-color:var(--brand)}
-  .dashboard-card:hover::before{opacity:1}
-  .card-icon{font-size:32px;margin-bottom:var(--spacing-md);line-height:1}
-  .card-title{font-size:17px;font-weight:600;margin:0 0 var(--spacing-sm);
-              letter-spacing:-.01em;color:var(--ink);line-height:1.3}
-  .card-description{font-size:13px;color:var(--muted);line-height:1.46154;margin:0 0 var(--spacing-md);
-                    display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;
-                    -webkit-box-orient:vertical;overflow:hidden;font-weight:400}
-  .card-meta{display:flex;gap:var(--spacing-md);align-items:center;flex-wrap:wrap;
-            padding-top:var(--spacing-md);border-top:0.5px solid var(--line);margin-top:var(--spacing-sm)}
-  .meta-item{display:flex;align-items:center;gap:var(--spacing-xs);font-size:11px;color:var(--muted);
-            font-weight:500}
-  .status-badge{display:inline-flex;align-items:center;gap:var(--spacing-xs);padding:4px 10px;
-                border-radius:999px;background:rgba(52,199,89,.1);border:0.5px solid rgba(52,199,89,.2);
-                font-size:11px;font-weight:600;color:var(--success)}
-  .status-badge::before{content:"✓";display:inline-block;width:12px;height:12px;border-radius:50%;
-                        background:var(--success);color:#fff;text-align:center;line-height:12px;
-                        font-size:8px;font-weight:700}
-
-  /* Footer */
-  .footer{display:flex;justify-content:flex-start;align-items:center;margin-top:var(--spacing-xl);
-          padding-top:var(--spacing-lg);border-top:0.5px solid var(--line);color:var(--muted);
-          font-size:12px;font-weight:500}
-  .brandmark{font-weight:700;letter-spacing:.05em;color:var(--muted)}
-
-  /* Status message */
-  .status-message{margin-top:8px;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:500;display:none}
-  .status-message.success{background:rgba(16,185,129,.1);color:var(--success);border:1px solid rgba(16,185,129,.2);display:block}
-  .status-message.error{background:rgba(239,68,68,.1);color:var(--error);border:1px solid rgba(239,68,68,.2);display:block}
-  .status-message.info{background:rgba(75,123,236,.1);color:var(--brand);border:1px solid rgba(75,123,236,.2);display:block}
-
-  /* -------------------------------------------------------
-     Auto-shrink rules for 13-inch laptops (common 1280–1440 wide, ~800 high)
-     - tighter paddings
-     - smaller title
-     - keep no-scroll
-  ------------------------------------------------------- */
-  @media (max-height:820px){
-    :root{ --card-pad:14px; }
-    .title{font-size:32px}
-    .subtitle{font-size:13px}
-    .dashboard-grid{gap:14px}
-  }
-  @media (max-height:760px){
-    :root{ --card-pad:12px; }
-    .title{font-size:28px}
-    .card-description{ -webkit-line-clamp:2; line-clamp:2; }
-    .footer{margin-top:8px;padding-top:8px}
-  }
-
-  /* Mobile header compaction */
-  @media (max-width:768px){
-    .wrap{padding:var(--spacing-md) var(--spacing-lg)}
-    .hdr-inner{gap:var(--spacing-md);flex-wrap:wrap}
-    .logo-img{height:44px}
-    .logo-text{font-size:20px}
-    .title{font-size:24px;font-weight:700;margin:0}
-    .subtitle{font-size:12px}
-    .hdr{height:auto;min-height:var(--hdr-h);padding:var(--spacing-md) 0}
-    .hdr-title-group{padding-right:0;padding-left:0}
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Ops Analytics</title>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --ink: #101418;
+            --muted: #6b7280;
+            --line: #e5e7eb;
+            --panel: #fafafa;
+            --brand: #4b7bec;
+            --brand-2: #6b5af9;
+            --accent: #f8fafc;
+            --border: #e2e8f0;
+            --glass: rgba(255,255,255,.65);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+        }
+        
+        [data-theme="dark"] {
+            --bg: #0a0e13;
+            --ink: #f5f7fa;
+            --muted: #9ca3af;
+            --line: #1f2937;
+            --panel: #111827;
+            --brand: #5b8ef7;
+            --brand-2: #7c6cf9;
+            --accent: #1a1f2e;
+            --border: #2d3748;
+            --glass: rgba(10,14,19,.85);
+            --success: #34d399;
+            --warning: #fbbf24;
+            --error: #f87171;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                        color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                        border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        html, body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--ink);
+            font: 15px/1.4 -apple-system, BlinkMacSystemFont, Inter, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            overflow-x: hidden;
+        }
+        
+        .wrap {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 16px 24px;
+            width: 100%;
+        }
+        
+        .hdr {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            backdrop-filter: saturate(180%) blur(8px);
+            -webkit-backdrop-filter: saturate(180%) blur(8px);
+            background: var(--glass);
+            border-bottom: 1px solid var(--line);
+            padding: 16px 24px;
+            margin: 0;
+            margin-bottom: 20px;
+        }
+        
+        [data-theme="dark"] .hdr {
+            background: linear-gradient(180deg, rgba(10,14,19,.95), rgba(10,14,19,.92) 60%, rgba(10,14,19,.88));
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-shrink: 0;
+            margin-right: 28px;
+        }
+        
+        .logo-symbol {
+            flex-shrink: 0;
+            height: 48px;
+            width: auto;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+            object-fit: contain;
+        }
+        
+        /* Invert logo for dark mode */
+        [data-theme="dark"] .logo-symbol {
+            filter: invert(1) brightness(1.2);
+        }
+        
+        .title {
+            font-size: 28px;
+            font-weight: 800;
+            line-height: 1.2;
+            margin: 0 0 6px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .subtitle {
+            color: var(--muted);
+            font-size: 13px;
+            max-width: 960px;
+            line-height: 1.4;
+            margin: 0;
+        }
+        
+        .hdr-inner {
+            display: flex;
+            gap: 18px;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .hdr-title-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .theme-toggle {
+            flex-shrink: 0;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--panel);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .theme-toggle:hover {
+            background: var(--accent);
+            border-color: var(--brand);
+            transform: scale(1.05);
+        }
+        
+        .theme-toggle:active {
+            transform: scale(0.98);
+        }
+        
+        .theme-toggle-icon {
+            width: 20px;
+            height: 20px;
+            position: absolute;
+            transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                        transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .theme-toggle-icon.sun {
+            opacity: 1;
+            transform: rotate(0deg) scale(1);
+        }
+        
+        .theme-toggle-icon.moon {
+            opacity: 0;
+            transform: rotate(-90deg) scale(0.8);
+        }
+        
+        [data-theme="dark"] .theme-toggle-icon.sun {
+            opacity: 0;
+            transform: rotate(90deg) scale(0.8);
+        }
+        
+        [data-theme="dark"] .theme-toggle-icon.moon {
+            opacity: 1;
+            transform: rotate(0deg) scale(1);
+        }
+        
+        .section-title {
+            font-size: 16px;
+            font-weight: 800;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            color: var(--ink);
+            text-transform: uppercase;
+            letter-spacing: .05em;
+        }
+        
+        .section-title:first-of-type {
+            margin-top: 0;
+            margin-bottom: 8px;
+        }
+        
+        /* Ensure all sections fit in viewport */
+        body {
+            max-height: 100vh;
+            overflow-y: auto;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .dashboard-card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,.05), 0 1px 2px rgba(0,0,0,.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        
+        .dashboard-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,.1), 0 2px 4px rgba(0,0,0,.08);
+            border-color: var(--brand);
+        }
+        
+        .card-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+        
+        .card-title {
+            font-size: 16px;
+            font-weight: 800;
+            margin-bottom: 6px;
+            color: var(--ink);
+            line-height: 1.2;
+        }
+        
+        .card-description {
+            font-size: 12px;
+            color: var(--muted);
+            line-height: 1.4;
+            margin-bottom: 10px;
+        }
+        
+        .card-meta {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            padding-top: 8px;
+            border-top: 1px solid var(--line);
+        }
+        
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            color: var(--muted);
+        }
+        
+        .meta-icon {
+            width: 14px;
+            height: 14px;
+            opacity: 0.7;
+        }
+        
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            border-radius: 999px;
+            background: var(--accent);
+            border: 1px solid var(--border);
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--success);
+        }
+        
+        .status-badge::before {
+            content: "✓";
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--success);
+            color: white;
+            text-align: center;
+            line-height: 10px;
+            font-size: 7px;
+        }
+        
+        .foot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid var(--line);
+            color: var(--muted);
+            font-size: 11px;
+        }
+        
+        .brandmark {
+            font-weight: 900;
+            letter-spacing: .08em;
+        }
+        
+        @media (max-width: 1200px) {
+            .dashboard-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            html, body {
+                font-size: 14px;
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+            }
+            
+            .wrap {
+                padding: 12px 16px;
+                max-width: 100%;
+            }
+            
+            .hdr {
+                padding: 8px 16px;
+                margin: 0;
+                margin-bottom: 12px;
+                position: sticky;
+                top: 0;
+                border-bottom: 1px solid var(--line);
+            }
+            
+            [data-theme="dark"] .hdr {
+                background: linear-gradient(180deg, rgba(10,14,19,.98), rgba(10,14,19,.96));
+            }
+            
+            .theme-toggle {
+                width: 40px;
+                height: 40px;
+            }
+            
+            .hdr-inner {
+                flex-direction: row;
+                align-items: center;
+                gap: 12px;
+            }
+            
+            .hdr-title-group {
+                flex: 1;
+                min-width: 0;
+                display: flex;
+                flex-direction: column;
+                gap: 2px;
+            }
+            
+            .logo-container {
+                margin-right: 0;
+                gap: 14px;
+                flex-shrink: 0;
+            }
+            
+            .logo-symbol {
+                height: 40px;
+                width: auto;
+                flex-shrink: 0;
+            }
+            
+            .logo-text {
+                font-size: 18px;
+                letter-spacing: .06em;
+            }
+            
+            .title {
+                font-size: 20px;
+                font-weight: 700;
+                margin: 0;
+                line-height: 1.2;
+                color: var(--ink);
+            }
+            
+            .subtitle {
+                font-size: 11px;
+                line-height: 1.4;
+                margin-top: 0;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                color: var(--muted);
+            }
+            
+            .section-title {
+                font-size: 13px;
+                margin-top: 16px;
+                margin-bottom: 8px;
+                letter-spacing: .03em;
+            }
+            
+            .section-title:first-of-type {
+                margin-top: 0;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+                margin-top: 8px;
+                margin-bottom: 8px;
+            }
+            
+            .dashboard-card {
+                padding: 14px;
+                border-radius: 10px;
+            }
+            
+            .card-icon {
+                font-size: 28px;
+                margin-bottom: 10px;
+            }
+            
+            .card-title {
+                font-size: 16px;
+                margin-bottom: 6px;
+            }
+            
+            .card-description {
+                font-size: 12px;
+                line-height: 1.5;
+                margin-bottom: 10px;
+            }
+            
+            .card-meta {
+                gap: 8px;
+                padding-top: 10px;
+            }
+            
+            .meta-item {
+                font-size: 10px;
+            }
+            
+            .status-badge {
+                font-size: 10px;
+                padding: 3px 8px;
+            }
+            
+            .foot {
+                margin-top: 16px;
+                padding-top: 12px;
+                font-size: 10px;
+                flex-direction: column;
+                gap: 8px;
+                align-items: flex-start;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .wrap {
+                padding: 12px;
+            }
+            
+            .hdr {
+                padding: 10px 12px;
+                margin: 0;
+                margin-bottom: 14px;
+            }
+            
+            .theme-toggle {
+                width: 36px;
+                height: 36px;
+            }
+            
+            .theme-toggle-icon {
+                width: 18px;
+                height: 18px;
+            }
+            
+            .logo-container {
+                gap: 8px;
+            }
+            
+            .logo-symbol {
+                width: 28px;
+                height: 28px;
+            }
+            
+            .logo-text {
+                font-size: 16px;
+                letter-spacing: .05em;
+            }
+            
+            .title {
+                font-size: 18px;
+                font-weight: 700;
+            }
+            
+            .subtitle {
+                font-size: 10px;
+                margin-top: 1px;
+            }
+            
+            .dashboard-card {
+                padding: 12px;
+            }
+            
+            .card-icon {
+                font-size: 24px;
+            }
+            
+            .card-title {
+                font-size: 15px;
+            }
+            
+            .card-description {
+                font-size: 11px;
+            }
+        }
+    </style>
 </head>
 <body>
-
-  <!-- Header -->
-  <div class="hdr">
-    <div class="wrap hdr-inner">
-      <!-- Logo + Title -->
-      <div style="flex: 1 1 auto; min-width: 0;">
-        <div class="logo-container">
-          <img src="innovLogo-black.png" alt="INNOVATIVE" class="logo-img" />
-          <span class="logo-text">INNOVATIVE</span>
+    <div class="hdr">
+        <div class="wrap hdr-inner">
+            <!-- Innovative Logo -->
+            <div class="logo-container">
+                <!-- Innovative logo from website -->
+                <img class="logo-symbol" src="innovLogo-black.png" alt="Innovative" />
+            </div>
+            <div class="hdr-title-group">
+                <div class="title">Sales Ops Analytics</div>
+                <div class="subtitle">Select a dashboard below to view detailed metrics and insights.</div>
+            </div>
+            <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light theme">
+                <svg class="theme-toggle-icon sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+                <svg class="theme-toggle-icon moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+            </button>
         </div>
-        <div class="hdr-title-group">
-          <div class="title">Sales Ops Analytics</div>
-          <div class="subtitle">Select a dashboard below to view detailed metrics and insights.</div>
+    </div>
+    
+    <div class="wrap">
+        <!-- Executive Dashboards -->
+        <div class="section-title">Executive Dashboards</div>
+        <div class="dashboard-grid">
+            <a href="exec_pipeline_dashboard - PoC.html" class="dashboard-card">
+                <div class="card-icon">🎯</div>
+                <div class="card-title">Executive Pipeline Dashboard</div>
+                <div class="card-description">Comprehensive executive-level pipeline analysis combining data from multiple sources. Includes high-level metrics, elite pipeline analysis, and strategic insights.</div>
+                <div class="card-meta">
+                    <div class="status-badge">Active</div>
+                </div>
+            </a>
         </div>
-      </div>
-
-      <!-- Theme toggle -->
-      <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light theme">
-        <svg class="theme-toggle-icon sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="5"></circle>
-          <line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line>
-          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-          <line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line>
-          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-        </svg>
-        <svg class="theme-toggle-icon moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-        </svg>
-      </button>
-    </div>
-  </div>
-
-  <!-- Viewport -->
-  <div class="wrap viewport">
-    <!-- Executive Dashboards -->
-    <div class="section-title">Executive Dashboards</div>
-    <div class="dashboard-grid">
-      <a href="exec_pipeline_dashboard - PoC.html" class="dashboard-card">
-        <div class="card-icon">🎯</div>
-        <div class="card-title">Executive Pipeline Dashboard</div>
-        <p class="card-description">Comprehensive executive-level pipeline analysis combining data from multiple sources. Includes high-level metrics, elite pipeline analysis, and strategic insights.</p>
-        <div class="card-meta"><span class="status-badge">Active</span></div>
-      </a>
-      <div></div>
-      <div></div>
-    </div>
-
-    <!-- Velocity & Performance -->
-    <div class="section-title">Velocity & Performance</div>
-    <div class="dashboard-grid">
-      <a href="boca_velocity_latest.html" class="dashboard-card">
-        <div class="card-icon">📊</div>
-        <div class="card-title">Boca Sales Velocity</div>
-        <p class="card-description">DGR Sales Velocity report tracking meetings, opportunity dollars, and closed won metrics by rep. Includes week-over-week comparisons and 6-week trailing averages.</p>
-        <div class="card-meta"><span class="status-badge">Active</span></div>
-      </a>
-
-      <a href="pipeline_velocity_latest.html" class="dashboard-card">
-        <div class="card-icon">⚡</div>
-        <div class="card-title">Pipeline Velocity</div>
-        <p class="card-description">Comprehensive pipeline velocity analysis tracking pipeline creation, accounts owned, open opportunities, win rates, and average deal metrics by rep.</p>
-        <div class="card-meta"><span class="status-badge">Active</span></div>
-      </a>
-      <div></div>
-    </div>
-
-    <!-- Featured Dashboards -->
-    <div class="section-title">Featured Dashboards</div>
-    <div class="dashboard-grid">
-      <a href="flow_slack_metrics_ghost_pipeline_latest.html" class="dashboard-card">
-        <div class="card-icon">👻</div>
-        <div class="card-title">Ghost Pipeline</div>
-        <p class="card-description">Track opportunities that have been in the pipeline for extended periods without activity. Monitor alerts sent, response times, and closed-out value to identify and address stalled deals.</p>
-        <div class="card-meta">
-          <div class="meta-item">Flow ID: 301PQ00000iX6QRYA0</div>
-          <span class="status-badge">Active</span>
+        
+        <!-- Velocity Dashboards -->
+        <div class="section-title">Velocity & Performance</div>
+        <div class="dashboard-grid">
+            <a href="boca_velocity_latest.html" class="dashboard-card">
+                <div class="card-icon">📊</div>
+                <div class="card-title">Boca Sales Velocity</div>
+                <div class="card-description">DGR Sales Velocity report tracking meetings, opportunity dollars, and closed won metrics by rep. Includes week-over-week comparisons and 6-week trailing averages.</div>
+                <div class="card-meta">
+                    <div class="status-badge">Active</div>
+                </div>
+            </a>
+            
+            <a href="pipeline_velocity_latest.html" class="dashboard-card">
+                <div class="card-icon">⚡</div>
+                <div class="card-title">Pipeline Velocity</div>
+                <div class="card-description">Comprehensive pipeline velocity analysis tracking pipeline creation, accounts owned, open opportunities, win rates, and average deal metrics by rep.</div>
+                <div class="card-meta">
+                    <div class="status-badge">Active</div>
+                </div>
+            </a>
         </div>
-      </a>
-
-      <a href="flow_slack_metrics_past_due_closed_date_latest.html" class="dashboard-card">
-        <div class="card-icon">📅</div>
-        <div class="card-title">Past Due Closed Date</div>
-        <p class="card-description">Monitor opportunities with past due close dates. Track compliance metrics, alert frequency, and response times to ensure timely deal closure.</p>
-        <div class="card-meta">
-          <div class="meta-item">Flow ID: 301PQ00000iMEFuYAO</div>
-          <span class="status-badge">Active</span>
+        
+        <!-- Featured Dashboards -->
+        <div class="section-title">Featured Dashboards</div>
+        <div class="dashboard-grid">
+            <a href="flow_slack_metrics_ghost_pipeline_latest.html" class="dashboard-card">
+                <div class="card-icon">👻</div>
+                <div class="card-title">Ghost Pipeline</div>
+                <div class="card-description">Track opportunities that have been in the pipeline for extended periods without activity. Monitor alerts sent, response times, and closed-out value to identify and address stalled deals.</div>
+                <div class="card-meta">
+                    <div class="meta-item">
+                        <svg class="meta-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor">
+                            <path d="M3 3h10v10H3zM6 6h4v4H6z"/>
+                        </svg>
+                        <span>Flow ID: 301PQ00000iX6QRYA0</span>
+                    </div>
+                    <div class="status-badge">Active</div>
+                </div>
+            </a>
+            
+            <a href="flow_slack_metrics_past_due_closed_date_latest.html" class="dashboard-card">
+                <div class="card-icon">📅</div>
+                <div class="card-title">Past Due Closed Date</div>
+                <div class="card-description">Monitor opportunities with past due close dates. Track compliance metrics, alert frequency, and response times to ensure timely deal closure.</div>
+                <div class="card-meta">
+                    <div class="meta-item">
+                        <svg class="meta-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor">
+                            <path d="M3 3h10v10H3zM6 6h4v4H6z"/>
+                        </svg>
+                        <span>Flow ID: 301PQ00000iMEFuYAO</span>
+                    </div>
+                    <div class="status-badge">Active</div>
+                </div>
+            </a>
+            
+            <a href="touchpoint_intelligence_latest.html" class="dashboard-card">
+                <div class="card-icon">🔍</div>
+                <div class="card-title">Touchpoint Intelligence Report</div>
+                <div class="card-description">Highlights high-signal accounts (multiple active touchpoints + recent engagement) before opportunities are created. Early-signal detection for proactive pipeline creation.</div>
+                <div class="card-meta">
+                    <div class="status-badge">Active</div>
+                </div>
+            </a>
         </div>
-      </a>
-
-      <a href="touchpoint_intelligence_latest.html" class="dashboard-card">
-        <div class="card-icon">🔍</div>
-        <div class="card-title">Touchpoint Intelligence Report</div>
-        <p class="card-description">Highlights high-signal accounts (multiple active touchpoints + recent engagement) before opportunities are created. Early-signal detection for proactive pipeline creation.</p>
-        <div class="card-meta"><span class="status-badge">Active</span></div>
-      </a>
+        
+        <div class="foot">
+            <div class="brandmark">INNOVATIVE • SALES OPS</div>
+        </div>
+        </div>
     </div>
-
-    <!-- Footer -->
-    <div class="footer">
-      <div class="brandmark">INNOVATIVE • SALES OPS</div>
-    </div>
-  </div>
-
-<script>
-
-  /* ----------------- Theme ----------------- */
-  (function(){
-    const themeToggle=document.getElementById('themeToggle');
-    const html=document.documentElement;
-    const saved=localStorage.getItem('theme')||'light';
-    const prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const initial=saved==='auto'?(prefersDark?'dark':'light'):saved;
-    if(initial==='dark') html.setAttribute('data-theme','dark');
-    themeToggle?.addEventListener('click',()=>{
-      const dark=html.getAttribute('data-theme')==='dark';
-      if(dark){ html.removeAttribute('data-theme'); localStorage.setItem('theme','light'); }
-      else{ html.setAttribute('data-theme','dark'); localStorage.setItem('theme','dark'); }
-    });
-  })();
-
-
-</script>
+    
+    <script>
+        (function() {
+            // Theme management
+            const themeToggle = document.getElementById('themeToggle');
+            const html = document.documentElement;
+            
+            // Get saved theme or default to light
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const initialTheme = savedTheme === 'auto' ? (prefersDark ? 'dark' : 'light') : savedTheme;
+            
+            // Apply initial theme
+            if (initialTheme === 'dark') {
+                html.setAttribute('data-theme', 'dark');
+            }
+            
+            // Theme toggle handler
+            themeToggle.addEventListener('click', function() {
+                const currentTheme = html.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                
+                if (newTheme === 'dark') {
+                    html.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    html.removeAttribute('data-theme');
+                    localStorage.setItem('theme', 'light');
+                }
+            });
+            
+            // Listen for system theme changes
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+                const savedTheme = localStorage.getItem('theme');
+                if (savedTheme === 'auto' || !savedTheme) {
+                    if (e.matches) {
+                        html.setAttribute('data-theme', 'dark');
+                    } else {
+                        html.removeAttribute('data-theme');
+                    }
+                }
+            });
+        })();
+    </script>
 </body>
 </html>

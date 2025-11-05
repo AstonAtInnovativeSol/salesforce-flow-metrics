@@ -122,6 +122,7 @@
             gap: 18px;
             align-items: center;
             justify-content: space-between;
+            flex-wrap: wrap;
         }
         
         .hdr-title-group {
@@ -321,21 +322,18 @@
         
         .filter-controls {
             display: flex;
-            gap: 12px;
+            gap: 8px;
             align-items: center;
-            margin-bottom: 20px;
-            padding: 12px 16px;
-            background: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: 12px;
+            flex-shrink: 0;
         }
         
         .filter-label {
-            font-size: 13px;
+            font-size: 11px;
             font-weight: 700;
-            color: var(--ink);
+            color: var(--muted);
             text-transform: uppercase;
             letter-spacing: .05em;
+            margin-right: 4px;
         }
         
         .filter-radio-group {
@@ -351,16 +349,17 @@
         .filter-radio-label {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            padding: 6px 12px;
-            border-radius: 8px;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 6px;
             border: 1px solid var(--border);
             background: var(--bg);
             color: var(--muted);
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
         }
         
         .filter-radio-label:hover {
@@ -475,18 +474,24 @@
                 margin-top: 0;
             }
             
+            .hdr-inner {
+                gap: 12px;
+            }
+            
             .filter-controls {
-                padding: 10px 12px;
-                margin-bottom: 16px;
+                order: 3;
+                width: 100%;
+                justify-content: center;
+                margin-top: 8px;
             }
             
             .filter-label {
-                font-size: 11px;
+                font-size: 10px;
             }
             
             .filter-radio-label {
-                padding: 5px 10px;
-                font-size: 11px;
+                padding: 4px 8px;
+                font-size: 10px;
             }
             
             .dashboard-grid {
@@ -616,6 +621,16 @@
                 <div class="title">Sales Ops Analytics</div>
                 <div class="subtitle">Select a dashboard below to view detailed metrics and insights.</div>
             </div>
+            <!-- Filter Controls -->
+            <div class="filter-controls">
+                <div class="filter-label">View:</div>
+                <div class="filter-radio-group">
+                    <input type="radio" id="filterDashboards" name="dashboardFilter" class="filter-radio filter-dashboards" checked>
+                    <label for="filterDashboards" class="filter-radio-label">Dashboards</label>
+                    <input type="radio" id="filterStandalone" name="dashboardFilter" class="filter-radio filter-standalone">
+                    <label for="filterStandalone" class="filter-radio-label">Stand Alone Reports</label>
+                </div>
+            </div>
             <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light theme">
                 <svg class="theme-toggle-icon sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="5"></circle>
@@ -636,16 +651,6 @@
     </div>
     
     <div class="wrap">
-        <!-- Filter Controls -->
-        <div class="filter-controls">
-            <div class="filter-label">View:</div>
-            <div class="filter-radio-group">
-                <input type="radio" id="filterDashboards" name="dashboardFilter" class="filter-radio filter-dashboards" checked>
-                <label for="filterDashboards" class="filter-radio-label">Dashboards</label>
-                <input type="radio" id="filterStandalone" name="dashboardFilter" class="filter-radio filter-standalone">
-                <label for="filterStandalone" class="filter-radio-label">Stand Alone Reports</label>
-            </div>
-        </div>
         
         <!-- Executive Dashboards -->
         <div class="section-title">Executive Dashboards</div>

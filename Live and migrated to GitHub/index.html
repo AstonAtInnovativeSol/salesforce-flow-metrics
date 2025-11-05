@@ -48,13 +48,12 @@
   [data-theme="dark"] .hdr{background:rgba(0,0,0,.8);border-bottom-color:rgba(255,255,255,.1)}
   .hdr-inner{display:flex;gap:var(--spacing-xl);align-items:center;justify-content:space-between;width:100%}
 
-  .logo-container{display:flex;align-items:center;gap:var(--spacing-md);flex-shrink:0}
-  .logo-img{height:56px;width:auto;object-fit:contain;display:block}
-  .logo-text{font-size:28px;font-weight:700;letter-spacing:-.02em;font-style:italic;color:var(--ink)}
-  .hdr-title-group{flex:1;min-width:0;padding-right:var(--spacing-lg)}
-  .title{font-size:var(--title-size);font-weight:700;line-height:1.1;margin:0 0 var(--spacing-sm);
-    letter-spacing:-.01em;color:var(--ink)}
-  .subtitle{color:var(--muted);font-size:14px;max-width:600px;line-height:1.42857;margin:0;
+  .logo-container{display:flex;align-items:center;gap:var(--spacing-lg);flex-shrink:0}
+  .logo-img{height:64px;width:auto;object-fit:contain;display:block}
+  .hdr-title-group{flex:1;min-width:0;padding-right:var(--spacing-xl);padding-left:var(--spacing-md)}
+  .title{font-size:36px;font-weight:700;line-height:1.1;margin:0 0 var(--spacing-md);
+    letter-spacing:-.02em;color:var(--ink)}
+  .subtitle{color:var(--muted);font-size:15px;max-width:700px;line-height:1.46667;margin:0;
     font-weight:400}
 
   /* command bar - Refined Apple-style controls */
@@ -104,25 +103,16 @@
   [data-theme="dark"] .theme-toggle .sun{opacity:0;transform:rotate(90deg)}
   [data-theme="dark"] .theme-toggle .moon{opacity:1;transform:rotate(0deg)}
 
-  /* Logo - PNG image */
-  .logo-img{height:56px;width:auto;object-fit:contain;display:block;transition:opacity .2s}
 
   /* -------------------------------------------------------
-     Tabs + No-Scroll Viewport - Premium spacing
+     Dashboard Grid - No tabs, all visible
   ------------------------------------------------------- */
   .viewport{height:calc(100vh - var(--hdr-h) - var(--spacing-md));display:flex;flex-direction:column}
-  .tabs{display:flex;gap:var(--spacing-sm);margin:var(--spacing-md) 0 var(--spacing-lg);
-        border-bottom:0.5px solid var(--line);padding-bottom:var(--spacing-sm)}
-  .tab{padding:var(--spacing-sm) var(--spacing-md);border:none;border-radius:0;
-       font-weight:600;font-size:13px;color:var(--muted);cursor:pointer;background:transparent;
-       transition:all .2s cubic-bezier(.4,0,.2,1);position:relative;margin-bottom:-1px;
-       border-bottom:2px solid transparent}
-  .tab:hover{color:var(--ink)}
-  .tab.active{color:var(--ink);border-bottom-color:var(--brand);font-weight:600}
-  .tabpanel{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:var(--spacing-lg);
-            align-content:start;overflow-y:auto;padding-bottom:var(--spacing-lg)}
-  @media (max-width:1200px){ .tabpanel{grid-template-columns:repeat(2,1fr)} }
-  @media (max-width:768px){ .viewport{height:auto} .tabpanel{grid-template-columns:1fr} }
+  .dashboard-grid{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:var(--spacing-lg);
+                  align-content:start;overflow-y:auto;padding:var(--spacing-lg) 0;
+                  margin-top:var(--spacing-md)}
+  @media (max-width:1200px){ .dashboard-grid{grid-template-columns:repeat(2,1fr)} }
+  @media (max-width:768px){ .viewport{height:auto} .dashboard-grid{grid-template-columns:1fr;gap:var(--spacing-md)} }
 
   /* -------------------------------------------------------
      Cards - Apple-level polish
@@ -174,13 +164,15 @@
      - keep no-scroll
   ------------------------------------------------------- */
   @media (max-height:820px){
-    :root{ --card-pad:14px; --title-size:24px; }
-    .subtitle{font-size:12px}
-    .tabpanel{gap:14px}
+    :root{ --card-pad:14px; }
+    .title{font-size:32px}
+    .subtitle{font-size:13px}
+    .dashboard-grid{gap:14px}
   }
   @media (max-height:760px){
-    :root{ --card-pad:12px; --title-size:22px; }
-    .card-description{ -webkit-line-clamp:2; line-clamp:2; }     /* already 2 lines, keep tight */
+    :root{ --card-pad:12px; }
+    .title{font-size:28px}
+    .card-description{ -webkit-line-clamp:2; line-clamp:2; }
     .footer{margin-top:8px;padding-top:8px}
   }
 
@@ -188,9 +180,8 @@
   @media (max-width:768px){
     .wrap{padding:var(--spacing-md) var(--spacing-lg)}
     .hdr-inner{gap:var(--spacing-md);flex-wrap:wrap}
-    .logo-img{height:44px}
-    .logo-text{font-size:22px}
-    .title{font-size:24px;font-weight:700;margin:0}
+    .logo-img{height:48px}
+    .title{font-size:28px;font-weight:700;margin:0}
     .subtitle{font-size:12px}
     .cmdbar{flex-direction:column;align-items:stretch;gap:var(--spacing-md);min-width:0}
     .hdr{height:auto;min-height:var(--hdr-h);padding:var(--spacing-md) 0}
@@ -206,7 +197,6 @@
       <!-- Logo + Title -->
       <div class="logo-container">
         <img src="innovLogo-black.png" alt="INNOVATIVE" class="logo-img" />
-        <span class="logo-text">INNOVATIVE</span>
       </div>
 
       <!-- Title group -->
@@ -262,27 +252,17 @@
 
   <!-- Viewport (no-scroll) -->
   <div class="wrap viewport">
-    <!-- Tabs -->
-    <div class="tabs" role="tablist">
-      <button class="tab active" data-tab="exec" role="tab" aria-selected="true">Executive</button>
-      <button class="tab" data-tab="velocity" role="tab" aria-selected="false">Velocity</button>
-      <button class="tab" data-tab="featured" role="tab" aria-selected="false">Featured</button>
-    </div>
-
-    <!-- EXEC -->
-    <div class="tabpanel" id="tab-exec" role="tabpanel">
+    <!-- All Dashboards in One Grid -->
+    <div class="dashboard-grid">
+      <!-- Executive -->
       <a href="exec_pipeline_dashboard - PoC.html" class="dashboard-card">
         <div class="card-icon">🎯</div>
         <div class="card-title">Executive Pipeline Dashboard</div>
         <p class="card-description">Comprehensive executive-level pipeline analysis combining data from multiple sources. Includes high-level metrics, elite pipeline analysis, and strategic insights.</p>
         <div class="card-meta"><span class="status-badge">Active</span></div>
       </a>
-      <!-- empty cells keep the row balanced without forcing scroll -->
-      <div></div><div></div>
-    </div>
 
-    <!-- VELOCITY -->
-    <div class="tabpanel" id="tab-velocity" role="tabpanel" hidden>
+      <!-- Velocity -->
       <a href="boca_velocity_latest.html" class="dashboard-card">
         <div class="card-icon">📊</div>
         <div class="card-title">Boca Sales Velocity</div>
@@ -296,11 +276,8 @@
         <p class="card-description">Comprehensive pipeline velocity analysis tracking pipeline creation, accounts owned, open opportunities, win rates, and average deal metrics by rep.</p>
         <div class="card-meta"><span class="status-badge">Active</span></div>
       </a>
-      <div></div>
-    </div>
 
-    <!-- FEATURED -->
-    <div class="tabpanel" id="tab-featured" role="tabpanel" hidden>
+      <!-- Featured -->
       <a href="flow_slack_metrics_ghost_pipeline_latest.html" class="dashboard-card">
         <div class="card-icon">👻</div>
         <div class="card-title">Ghost Pipeline</div>
@@ -372,21 +349,6 @@
     });
   })();
 
-  /* ----------------- Tabs ----------------- */
-  const tabs=document.querySelectorAll('.tab');
-  const panes={
-    exec:document.getElementById('tab-exec'),
-    velocity:document.getElementById('tab-velocity'),
-    featured:document.getElementById('tab-featured'),
-  };
-  tabs.forEach(t=>{
-    t.addEventListener('click',()=>{
-      tabs.forEach(x=>{x.classList.remove('active');x.setAttribute('aria-selected','false');});
-      Object.values(panes).forEach(p=>p.hidden=true);
-      t.classList.add('active');t.setAttribute('aria-selected','true');
-      panes[t.dataset.tab].hidden=false;
-    });
-  });
 
   /* ----------------- Actions ----------------- */
   const executeButton=document.getElementById('executeButton');

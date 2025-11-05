@@ -105,14 +105,19 @@
 
 
   /* -------------------------------------------------------
-     Dashboard Grid - No tabs, all visible
+     Dashboard Sections - Original layout
   ------------------------------------------------------- */
-  .viewport{height:calc(100vh - var(--hdr-h) - var(--spacing-md));display:flex;flex-direction:column}
-  .dashboard-grid{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:var(--spacing-lg);
-                  align-content:start;overflow-y:auto;padding:var(--spacing-lg) 0;
-                  margin-top:var(--spacing-md)}
+  .viewport{height:calc(100vh - var(--hdr-h) - var(--spacing-md));display:flex;flex-direction:column;
+            overflow-y:auto;padding:var(--spacing-lg) 0}
+  .section-title{font-size:20px;font-weight:700;margin-top:var(--spacing-xl);margin-bottom:var(--spacing-md);
+                 color:var(--ink);letter-spacing:-.01em}
+  .section-title:first-child{margin-top:0}
+  .dashboard-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--spacing-lg);
+                  margin-bottom:var(--spacing-xl)}
   @media (max-width:1200px){ .dashboard-grid{grid-template-columns:repeat(2,1fr)} }
-  @media (max-width:768px){ .viewport{height:auto} .dashboard-grid{grid-template-columns:1fr;gap:var(--spacing-md)} }
+  @media (max-width:768px){ .viewport{height:auto;padding:var(--spacing-md) 0}
+                           .dashboard-grid{grid-template-columns:1fr;gap:var(--spacing-md);
+                                         margin-bottom:var(--spacing-lg)} }
 
   /* -------------------------------------------------------
      Cards - Apple-level polish
@@ -250,19 +255,24 @@
     </div>
   </div>
 
-  <!-- Viewport (no-scroll) -->
+  <!-- Viewport -->
   <div class="wrap viewport">
-    <!-- All Dashboards in One Grid -->
+    <!-- Executive Dashboards -->
+    <div class="section-title">Executive Dashboards</div>
     <div class="dashboard-grid">
-      <!-- Executive -->
       <a href="exec_pipeline_dashboard - PoC.html" class="dashboard-card">
         <div class="card-icon">🎯</div>
         <div class="card-title">Executive Pipeline Dashboard</div>
         <p class="card-description">Comprehensive executive-level pipeline analysis combining data from multiple sources. Includes high-level metrics, elite pipeline analysis, and strategic insights.</p>
         <div class="card-meta"><span class="status-badge">Active</span></div>
       </a>
+      <div></div>
+      <div></div>
+    </div>
 
-      <!-- Velocity -->
+    <!-- Velocity & Performance -->
+    <div class="section-title">Velocity & Performance</div>
+    <div class="dashboard-grid">
       <a href="boca_velocity_latest.html" class="dashboard-card">
         <div class="card-icon">📊</div>
         <div class="card-title">Boca Sales Velocity</div>
@@ -276,12 +286,16 @@
         <p class="card-description">Comprehensive pipeline velocity analysis tracking pipeline creation, accounts owned, open opportunities, win rates, and average deal metrics by rep.</p>
         <div class="card-meta"><span class="status-badge">Active</span></div>
       </a>
+      <div></div>
+    </div>
 
-      <!-- Featured -->
+    <!-- Featured Dashboards -->
+    <div class="section-title">Featured Dashboards</div>
+    <div class="dashboard-grid">
       <a href="flow_slack_metrics_ghost_pipeline_latest.html" class="dashboard-card">
         <div class="card-icon">👻</div>
         <div class="card-title">Ghost Pipeline</div>
-        <p class="card-description">Track opportunities in the pipeline with extended periods without activity. Monitor alerts sent, response times, and closed-out value to identify and address stalled deals.</p>
+        <p class="card-description">Track opportunities that have been in the pipeline for extended periods without activity. Monitor alerts sent, response times, and closed-out value to identify and address stalled deals.</p>
         <div class="card-meta">
           <div class="meta-item">Flow ID: 301PQ00000iX6QRYA0</div>
           <span class="status-badge">Active</span>
@@ -306,7 +320,7 @@
       </a>
     </div>
 
-    <!-- Footer inside viewport -->
+    <!-- Footer -->
     <div class="footer">
       <div id="runStatus">Ready</div>
       <div class="brandmark">INNOVATIVE • SALES OPS</div>

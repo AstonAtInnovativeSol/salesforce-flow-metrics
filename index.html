@@ -319,6 +319,65 @@
             letter-spacing: .08em;
         }
         
+        .filter-controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 12px 16px;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+        }
+        
+        .filter-label {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--ink);
+            text-transform: uppercase;
+            letter-spacing: .05em;
+        }
+        
+        .filter-radio-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .filter-radio {
+            display: none;
+        }
+        
+        .filter-radio-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .filter-radio-label:hover {
+            background: var(--accent);
+            border-color: var(--brand);
+        }
+        
+        .filter-radio:checked + .filter-radio-label {
+            background: var(--brand);
+            color: white;
+            border-color: var(--brand);
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
         @media (max-width: 1200px) {
             .dashboard-grid {
                 grid-template-columns: repeat(2, 1fr);
@@ -414,6 +473,20 @@
             
             .section-title:first-of-type {
                 margin-top: 0;
+            }
+            
+            .filter-controls {
+                padding: 10px 12px;
+                margin-bottom: 16px;
+            }
+            
+            .filter-label {
+                font-size: 11px;
+            }
+            
+            .filter-radio-label {
+                padding: 5px 10px;
+                font-size: 11px;
             }
             
             .dashboard-grid {
@@ -563,10 +636,21 @@
     </div>
     
     <div class="wrap">
+        <!-- Filter Controls -->
+        <div class="filter-controls">
+            <div class="filter-label">View:</div>
+            <div class="filter-radio-group">
+                <input type="radio" id="filterDashboards" name="dashboardFilter" class="filter-radio filter-dashboards" checked>
+                <label for="filterDashboards" class="filter-radio-label">Dashboards</label>
+                <input type="radio" id="filterStandalone" name="dashboardFilter" class="filter-radio filter-standalone">
+                <label for="filterStandalone" class="filter-radio-label">Stand Alone Reports</label>
+            </div>
+        </div>
+        
         <!-- Executive Dashboards -->
         <div class="section-title">Executive Dashboards</div>
         <div class="dashboard-grid">
-            <a href="exec_pipeline_dashboard - PoC.html" class="dashboard-card">
+            <a href="exec_pipeline_dashboard - PoC.html" class="dashboard-card" data-standalone="false">
                 <div class="card-icon">🎯</div>
                 <div class="card-title">Executive Pipeline Dashboard</div>
                 <div class="card-description">Comprehensive executive-level pipeline analysis combining data from multiple sources. Includes high-level metrics, elite pipeline analysis, and strategic insights.</div>
@@ -579,7 +663,7 @@
         <!-- Velocity Dashboards -->
         <div class="section-title">Velocity & Performance</div>
         <div class="dashboard-grid">
-            <a href="boca_velocity_latest.html" class="dashboard-card">
+            <a href="boca_velocity_latest.html" class="dashboard-card" data-standalone="false">
                 <div class="card-icon">📊</div>
                 <div class="card-title">Boca Sales Velocity</div>
                 <div class="card-description">DGR Sales Velocity report tracking meetings, opportunity dollars, and closed won metrics by rep. Includes week-over-week comparisons and 6-week trailing averages.</div>
@@ -588,7 +672,7 @@
                 </div>
             </a>
             
-            <a href="pipeline_velocity_latest.html" class="dashboard-card">
+            <a href="pipeline_velocity_latest.html" class="dashboard-card" data-standalone="false">
                 <div class="card-icon">⚡</div>
                 <div class="card-title">Pipeline Velocity</div>
                 <div class="card-description">Comprehensive pipeline velocity analysis tracking pipeline creation, accounts owned, open opportunities, win rates, and average deal metrics by rep.</div>
@@ -601,7 +685,7 @@
         <!-- Featured Dashboards -->
         <div class="section-title">Featured Dashboards</div>
         <div class="dashboard-grid">
-            <a href="flow_slack_metrics_ghost_pipeline_latest.html" class="dashboard-card">
+            <a href="flow_slack_metrics_ghost_pipeline_latest.html" class="dashboard-card" data-standalone="false">
                 <div class="card-icon">👻</div>
                 <div class="card-title">Ghost Pipeline</div>
                 <div class="card-description">Track opportunities that have been in the pipeline for extended periods without activity. Monitor alerts sent, response times, and closed-out value to identify and address stalled deals.</div>
@@ -616,7 +700,7 @@
                 </div>
             </a>
             
-            <a href="flow_slack_metrics_past_due_closed_date_latest.html" class="dashboard-card">
+            <a href="flow_slack_metrics_past_due_closed_date_latest.html" class="dashboard-card" data-standalone="false">
                 <div class="card-icon">📅</div>
                 <div class="card-title">Past Due Closed Date</div>
                 <div class="card-description">Monitor opportunities with past due close dates. Track compliance metrics, alert frequency, and response times to ensure timely deal closure.</div>
@@ -631,10 +715,22 @@
                 </div>
             </a>
             
-            <a href="touchpoint_intelligence_latest.html" class="dashboard-card">
+            <a href="touchpoint_intelligence_latest.html" class="dashboard-card" data-standalone="false">
                 <div class="card-icon">🔍</div>
                 <div class="card-title">Touchpoint Intelligence Report</div>
                 <div class="card-description">Highlights high-signal accounts (multiple active touchpoints + recent engagement) before opportunities are created. Early-signal detection for proactive pipeline creation.</div>
+                <div class="card-meta">
+                    <div class="status-badge">Active</div>
+                </div>
+            </a>
+        </div>
+        
+        <!-- Stand Alone Reports (no section title - cards only) -->
+        <div class="dashboard-grid">
+            <a href="ghost_pipeline_comparison_latest.html" class="dashboard-card" data-standalone="true">
+                <div class="card-icon">📊</div>
+                <div class="card-title">Ghost Pipeline Comparison</div>
+                <div class="card-description">Compare opportunities with and without Ghost Pipeline alerts. Analyze win rates, sales cycle velocity, and loss reasons over the last 90 days.</div>
                 <div class="card-meta">
                     <div class="status-badge">Active</div>
                 </div>
@@ -688,6 +784,55 @@
                     }
                 }
             });
+            
+            // Dashboard filter functionality
+            const filterDashboards = document.getElementById('filterDashboards');
+            const filterStandalone = document.getElementById('filterStandalone');
+            const dashboardCards = document.querySelectorAll('.dashboard-card');
+            const sectionTitles = document.querySelectorAll('.section-title');
+            
+            function filterDashboardsByType() {
+                const showStandalone = filterStandalone.checked;
+                
+                // Filter dashboard cards
+                dashboardCards.forEach(card => {
+                    const isStandalone = card.getAttribute('data-standalone') === 'true';
+                    
+                    if (showStandalone) {
+                        // Show only standalone reports
+                        if (isStandalone) {
+                            card.classList.remove('hidden');
+                        } else {
+                            card.classList.add('hidden');
+                        }
+                    } else {
+                        // Show only regular dashboards
+                        if (isStandalone) {
+                            card.classList.add('hidden');
+                        } else {
+                            card.classList.remove('hidden');
+                        }
+                    }
+                });
+                
+                // Hide/show section titles based on filter
+                sectionTitles.forEach(title => {
+                    if (showStandalone) {
+                        // Hide all section titles when showing standalone reports
+                        title.classList.add('hidden');
+                    } else {
+                        // Show all section titles when showing regular dashboards
+                        title.classList.remove('hidden');
+                    }
+                });
+            }
+            
+            // Initialize filter on page load
+            filterDashboardsByType();
+            
+            // Add event listeners
+            filterDashboards.addEventListener('change', filterDashboardsByType);
+            filterStandalone.addEventListener('change', filterDashboardsByType);
         })();
     </script>
 </body>

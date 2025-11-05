@@ -1,0 +1,2315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ghost Pipeline Comparison - With vs Without Alerts</title>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --ink: #101418;
+            --muted: #6b7280;
+            --line: #e5e7eb;
+            --panel: #fafafa;
+            --brand: #4b7bec;
+            --brand-2: #6b5af9;
+            --accent: #f8fafc;
+            --border: #e2e8f0;
+            --glass: rgba(255,255,255,.65);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--ink);
+            font: 16px/1.45 -apple-system, BlinkMacSystemFont, Inter, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+        
+        .wrap {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+            width: 100%;
+        }
+        
+        .hdr {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            backdrop-filter: saturate(180%) blur(8px);
+            background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.86) 60%, rgba(255,255,255,.70));
+            border-bottom: 1px solid var(--line);
+            padding: 12px 24px;
+            margin: 0 -24px 12px;
+        }
+        
+        .kicker {
+            letter-spacing: .22em;
+            text-transform: uppercase;
+            color: var(--muted);
+            font-weight: 700;
+            font-size: 12px;
+        }
+        
+        .title {
+            font-size: 28px;
+            font-weight: 800;
+            line-height: 1.1;
+            margin: 4px 0 3px;
+        }
+        
+        .subtitle {
+            color: var(--muted);
+            font-size: 13px;
+            max-width: 960px;
+            line-height: 1.4;
+        }
+        
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 18px;
+            box-shadow: 0 1px 3px rgba(0,0,0,.05), 0 1px 2px rgba(0,0,0,.08);
+            margin-bottom: 14px;
+        }
+        
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+        
+        .metric-section {
+            margin-bottom: 24px;
+        }
+        
+        .metric-section h3 {
+            color: var(--ink);
+            font-size: 14px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            margin-bottom: 12px;
+        }
+        
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+        
+        .metric-box {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            transition: transform .2s, box-shadow .2s;
+        }
+        
+        .metric-box:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(0,0,0,.10);
+        }
+        
+        .metric-box[style*="border-left-color"] {
+            border-left-width: 4px;
+            border-left-style: solid;
+        }
+        
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 6px 10px;
+            background: #fff;
+            box-shadow: 0 1px 2px rgba(0,0,0,.05);
+        }
+        
+        .metric-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+        
+        .metric-value {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--ink);
+            font-variant-numeric: tabular-nums;
+        }
+        
+        .comparison-box {
+            background: linear-gradient(135deg, #f6f9ff, #f0f4ff);
+            border: 2px solid var(--brand);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .comparison-box h4 {
+            color: var(--brand);
+            font-size: 16px;
+            font-weight: 800;
+            margin-bottom: 12px;
+        }
+        
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--line);
+        }
+        
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+        
+        .stat-label {
+            color: var(--muted);
+            font-size: 13px;
+        }
+        
+        .stat-value {
+            font-weight: 700;
+            color: var(--ink);
+            font-variant-numeric: tabular-nums;
+        }
+        
+        .positive {
+            color: var(--success);
+        }
+        
+        .negative {
+            color: var(--error);
+        }
+        
+        .opp-list {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 12px;
+        }
+        
+        .opp-item {
+            padding: 12px;
+            background: #fff;
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--brand);
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .opp-item.won {
+            border-left-color: var(--success);
+        }
+        
+        .opp-item.lost {
+            border-left-color: var(--warning);
+        }
+        
+        .opp-name {
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+        
+        .opp-details {
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom: 4px;
+        }
+        
+        .reason {
+            font-size: 12px;
+            color: var(--ink);
+            font-style: italic;
+            margin-top: 4px;
+            padding: 6px;
+            background: var(--accent);
+            border-radius: 4px;
+        }
+        
+        .foot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 14px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+        
+        .brandmark {
+            font-weight: 900;
+            letter-spacing: .08em;
+        }
+        
+        .note {
+            color: var(--muted);
+            font-size: 12px;
+            margin-top: 8px;
+        }
+        
+        .count-up {
+            font-variant-numeric: tabular-nums;
+        }
+        
+        @media (max-width: 1080px) {
+            .wrap {
+                padding: 18px;
+            }
+            .title {
+                font-size: 22px;
+            }
+            .metric-grid {
+                grid-template-columns: 1fr;
+            }
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .wrap {
+                padding: 12px;
+            }
+            
+            .hdr {
+                padding: 12px;
+                margin: 0 -12px 12px;
+            }
+            
+            .hdr-inner {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .header-content-wrapper {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .header-flow-info {
+                width: 100%;
+            }
+            
+            .title {
+                font-size: 20px;
+            }
+            
+            .subtitle {
+                font-size: 12px;
+            }
+            
+            .kicker {
+                font-size: 10px;
+            }
+            
+            .metric-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .metric-box {
+                padding: 12px;
+            }
+            
+            .metric-value {
+                font-size: 20px;
+            }
+            
+            .chip {
+                font-size: 11px;
+                padding: 5px 8px;
+            }
+            
+            .panel {
+                padding: 12px;
+                border-radius: 12px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .wrap {
+                padding: 10px;
+            }
+            
+            .hdr {
+                padding: 10px;
+                margin: 0 -10px 10px;
+            }
+            
+            .title {
+                font-size: 18px;
+            }
+            
+            .subtitle {
+                font-size: 11px;
+            }
+            
+            .metric-value {
+                font-size: 18px;
+            }
+            
+            .metric-label {
+                font-size: 10px;
+            }
+            
+            .chip {
+                font-size: 10px;
+                padding: 4px 6px;
+            }
+        }
+    </style>
+    <script>
+        // Animation: Count up numbers from 0
+        function animateValue(element, start, end, duration, formatFn) {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                const value = Math.floor(progress * (end - start) + start);
+                element.textContent = formatFn ? formatFn(value) : value;
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+        
+        function initAnimations() {
+            // Set zoom to 80% only on desktop (not mobile)
+            if (window.innerWidth > 768) {
+                document.body.style.zoom = '0.8';
+            }
+            
+            // Find all metric values and animate them
+            document.querySelectorAll('.metric-value').forEach(el => {
+                const originalText = el.textContent.trim();
+                
+                // Skip animation for currency values with M or K suffixes (they're already formatted correctly)
+                if (originalText.includes('M') || originalText.includes('K')) {
+                    return; // Don't animate pre-formatted values
+                }
+                
+                // Extract numbers from text
+                let match = originalText.match(/[\$]?([\d,]+\.?\d*)/);
+                if (match) {
+                    let numStr = match[1].replace(/,/g, '');
+                    let num = parseFloat(numStr);
+                    
+                    if (!isNaN(num) && num > 0) {
+                        // Store original text for formatting reference
+                        el.dataset.originalText = originalText;
+                        
+                        // Determine format
+                        let formatFn;
+                        if (originalText.includes('$')) {
+                            formatFn = (val) => {
+                                if (originalText.includes('.')) {
+                                    return '$' + val.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                                } else {
+                                    return '$' + val.toLocaleString('en-US');
+                                }
+                            };
+                        } else if (originalText.includes('%')) {
+                            formatFn = (val) => val.toFixed(1) + '%';
+                        } else {
+                            formatFn = (val) => val.toLocaleString('en-US');
+                        }
+                        
+                        // Set initial value to 0
+                        el.textContent = formatFn(0);
+                        el.classList.add('count-up');
+                        
+                        // Animate with slight random delay for visual effect
+                        setTimeout(() => {
+                            animateValue(el, 0, num, 1500, formatFn);
+                        }, Math.random() * 200);
+                    }
+                }
+            });
+        }
+        
+        // Run animations when page loads
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initAnimations);
+        } else {
+            initAnimations();
+        }
+    </script>
+</head>
+<body>
+    <div class="hdr">
+        <div class="wrap">
+            <div class="kicker">Sales Ops • Ghost Pipeline Analysis</div>
+            <div class="title">Ghost Pipeline Comparison</div>
+            <div class="subtitle">Last 90 Days: Opportunities WITH vs WITHOUT Alerts - Win Rate, Sales Cycle Velocity, and Reason Analysis</div>
+        </div>
+    </div>
+    
+    <div class="wrap">
+        <!-- Key Comparison -->
+        <div class="comparison-box">
+            <h4>📊 Key Comparison Metrics</h4>
+            <div class="stat-row">
+                <span class="stat-label">Sales Cycle Velocity Difference:</span>
+                <span class="stat-value positive">
+                    30.7 days faster with alerts
+                </span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Win Rate Difference:</span>
+                <span class="stat-value positive">
+                    8.1% higher with alerts
+                </span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Closed Opportunities:</span>
+                <span class="stat-value">
+                    547 (no alerts) vs 16 (with alerts)
+                </span>
+            </div>
+            <div class="stat-row" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line);">
+                <span class="stat-label">✅ Validation (vs SF Report):</span>
+                <span class="stat-value" style="color: var(--success);">
+                    Total: 563 / Expected: 563 ✅ Match
+                </span>
+            </div>
+        </div>
+        
+        <!-- Side-by-Side Comparison -->
+        <div class="comparison-grid">
+            <!-- Without Alerts -->
+            <div class="panel">
+                <div class="metric-section">
+                    <h3>❌ Opportunities WITHOUT Alerts (Last 90 Days)</h3>
+                    <div class="metric-grid">
+                        <div class="metric-box">
+                            <div class="metric-label">Total Opportunities</div>
+                            <div class="metric-value">547</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="metric-label">Closed</div>
+                            <div class="metric-value">547</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="metric-label">Win Rate</div>
+                            <div class="metric-value">41.9%</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="metric-label">Avg Sales Cycle</div>
+                            <div class="metric-value">42.0 days</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="metric-label">Total Value</div>
+                            <div class="metric-value">$20.23M</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="metric-label">Closed Value</div>
+                            <div class="metric-value">$20.23M</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="metric-label">Won Value</div>
+                            <div class="metric-value" style="color: var(--success);">$7.95M</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="metric-label">Lost Value</div>
+                            <div class="metric-value" style="color: var(--warning);">$12.28M</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- With Alerts -->
+            <div class="panel">
+                <div class="metric-section">
+                    <h3>✅ Opportunities WITH Alerts (Last 90 Days)</h3>
+                    <div class="metric-grid">
+                        <div class="metric-box">
+                            <div class="metric-label">Total Opportunities</div>
+                            <div class="metric-value">16</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="metric-label">Closed</div>
+                            <div class="metric-value">16</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="metric-label">Win Rate</div>
+                            <div class="metric-value">50.0%</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="metric-label">Avg Sales Cycle</div>
+                            <div class="metric-value">11.3 days</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="metric-label">Total Value</div>
+                            <div class="metric-value">$205K</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="metric-label">Closed Value</div>
+                            <div class="metric-value">$205K</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="metric-label">Won Value</div>
+                            <div class="metric-value" style="color: var(--success);">$75K</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="metric-label">Lost Value</div>
+                            <div class="metric-value" style="color: var(--warning);">$130K</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Reason for Closed Lost (Auto Close Reason) -->
+        <div class="panel">
+            <div class="metric-section">
+                <h3>❌ Reason for Closed Lost (Auto Close Reason)</h3>
+                <div class="comparison-grid">
+                    <div>
+                        <h4 style="font-size: 13px; margin-bottom: 8px; color: var(--muted);">Without Alerts</h4>
+                        <div style="max-height: 300px; overflow-y: auto;">
+
+                            <div class="stat-row">
+                                <span class="stat-label">Aging No Activity Auto-close</span>
+                                <span class="stat-value">20</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">No intent to solve (ghosted us)</span>
+                                <span class="stat-value">4</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">No intent to solve</span>
+                                <span class="stat-value">2</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">cable came loose.  Customer resolved</span>
+                                <span class="stat-value">1</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">Will be using flex hours for this over the next few months</span>
+                                <span class="stat-value">1</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">Not needed</span>
+                                <span class="stat-value">1</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">Went with another opp</span>
+                                <span class="stat-value">1</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">10/20- lost contact with customer- closing out until I hear otherwise from them despite multiple call and email outreach attempts</span>
+                                <span class="stat-value">1</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">company going through layoffs/financial crisis- bringing in a 3rd party to help them manage their IT so thinking this project is dead at the moment</span>
+                                <span class="stat-value">1</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">10/6- Chloe closing out for now while maxi goes through economic struggles and is providing us with new success criteria</span>
+                                <span class="stat-value">1</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">Client taking project in house, re-connecting 2026</span>
+                                <span class="stat-value">1</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">Customer ghosted</span>
+                                <span class="stat-value">1</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">Customer went NetSuite for reporting</span>
+                                <span class="stat-value">1</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">Went with one year option</span>
+                                <span class="stat-value">1</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">IS voluntary withdraw</span>
+                                <span class="stat-value">1</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">Half Price on Amazon</span>
+                                <span class="stat-value">1</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">on hold for now</span>
+                                <span class="stat-value">1</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">8/8- Chloe took over this deal from Alejandra.. synced with brad the customer emailed they are going with an out of the box and cheaper solution and deal is dead- champion was laid off</span>
+                                <span class="stat-value">1</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 style="font-size: 13px; margin-bottom: 8px; color: var(--muted);">With Alerts</h4>
+                        <div style="max-height: 300px; overflow-y: auto;">
+
+                            <div class="stat-row">
+                                <span class="stat-label">main customer left company- no longer opp here</span>
+                                <span class="stat-value">1</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Closed Opportunities Details -->
+        <div class="panel">
+            <div class="metric-section">
+                <h3>📋 Closed Opportunities Details</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; cursor: pointer;" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'; this.querySelector('.toggle-icon').textContent = this.nextElementSibling.style.display === 'none' ? '▶' : '▼';">
+                    <h4 style="color: var(--ink); margin: 0; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em;">❌ Without Alerts - Closed Opportunities ({without_alerts['closed_opportunities']} total)</h4>
+                    <span class="toggle-icon" style="font-size: 12px; color: var(--muted);">▼</span>
+                </div>
+                <div class="opp-list" style="display: block;">
+
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #30d158; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        1. Firewall renewal
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Smith Allergy & Asthma Specialists | 
+                                        <span style="font-weight: 600;">Stage:</span> Closed Won | 
+                                        <span style="color: #30d158; font-weight: 700;">✅ WON</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$150.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-11-04
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000a0f87YAA/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #30d158; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        2. MAP Assessment
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Gutchess Lumber Co., Inc. | 
+                                        <span style="font-weight: 600;">Stage:</span> Closed Won | 
+                                        <span style="color: #30d158; font-weight: 700;">✅ WON</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$10,000.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-11-04
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000ZceeeYAB/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #30d158; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        3. DUO Licenses
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Vie de France | 
+                                        <span style="font-weight: 600;">Stage:</span> Closed Won | 
+                                        <span style="color: #30d158; font-weight: 700;">✅ WON</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$196.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-11-04
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000ZbiVlYAJ/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #ff9500; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        4. Rapid Gen AI Assessment
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Venture Forthe, Inc. | 
+                                        <span style="font-weight: 600;">Stage:</span> Disqualified | 
+                                        <span style="color: #ff9500; font-weight: 700;">❌ Lost</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$10,000.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-11-04
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000YVfBQYA1/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #ff9500; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        5. AP Troubleshooting
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Equitable Advisors | 
+                                        <span style="font-weight: 600;">Stage:</span> Closed Lost | 
+                                        <span style="color: #ff9500; font-weight: 700;">❌ Lost</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$800.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-11-04
+ | 
+                                        <span style="font-weight: 600;">Reason for Closed Lost:</span> cable came loose.  Customer resolved
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000YUYLeYAP/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #ff9500; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        6. Rapid Gen AI Assessment
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Partners Ending Homelessness | 
+                                        <span style="font-weight: 600;">Stage:</span> Disqualified | 
+                                        <span style="color: #ff9500; font-weight: 700;">❌ Lost</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$10,000.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-11-04
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000Y65B9YAJ/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #ff9500; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        7. Network Assessment w Documentation and Recommendations
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Rochester Housing Authority (RHA) | 
+                                        <span style="font-weight: 600;">Stage:</span> Closed Lost | 
+                                        <span style="color: #ff9500; font-weight: 700;">❌ Lost</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$7,500.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-11-04
+ | 
+                                        <span style="font-weight: 600;">Reason for Closed Lost:</span> Will be using flex hours for this over the next few months
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000XpH73YAF/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #ff9500; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        8. Custom AWS Project-Arvie--A
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Arvie | 
+                                        <span style="font-weight: 600;">Stage:</span> Disqualified | 
+                                        <span style="color: #ff9500; font-weight: 700;">❌ Lost</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$25,000.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-11-04
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000X9WwwYAF/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #ff9500; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        9. MTS
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> iTP Partners | 
+                                        <span style="font-weight: 600;">Stage:</span> Disqualified | 
+                                        <span style="color: #ff9500; font-weight: 700;">❌ Lost</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$18,000.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-11-04
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000X91ZlYAJ/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #ff9500; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        10. Custom AWS Project-Quantify Crypto--A
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Quantify Crypto | 
+                                        <span style="font-weight: 600;">Stage:</span> Disqualified | 
+                                        <span style="color: #ff9500; font-weight: 700;">❌ Lost</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$90,000.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-11-04
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000WvcfdYAB/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #ff9500; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        11. RAPID AI Assessment-Optimal Aquafeed--A
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Optimal Aquafeed | 
+                                        <span style="font-weight: 600;">Stage:</span> Disqualified | 
+                                        <span style="color: #ff9500; font-weight: 700;">❌ Lost</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$10,000.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-11-04
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000Wk9gzYAB/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #ff9500; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        12. Glewee-GenAI Implementation
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Glewee | 
+                                        <span style="font-weight: 600;">Stage:</span> Disqualified | 
+                                        <span style="color: #ff9500; font-weight: 700;">❌ Lost</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$25,000.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-11-04
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000WELa2YAH/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #ff9500; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        13. CSC Snapshot  -Vome Inc.
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Vome Inc. | 
+                                        <span style="font-weight: 600;">Stage:</span> Disqualified | 
+                                        <span style="color: #ff9500; font-weight: 700;">❌ Lost</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$99.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-11-04
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000Vug7ZYAR/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #ff9500; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        14. Calculum- GCP AI Workload Migration- BRAD
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Calculum | 
+                                        <span style="font-weight: 600;">Stage:</span> Disqualified | 
+                                        <span style="color: #ff9500; font-weight: 700;">❌ Lost</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$25,000.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-11-04
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000VZRefYAH/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #ff9500; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        15. CSC Snapshot
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Rugged Telemetry | 
+                                        <span style="font-weight: 600;">Stage:</span> Disqualified | 
+                                        <span style="color: #ff9500; font-weight: 700;">❌ Lost</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$99.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-11-04
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000VNMh9YAH/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #ff9500; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        16. VMWare OLA
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> CDS Monarch Inc. | 
+                                        <span style="font-weight: 600;">Stage:</span> Disqualified | 
+                                        <span style="color: #ff9500; font-weight: 700;">❌ Lost</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$10,000.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-11-04
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000Uld7wYAB/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #ff9500; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        17. RAPID AI Assessment-Infotex--A
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Infotex | 
+                                        <span style="font-weight: 600;">Stage:</span> Disqualified | 
+                                        <span style="color: #ff9500; font-weight: 700;">❌ Lost</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$10,000.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-11-04
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000S6pqvYAB/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #30d158; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        18. MCS (8 hours)
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> ACERTUS | 
+                                        <span style="font-weight: 600;">Stage:</span> Closed Won | 
+                                        <span style="color: #30d158; font-weight: 700;">✅ WON</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$2,400.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-11-03
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000ZdOPmYAN/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #ff9500; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        19. Custom AWS Project-Picketa Systems--A
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Picketa Systems | 
+                                        <span style="font-weight: 600;">Stage:</span> Disqualified | 
+                                        <span style="color: #ff9500; font-weight: 700;">❌ Lost</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$25,000.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-11-03
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000VqJO5YAN/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #ff9500; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        20. RAPID AI Assessment-Exact Tool--A
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Exact Tool | 
+                                        <span style="font-weight: 600;">Stage:</span> Disqualified | 
+                                        <span style="color: #ff9500; font-weight: 700;">❌ Lost</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$10,000.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-11-03
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000VZpk9YAD/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #ff9500; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        21. RAPID AI Assessment-Cloud 9 Infosystems--A
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Cloud 9 Infosystems | 
+                                        <span style="font-weight: 600;">Stage:</span> Disqualified | 
+                                        <span style="color: #ff9500; font-weight: 700;">❌ Lost</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$10,000.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-11-03
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000VFgy0YAD/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #ff9500; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        22. Custom AWS Project-AGNIMBLE LLC--A
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> AGNIMBLE LLC | 
+                                        <span style="font-weight: 600;">Stage:</span> Disqualified | 
+                                        <span style="color: #ff9500; font-weight: 700;">❌ Lost</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$25,000.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-11-03
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000Uq6GAYAZ/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #ff9500; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        23. Tailwinds OnRamp
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Hero Homes | 
+                                        <span style="font-weight: 600;">Stage:</span> Disqualified | 
+                                        <span style="color: #ff9500; font-weight: 700;">❌ Lost</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$25,000.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-11-03
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000T38TOYAZ/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #ff9500; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        24. Blustream - Production Deployment
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Blustream.io | 
+                                        <span style="font-weight: 600;">Stage:</span> Closed Lost | 
+                                        <span style="color: #ff9500; font-weight: 700;">❌ Lost</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$205,000.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-11-03
+ | 
+                                        <span style="font-weight: 600;">Reason for Closed Lost:</span> Aging No Activity Auto-close
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000MRO1ZYAX/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #30d158; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        25. Boundless RAPID & POC
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Boundless Software Inc. | 
+                                        <span style="font-weight: 600;">Stage:</span> Closed Won - Pending | 
+                                        <span style="color: #30d158; font-weight: 700;">✅ WON</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$9,900.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-10-31
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000a5BZEYA2/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #30d158; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        26. Open Value Renewal
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Monroe Plan for Medical Care | 
+                                        <span style="font-weight: 600;">Stage:</span> Closed Won | 
+                                        <span style="color: #30d158; font-weight: 700;">✅ WON</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$18,700.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-10-31
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000a4nJxYAI/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #ff9500; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        27. Tailwinds OnRamp
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Ubique Group | 
+                                        <span style="font-weight: 600;">Stage:</span> Disqualified | 
+                                        <span style="color: #ff9500; font-weight: 700;">❌ Lost</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$25,000.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-10-31
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000a4fZJYAY/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #ff9500; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        28. Tailwinds OnRamp
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Si3 | 
+                                        <span style="font-weight: 600;">Stage:</span> Disqualified | 
+                                        <span style="color: #ff9500; font-weight: 700;">❌ Lost</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$25,000.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-10-31
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000a4dR3YAI/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #ff9500; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        29. Tailwinds OnRamp
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Webociti | 
+                                        <span style="font-weight: 600;">Stage:</span> Disqualified | 
+                                        <span style="color: #ff9500; font-weight: 700;">❌ Lost</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$25,000.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-10-31
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000a4aOMYAY/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #ff9500; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        30. Tailwinds OnRamp
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Renegade Insurance | 
+                                        <span style="font-weight: 600;">Stage:</span> Disqualified | 
+                                        <span style="color: #ff9500; font-weight: 700;">❌ Lost</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$25,000.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-10-31
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000a4cunYAA/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #ff9500; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        31. Tailwinds OnRamp
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Choice MD | 
+                                        <span style="font-weight: 600;">Stage:</span> Disqualified | 
+                                        <span style="color: #ff9500; font-weight: 700;">❌ Lost</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$25,000.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-10-31
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000a4XOsYAM/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #ff9500; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        32. Tailwinds OnRamp
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Baizel, LLC | 
+                                        <span style="font-weight: 600;">Stage:</span> Disqualified | 
+                                        <span style="color: #ff9500; font-weight: 700;">❌ Lost</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$25,000.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-10-31
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000a4KoFYAU/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #ff9500; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        33. Tailwinds OnRamp
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> McAnany Construction | 
+                                        <span style="font-weight: 600;">Stage:</span> Disqualified | 
+                                        <span style="color: #ff9500; font-weight: 700;">❌ Lost</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$25,000.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-10-31
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000a4NRAYA2/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #ff9500; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        34. Tailwinds OnRamp
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> GenX Security Solutions | 
+                                        <span style="font-weight: 600;">Stage:</span> Disqualified | 
+                                        <span style="color: #ff9500; font-weight: 700;">❌ Lost</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$25,000.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-10-31
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000a4AddYAE/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #30d158; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        35. Aida- RAPID & POC
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> myAIDA | 
+                                        <span style="font-weight: 600;">Stage:</span> Closed Won - Pending | 
+                                        <span style="color: #30d158; font-weight: 700;">✅ WON</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$9,900.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-10-31
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000a4Z45YAE/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #ff9500; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        36. Tailwinds OnRamp
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Dademade | 
+                                        <span style="font-weight: 600;">Stage:</span> Disqualified | 
+                                        <span style="color: #ff9500; font-weight: 700;">❌ Lost</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$25,000.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-10-31
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000a4JQmYAM/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #30d158; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        37. Change Order (6 Months) – Monthly Support Project
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> The Wound Pros LLC | 
+                                        <span style="font-weight: 600;">Stage:</span> Closed Won | 
+                                        <span style="color: #30d158; font-weight: 700;">✅ WON</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$90,000.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-10-31
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000ZwDK5YAN/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #ff9500; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        38. POD Increase for Q
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Foundation Finance | 
+                                        <span style="font-weight: 600;">Stage:</span> Closed Lost | 
+                                        <span style="color: #ff9500; font-weight: 700;">❌ Lost</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$24,000.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-10-31
+ | 
+                                        <span style="font-weight: 600;">Reason for Closed Lost:</span> Not needed
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000Zbn8sYAB/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #30d158; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        39. Ransomware Recovery
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> BMP America Inc. | 
+                                        <span style="font-weight: 600;">Stage:</span> Closed Won | 
+                                        <span style="color: #30d158; font-weight: 700;">✅ WON</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$52,500.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-10-31
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000ZHnL7YAL/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #30d158; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        40. Range USA- RAPID & POC
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Range USA | 
+                                        <span style="font-weight: 600;">Stage:</span> Closed Won - Pending | 
+                                        <span style="color: #30d158; font-weight: 700;">✅ WON</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$9,900.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-10-31
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000YhXpzYAF/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #30d158; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        41. RAPID AI Assessment + POC-Ohio Valley Residential Services--A
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Ohio Valley Residential Services | 
+                                        <span style="font-weight: 600;">Stage:</span> Closed Won - Pending | 
+                                        <span style="color: #30d158; font-weight: 700;">✅ WON</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$9,900.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-10-31
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000YJrBVYA1/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #30d158; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        42. RAPID AI Assessment
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> eMedicalPractice | 
+                                        <span style="font-weight: 600;">Stage:</span> Closed Won - Pending | 
+                                        <span style="color: #30d158; font-weight: 700;">✅ WON</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$9,900.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-10-30
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000a266DYAQ/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #30d158; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        43. Salesforce troubleshooting assistance
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Shulman & Hill | 
+                                        <span style="font-weight: 600;">Stage:</span> Closed Won | 
+                                        <span style="color: #30d158; font-weight: 700;">✅ WON</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$1,200.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-10-30
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000a0TeoYAE/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #30d158; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        44. Anutio- RAPID Gen AI Assessment + POC
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Anutio | 
+                                        <span style="font-weight: 600;">Stage:</span> Closed Won - Pending | 
+                                        <span style="color: #30d158; font-weight: 700;">✅ WON</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$9,900.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-10-30
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000ZyEX0YAN/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #30d158; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        45. Laptop for Oil Abbott
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> EC Scott Group LLC | 
+                                        <span style="font-weight: 600;">Stage:</span> Closed Won | 
+                                        <span style="color: #30d158; font-weight: 700;">✅ WON</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$425.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-10-30
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000Zw1sPYAR/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #30d158; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        46. Laptop for Victor Loc and PC for Josh
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Miller Funeral and Cremation Services, Inc | 
+                                        <span style="font-weight: 600;">Stage:</span> Closed Won | 
+                                        <span style="color: #30d158; font-weight: 700;">✅ WON</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$850.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-10-30
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000Zqf1LYAR/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #ff9500; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        47. Mobile Application Development
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Truck Now LLC | 
+                                        <span style="font-weight: 600;">Stage:</span> Disqualified | 
+                                        <span style="color: #ff9500; font-weight: 700;">❌ Lost</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$25,000.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-10-30
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000XWSpPYAX/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #ff9500; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        48. Custom AWS Project-Gritsee--A
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Gritsee | 
+                                        <span style="font-weight: 600;">Stage:</span> Disqualified | 
+                                        <span style="color: #ff9500; font-weight: 700;">❌ Lost</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$25,000.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-10-30
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000Wb06fYAB/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #ff9500; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        49. Acolide-GenAI Build
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Acolide | 
+                                        <span style="font-weight: 600;">Stage:</span> Disqualified | 
+                                        <span style="color: #ff9500; font-weight: 700;">❌ Lost</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$25,000.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-10-30
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000VpbepYAB/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #ff9500; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        50. Migration
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Honeydew | 
+                                        <span style="font-weight: 600;">Stage:</span> Closed Lost | 
+                                        <span style="color: #ff9500; font-weight: 700;">❌ Lost</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$123,000.00</span> | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-10-30
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000VokfLYAR/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; margin-bottom: 15px; cursor: pointer;" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'; this.querySelector('.toggle-icon').textContent = this.nextElementSibling.style.display === 'none' ? '▶' : '▼';">
+                    <h4 style="color: var(--ink); margin: 0; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em;">✅ With Alerts - Closed Opportunities (16 total)</h4>
+                    <span class="toggle-icon" style="font-size: 12px; color: var(--muted);">▼</span>
+                </div>
+                <div class="opp-list" style="display: block;">
+
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #ff9500; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        1. Tailwinds OnRamp
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Tamarack Mining Services | 
+                                        <span style="font-weight: 600;">Stage:</span> Disqualified | 
+                                        <span style="color: #ff9500; font-weight: 700;">❌ Lost</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$25,000.00</span> | 
+                                        <span style="font-weight: 600;">📅 Alert Sent:</span> 2025-11-01 | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-11-04
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000a4ggfYAA/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #ff9500; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        2. Tailwinds OnRamp
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Caretaker Medical | 
+                                        <span style="font-weight: 600;">Stage:</span> Disqualified | 
+                                        <span style="color: #ff9500; font-weight: 700;">❌ Lost</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$25,000.00</span> | 
+                                        <span style="font-weight: 600;">📅 Alert Sent:</span> 2025-11-01 | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-11-03
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000a4j1pYAA/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #30d158; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        3. RAPID AI Assessment + POC-The Whitestone Group--A
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> The Whitestone Group | 
+                                        <span style="font-weight: 600;">Stage:</span> Closed Won - Pending | 
+                                        <span style="color: #30d158; font-weight: 700;">✅ WON</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$9,900.00</span> | 
+                                        <span style="font-weight: 600;">📅 Alert Sent:</span> 2025-10-31 | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-11-03
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000a1p6zYAA/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #30d158; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        4. RAPID AI Assessment + POC-Penta Engineering--A
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Penta Engineering | 
+                                        <span style="font-weight: 600;">Stage:</span> Closed Won - Pending | 
+                                        <span style="color: #30d158; font-weight: 700;">✅ WON</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$9,900.00</span> | 
+                                        <span style="font-weight: 600;">📅 Alert Sent:</span> 2025-10-31 | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-11-03
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000a1XI9YAM/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #30d158; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        5. Company Mileage Disaster Recovery
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> CompanyMileage.com | 
+                                        <span style="font-weight: 600;">Stage:</span> Closed Won | 
+                                        <span style="color: #30d158; font-weight: 700;">✅ WON</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$14,000.00</span> | 
+                                        <span style="font-weight: 600;">📅 Alert Sent:</span> 2025-10-23 | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-11-03
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000ZTlSRYA1/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #ff9500; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        6. Gen AI Assessment
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Questex Media | 
+                                        <span style="font-weight: 600;">Stage:</span> Disqualified | 
+                                        <span style="color: #ff9500; font-weight: 700;">❌ Lost</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$9,900.00</span> | 
+                                        <span style="font-weight: 600;">📅 Alert Sent:</span> 2025-10-28 | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-10-31
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000ZlUbDYAV/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #ff9500; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        7. MVA Assessment
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Technology Management Resources | 
+                                        <span style="font-weight: 600;">Stage:</span> Disqualified | 
+                                        <span style="color: #ff9500; font-weight: 700;">❌ Lost</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$25,000.00</span> | 
+                                        <span style="font-weight: 600;">📅 Alert Sent:</span> 2025-10-18 | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-10-31
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000ZAfAbYAL/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #30d158; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        8. RAPID AI Assessment + POC-Cheshil Consultants--A
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Cheshil Consultants | 
+                                        <span style="font-weight: 600;">Stage:</span> Closed Won - Pending | 
+                                        <span style="color: #30d158; font-weight: 700;">✅ WON</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$9,900.00</span> | 
+                                        <span style="font-weight: 600;">📅 Alert Sent:</span> 2025-10-17 | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-10-31
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000Z7FSpYAN/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #ff9500; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        9. RAPID AI Assessment + POC-Pineapple
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Pineapple | 
+                                        <span style="font-weight: 600;">Stage:</span> Closed Lost | 
+                                        <span style="color: #ff9500; font-weight: 700;">❌ Lost</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$9,900.00</span> | 
+                                        <span style="font-weight: 600;">📅 Alert Sent:</span> 2025-10-17 | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-10-31
+ | 
+                                        <span style="font-weight: 600;">Reason for Closed Lost:</span> main customer left company- no longer opp here
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000Z6lzNYAR/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #ff9500; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        10. MAP Assess + GenAI Buildout
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> CultureOwl | 
+                                        <span style="font-weight: 600;">Stage:</span> Disqualified | 
+                                        <span style="color: #ff9500; font-weight: 700;">❌ Lost</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$15,000.00</span> | 
+                                        <span style="font-weight: 600;">📅 Alert Sent:</span> 2025-10-30 | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-10-30
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000XS1iyYAD/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #30d158; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        11. RAPID AI Assessment + POC-McClure Tables--A
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> McClure Tables | 
+                                        <span style="font-weight: 600;">Stage:</span> Closed Won - Pending | 
+                                        <span style="color: #30d158; font-weight: 700;">✅ WON</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$9,900.00</span> | 
+                                        <span style="font-weight: 600;">📅 Alert Sent:</span> 2025-10-29 | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-10-29
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000ZrG8vYAF/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #ff9500; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        12. RAPID AI Assessment + POC-Beacon MedTech Solutions--A
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Beacon MedTech Solutions | 
+                                        <span style="font-weight: 600;">Stage:</span> Disqualified | 
+                                        <span style="color: #ff9500; font-weight: 700;">❌ Lost</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$9,900.00</span> | 
+                                        <span style="font-weight: 600;">📅 Alert Sent:</span> 2025-10-18 | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-10-29
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000YIUlfYAH/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #30d158; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        13. RAPID AI Assessment + POC-Real Safe Agent
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Real Safe Agent | 
+                                        <span style="font-weight: 600;">Stage:</span> Closed Won | 
+                                        <span style="color: #30d158; font-weight: 700;">✅ WON</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$9,900.00</span> | 
+                                        <span style="font-weight: 600;">📅 Alert Sent:</span> 2025-10-22 | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-10-27
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000XtibkYAB/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #30d158; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        14. Firewall assistance for Phone install
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Browncroft Community Church | 
+                                        <span style="font-weight: 600;">Stage:</span> Closed Won | 
+                                        <span style="color: #30d158; font-weight: 700;">✅ WON</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$1,800.00</span> | 
+                                        <span style="font-weight: 600;">📅 Alert Sent:</span> 2025-10-23 | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-10-23
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000ZR96HYAT/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #30d158; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        15. RAPID AI Assessment + POC-Metro Outdoor--A
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> Metro Outdoor | 
+                                        <span style="font-weight: 600;">Stage:</span> Closed Won | 
+                                        <span style="color: #30d158; font-weight: 700;">✅ WON</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$9,900.00</span> | 
+                                        <span style="font-weight: 600;">📅 Alert Sent:</span> 2025-10-22 | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-10-22
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000ZP4sIYAT/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px; padding: 12px; background: #fff; border: 1px solid var(--border); border-left: 4px solid #ff9500; border-radius: 10px; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.10)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 6px;">
+                                        16. RAPID AI Assessment + POC-SlumberShield--A
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted); margin-bottom: 4px;">
+                                        <span style="font-weight: 600;">Account:</span> SlumberShield | 
+                                        <span style="font-weight: 600;">Stage:</span> Disqualified | 
+                                        <span style="color: #ff9500; font-weight: 700;">❌ Lost</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--muted);">
+                                        <span style="font-weight: 600;">Value:</span> <span style="font-variant-numeric: tabular-nums;">$9,900.00</span> | 
+                                        <span style="font-weight: 600;">📅 Alert Sent:</span> 2025-10-21 | 
+                                        <span style="font-weight: 600;">Closed:</span> 2025-10-21
+
+                                    </div>
+                                </div>
+
+                                <a href="https://innovativesolutions.lightning.force.com/lightning/r/Opportunity/006PQ00000ZHotuYAD/view" target="_blank" style="background: var(--brand); color: white; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; white-space: nowrap; margin-left: 10px; display: inline-block; transition: transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,.15)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
+                                    🔗 View in Salesforce
+                                </a>
+
+                            </div>
+                        </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="foot">
+            <div class="note">Report generated automatically • Refresh page to update metrics</div>
+            <div class="brandmark">INNOVATIVE • FLOW METRICS</div>
+        </div>
+    </div>
+</body>
+</html>

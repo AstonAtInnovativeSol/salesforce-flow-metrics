@@ -1307,6 +1307,13 @@ def main():
         f.write(html_content)
     
     print(f"✅ HTML Dashboard: {html_file}")
+    
+    # Also create a _latest.html file for GitHub Pages
+    latest_html_file = OUTPUT_DIR / "ghost_pipeline_comparison_latest.html"
+    with open(latest_html_file, 'w') as f:
+        f.write(html_content)
+    
+    print(f"✅ Latest HTML Dashboard: {latest_html_file}")
     print()
     print("=" * 80)
     print("✅ ANALYSIS COMPLETE")

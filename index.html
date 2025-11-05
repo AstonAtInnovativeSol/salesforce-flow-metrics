@@ -81,45 +81,32 @@
         .logo-container {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 16px;
             flex-shrink: 0;
-            margin-right: 20px;
+            margin-right: 24px;
         }
         
         .logo-symbol {
             flex-shrink: 0;
-            width: 40px;
-            height: 40px;
-            shape-rendering: geometricPrecision;
+            height: 36px;
+            width: auto;
             image-rendering: -webkit-optimize-contrast;
             image-rendering: crisp-edges;
-            image-rendering: pixelated;
+            object-fit: contain;
         }
         
-        .logo-symbol {
-            color: var(--ink);
-        }
-        
-        .logo-symbol .logo-path {
-            stroke: currentColor;
-            transition: stroke 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        .logo-text {
-            font-size: 24px;
-            font-weight: 900;
-            letter-spacing: .08em;
-            font-style: italic;
-            color: var(--ink);
-            text-transform: uppercase;
-            line-height: 1;
+        /* Invert logo for dark mode */
+        [data-theme="dark"] .logo-symbol {
+            filter: invert(1) brightness(1.2);
         }
         
         .title {
             font-size: 28px;
             font-weight: 800;
-            line-height: 1.1;
+            line-height: 1.2;
             margin: 0 0 6px;
+            display: flex;
+            align-items: center;
         }
         
         .subtitle {
@@ -351,9 +338,9 @@
             }
             
             .hdr {
-                padding: 10px 16px;
+                padding: 8px 16px;
                 margin: 0;
-                margin-bottom: 14px;
+                margin-bottom: 12px;
                 position: sticky;
                 top: 0;
                 border-bottom: 1px solid var(--line);
@@ -377,6 +364,9 @@
             .hdr-title-group {
                 flex: 1;
                 min-width: 0;
+                display: flex;
+                flex-direction: column;
+                gap: 2px;
             }
             
             .logo-container {
@@ -401,16 +391,18 @@
                 font-weight: 700;
                 margin: 0;
                 line-height: 1.2;
+                color: var(--ink);
             }
             
             .subtitle {
                 font-size: 11px;
                 line-height: 1.4;
-                margin-top: 2px;
+                margin-top: 0;
                 display: -webkit-box;
                 -webkit-line-clamp: 2;
                 -webkit-box-orient: vertical;
                 overflow: hidden;
+                color: var(--muted);
             }
             
             .section-title {
@@ -544,18 +536,12 @@
         <div class="wrap hdr-inner">
             <!-- Innovative Logo -->
             <div class="logo-container">
-                <svg class="logo-symbol" viewBox="0 0 48 48" width="48" height="48" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision" style="image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges;">
-                    <!-- Interlocking ribbon logo - matching actual logo design -->
-                    <!-- Left shape: passes behind then in front -->
-                    <path class="logo-path" d="M 8 12 L 8 8 L 20 8 L 28 8 L 36 8 L 40 8 L 40 12 Q 40 16 36 16 L 28 16 Q 24 16 24 20 L 24 28 Q 24 32 28 32 L 36 32 Q 40 32 40 36 L 40 40 L 28 40 L 20 40 L 12 40 L 8 40 L 8 36 Q 8 32 12 32 L 20 32 Q 24 32 24 28 L 24 20 Q 24 16 20 16 L 12 16 Q 8 16 8 12 Z" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="square" stroke-linejoin="miter" vector-effect="non-scaling-stroke" transform="rotate(-10 24 24)"/>
-                    <!-- Right shape: passes in front then behind -->
-                    <path class="logo-path" d="M 12 16 L 12 12 L 24 12 L 32 12 L 40 12 L 44 12 L 44 16 Q 44 20 40 20 L 32 20 Q 28 20 28 24 L 28 32 Q 28 36 32 36 L 40 36 Q 44 36 44 40 L 44 44 L 32 44 L 24 44 L 16 44 L 12 44 L 12 40 Q 12 36 16 36 L 24 36 Q 28 36 28 32 L 28 24 Q 28 20 24 20 L 16 20 Q 12 20 12 16 Z" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="square" stroke-linejoin="miter" vector-effect="non-scaling-stroke" transform="rotate(10 24 24)"/>
-                </svg>
-                <span class="logo-text">INNOVATIVE</span>
+                <!-- Innovative logo from website -->
+                <img class="logo-symbol" src="innovLogo-black.png" alt="Innovative" />
             </div>
             <div class="hdr-title-group">
                 <div class="title">Sales Ops Analytics</div>
-                <div class="subtitle">Real-time analytics dashboards for sales operations. Select a dashboard below to view detailed metrics and insights.</div>
+                <div class="subtitle">Select a dashboard below to view detailed metrics and insights.</div>
             </div>
             <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light theme">
                 <svg class="theme-toggle-icon sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -656,7 +642,6 @@
         </div>
         
         <div class="foot">
-            <div>Report generated automatically • Refresh page to update metrics</div>
             <div class="brandmark">INNOVATIVE • SALES OPS</div>
         </div>
         </div>

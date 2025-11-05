@@ -13,6 +13,7 @@ config.py
 # Output Files (CSV, HTML dashboards)
 *.csv
 *.html
+!index.html
 outputs/
 dashboards/
 

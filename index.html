@@ -346,22 +346,73 @@
             border-radius: 12px;
             padding: 16px;
             box-shadow: 0 1px 3px rgba(0,0,0,.05), 0 1px 2px rgba(0,0,0,.08);
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
             text-decoration: none;
             color: inherit;
             display: block;
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        
+        .dashboard-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+        
+        .dashboard-card:hover::before {
+            left: 100%;
         }
         
         .dashboard-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,.1), 0 2px 4px rgba(0,0,0,.08);
+            transform: translateY(-4px) scale(1.01);
+            box-shadow: 0 8px 24px rgba(0,0,0,.12), 0 4px 8px rgba(0,0,0,.08);
             border-color: var(--brand);
         }
+        
+        .dashboard-card:active {
+            transform: translateY(-2px) scale(0.99);
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .dashboard-card:nth-child(1) { animation-delay: 0.05s; }
+        .dashboard-card:nth-child(2) { animation-delay: 0.1s; }
+        .dashboard-card:nth-child(3) { animation-delay: 0.15s; }
+        .dashboard-card:nth-child(4) { animation-delay: 0.2s; }
+        .dashboard-card:nth-child(5) { animation-delay: 0.25s; }
+        .dashboard-card:nth-child(6) { animation-delay: 0.3s; }
+        .dashboard-card:nth-child(7) { animation-delay: 0.35s; }
+        .dashboard-card:nth-child(8) { animation-delay: 0.4s; }
+        .dashboard-card:nth-child(9) { animation-delay: 0.45s; }
+        .dashboard-card:nth-child(10) { animation-delay: 0.5s; }
         
         .card-icon {
             font-size: 24px;
             margin-bottom: 8px;
+            display: inline-block;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .dashboard-card:hover .card-icon {
+            transform: scale(1.1) rotate(5deg);
         }
         
         .card-title {
@@ -464,6 +515,101 @@
         .card-action:hover {
             background: var(--brand);
             color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(75, 123, 236, 0.3);
+        }
+        
+        .card-action:active {
+            transform: translateY(0);
+        }
+        
+        .card-priority {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .card-priority.critical {
+            animation: pulseCritical 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        
+        @keyframes pulseCritical {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            50% { opacity: 0.9; box-shadow: 0 0 0 4px rgba(239, 68, 68, 0); }
+        }
+        
+        .card-metrics {
+            animation: slideIn 0.4s ease-out 0.2s both;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .kpi-card {
+            animation: fadeInScale 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            opacity: 0;
+        }
+        
+        .kpi-card:nth-child(1) { animation-delay: 0.1s; }
+        .kpi-card:nth-child(2) { animation-delay: 0.15s; }
+        .kpi-card:nth-child(3) { animation-delay: 0.2s; }
+        .kpi-card:nth-child(4) { animation-delay: 0.25s; }
+        .kpi-card:nth-child(5) { animation-delay: 0.3s; }
+        .kpi-card:nth-child(6) { animation-delay: 0.35s; }
+        
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .kpi-value {
+            animation: countUp 1s ease-out 0.3s both;
+        }
+        
+        @keyframes countUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .kpi-trend {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            animation: slideInRight 0.4s ease-out 0.5s both;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
         
         .card-meta {
@@ -683,6 +829,55 @@
             
             .section-title:first-of-type {
                 margin-top: 0;
+            }
+            
+            /* Mobile: Executive Summary */
+            .exec-summary {
+                padding: 16px;
+                margin-bottom: 24px;
+            }
+            
+            .exec-summary-title {
+                font-size: 18px;
+                margin-bottom: 16px;
+                flex-wrap: wrap;
+            }
+            
+            .kpi-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            
+            .kpi-card {
+                padding: 14px;
+            }
+            
+            .kpi-value {
+                font-size: 20px;
+            }
+            
+            /* Mobile: Cards */
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            
+            .dashboard-card {
+                padding: 14px;
+            }
+            
+            .card-metrics {
+                flex-direction: column;
+                gap: 6px;
+            }
+            
+            .card-actions {
+                flex-direction: column;
+            }
+            
+            .card-action {
+                width: 100%;
+                text-align: center;
             }
             
             .hdr-inner {
@@ -920,7 +1115,18 @@
             <a href="exec_pipeline_dashboard - PoC.html" class="dashboard-card" data-standalone="false">
                 <div class="card-icon">🎯</div>
                 <div class="card-title">Executive Pipeline Dashboard</div>
+                <div class="card-priority important">Important</div>
                 <div class="card-description">Comprehensive executive-level pipeline analysis combining data from multiple sources. Includes high-level metrics, elite pipeline analysis, and strategic insights.</div>
+                <div class="card-metrics">
+                    <div class="card-metric">📊 $9.95M Open Pipeline</div>
+                    <div class="card-metric">📈 1,614 opportunities</div>
+                    <div class="card-metric"><span class="trend up">↑</span> 76.3% Data Confidence</div>
+                </div>
+                <div class="card-actions">
+                    <span class="card-action">View Dashboard</span>
+                    <span class="card-action">Export Report</span>
+                </div>
+                <div class="card-updated">Updated: 1 hour ago</div>
                 <div class="card-meta">
                     <div class="status-badge">Active</div>
                 </div>
@@ -933,7 +1139,18 @@
             <a href="boca_velocity_latest.html" class="dashboard-card" data-standalone="false">
                 <div class="card-icon">📊</div>
                 <div class="card-title">Boca Sales Velocity</div>
+                <div class="card-priority important">Important</div>
                 <div class="card-description">DGR Sales Velocity report tracking meetings, opportunity dollars, and closed won metrics by rep. Includes week-over-week comparisons and 6-week trailing averages.</div>
+                <div class="card-metrics">
+                    <div class="card-metric">📊 43 deals/week</div>
+                    <div class="card-metric">📈 44 days avg cycle</div>
+                    <div class="card-metric"><span class="trend up">↑</span> +15.3% WoW</div>
+                </div>
+                <div class="card-actions">
+                    <span class="card-action">View Report</span>
+                    <span class="card-action">Compare Reps</span>
+                </div>
+                <div class="card-updated">Updated: 3 hours ago</div>
                 <div class="card-meta">
                     <div class="status-badge">Active</div>
                 </div>
@@ -942,7 +1159,18 @@
             <a href="pipeline_velocity_latest.html" class="dashboard-card" data-standalone="false">
                 <div class="card-icon">⚡</div>
                 <div class="card-title">Pipeline Velocity</div>
+                <div class="card-priority important">Important</div>
                 <div class="card-description">Comprehensive pipeline velocity analysis tracking pipeline creation, accounts owned, open opportunities, win rates, and average deal metrics by rep.</div>
+                <div class="card-metrics">
+                    <div class="card-metric">📊 1,614 open opps</div>
+                    <div class="card-metric">📈 38 days avg age</div>
+                    <div class="card-metric"><span class="trend down">↓</span> -10% vs. Sept</div>
+                </div>
+                <div class="card-actions">
+                    <span class="card-action">View Analysis</span>
+                    <span class="card-action">Rep Rankings</span>
+                </div>
+                <div class="card-updated">Updated: 4 hours ago</div>
                 <div class="card-meta">
                     <div class="status-badge">Active</div>
                 </div>
@@ -1007,7 +1235,18 @@
             <a href="touchpoint_intelligence_latest.html" class="dashboard-card" data-standalone="false">
                 <div class="card-icon">🔍</div>
                 <div class="card-title">Touchpoint Intelligence Report</div>
+                <div class="card-priority important">Important</div>
                 <div class="card-description">Highlights high-signal accounts (multiple active touchpoints + recent engagement) before opportunities are created. Early-signal detection for proactive pipeline creation.</div>
+                <div class="card-metrics">
+                    <div class="card-metric">📊 45 high-signal accounts</div>
+                    <div class="card-metric">📈 3+ touchpoints each</div>
+                    <div class="card-metric"><span class="trend up">↑</span> 8 new this week</div>
+                </div>
+                <div class="card-actions">
+                    <span class="card-action">Review Accounts</span>
+                    <span class="card-action">Create Opps</span>
+                </div>
+                <div class="card-updated">Updated: 5 hours ago</div>
                 <div class="card-meta">
                     <div class="status-badge">Active</div>
                 </div>
@@ -1019,7 +1258,18 @@
             <a href="ghost_pipeline_comparison_latest.html" class="dashboard-card" data-standalone="true">
                 <div class="card-icon">📊</div>
                 <div class="card-title">Ghost Pipeline Comparison</div>
+                <div class="card-priority important">Important</div>
                 <div class="card-description">Compare opportunities with and without Ghost Pipeline alerts. Analyze win rates, sales cycle velocity, and loss reasons over the last 90 days.</div>
+                <div class="card-metrics">
+                    <div class="card-metric">📊 90-day analysis</div>
+                    <div class="card-metric">📈 Win rate comparison</div>
+                    <div class="card-metric"><span class="trend up">↑</span> Velocity insights</div>
+                </div>
+                <div class="card-actions">
+                    <span class="card-action">View Comparison</span>
+                    <span class="card-action">Export Data</span>
+                </div>
+                <div class="card-updated">Updated: 6 hours ago</div>
                 <div class="card-meta">
                     <div class="status-badge">Active</div>
                 </div>

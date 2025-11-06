@@ -626,6 +626,11 @@ def generate_html_dashboard(scored_opps: List[OpportunityScore], profiles: Dict[
     medium_score_count = sum(1 for s in scored_opps if 50 <= s.opportunity_score < 75)
     low_score_count = sum(1 for s in scored_opps if s.opportunity_score < 50)
     
+    # Calculate percentages
+    high_score_pct = (high_score_count / total_opportunities * 100) if total_opportunities > 0 else 0
+    medium_score_pct = (medium_score_count / total_opportunities * 100) if total_opportunities > 0 else 0
+    low_score_pct = (low_score_count / total_opportunities * 100) if total_opportunities > 0 else 0
+    
     total_pipeline_value = sum(s.amount for s in scored_opps)
     high_score_value = sum(s.amount for s in scored_opps if s.opportunity_score >= 75)
     
@@ -978,6 +983,9 @@ def generate_html_dashboard(scored_opps: List[OpportunityScore], profiles: Dict[
                     <div style="font-size: 11px; color: var(--muted); margin-top: 4px;">
                         ${sum(s.amount for s in scored_opps if s.opportunity_score >= 75):,.0f} value
                     </div>
+                    <div style="font-size: 11px; color: var(--muted); margin-top: 2px; font-weight: 600;">
+                        {high_score_pct:.1f}% of Total Opps
+                    </div>
                 </div>
                 <div class="metric-box">
                     <div class="metric-label">Medium Score (50-74)</div>
@@ -985,12 +993,18 @@ def generate_html_dashboard(scored_opps: List[OpportunityScore], profiles: Dict[
                     <div style="font-size: 11px; color: var(--muted); margin-top: 4px;">
                         ${sum(s.amount for s in scored_opps if 50 <= s.opportunity_score < 75):,.0f} value
                     </div>
+                    <div style="font-size: 11px; color: var(--muted); margin-top: 2px; font-weight: 600;">
+                        {medium_score_pct:.1f}% of Total Opps
+                    </div>
                 </div>
                 <div class="metric-box">
                     <div class="metric-label">Low Score (<50)</div>
                     <div class="metric-value">{low_score_count:,}</div>
                     <div style="font-size: 11px; color: var(--muted); margin-top: 4px;">
                         ${sum(s.amount for s in scored_opps if s.opportunity_score < 50):,.0f} value
+                    </div>
+                    <div style="font-size: 11px; color: var(--muted); margin-top: 2px; font-weight: 600;">
+                        {low_score_pct:.1f}% of Total Opps
                     </div>
                 </div>
             </div>

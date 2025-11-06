@@ -210,6 +210,106 @@
             transform: rotate(0deg) scale(1);
         }
         
+        /* Executive Summary Section */
+        .exec-summary {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 32px;
+            box-shadow: 0 2px 8px rgba(0,0,0,.04);
+        }
+        
+        .exec-summary-title {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            color: var(--ink);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .kpi-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,.05);
+        }
+        
+        .kpi-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+        
+        .kpi-value {
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--ink);
+            margin-bottom: 4px;
+            font-variant-numeric: tabular-nums;
+        }
+        
+        .kpi-trend {
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .kpi-trend.up {
+            color: var(--success);
+        }
+        
+        .kpi-trend.down {
+            color: var(--error);
+        }
+        
+        .kpi-target {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 6px;
+        }
+        
+        .kpi-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 700;
+            margin-top: 6px;
+        }
+        
+        .kpi-status.on-track {
+            background: rgba(21, 183, 158, 0.1);
+            color: var(--success);
+        }
+        
+        .kpi-status.at-risk {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+        }
+        
+        .kpi-status.warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+        
         .section-title {
             font-size: 16px;
             font-weight: 800;
@@ -277,6 +377,93 @@
             color: var(--muted);
             line-height: 1.4;
             margin-bottom: 10px;
+        }
+        
+        .card-metrics {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: var(--accent);
+            border-radius: 8px;
+        }
+        
+        .card-metric {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--ink);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .card-metric .trend {
+            font-size: 10px;
+        }
+        
+        .card-metric .trend.up {
+            color: var(--success);
+        }
+        
+        .card-metric .trend.down {
+            color: var(--error);
+        }
+        
+        .card-priority {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-right: 6px;
+        }
+        
+        .card-priority.critical {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+        }
+        
+        .card-priority.important {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+        
+        .card-priority.informational {
+            background: rgba(21, 183, 158, 0.1);
+            color: var(--success);
+        }
+        
+        .card-updated {
+            font-size: 9px;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+        
+        .card-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .card-action {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--brand);
+            text-decoration: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: var(--accent);
+            transition: all 0.2s;
+        }
+        
+        .card-action:hover {
+            background: var(--brand);
+            color: white;
         }
         
         .card-meta {
@@ -675,6 +862,57 @@
     </div>
     
     <div class="wrap">
+        <!-- Executive Summary - Q4 2025 KPIs -->
+        <div class="exec-summary">
+            <div class="exec-summary-title">
+                📊 Q4 2025 Executive Summary
+                <span style="font-size: 12px; font-weight: 600; color: var(--muted); margin-left: auto;">Updated: Nov 6, 2025</span>
+            </div>
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-label">Net New Pipeline Created</div>
+                    <div class="kpi-value">$7.11M</div>
+                    <div class="kpi-trend up">↑ +17% vs. Sept</div>
+                    <div class="kpi-target">Target: $7.0M (Nov)</div>
+                    <div class="kpi-status on-track">✓ Exceeded Oct Target by +9%</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Sales Cycle Time</div>
+                    <div class="kpi-value">38 days</div>
+                    <div class="kpi-trend down">↓ -10% vs. Sept (42 days)</div>
+                    <div class="kpi-target">Target: Reduce cycle time</div>
+                    <div class="kpi-status on-track">✓ On Track</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Pipeline Multiple</div>
+                    <div class="kpi-value">4.2x</div>
+                    <div class="kpi-trend up">↑ +10% vs. Sept (3.8x)</div>
+                    <div class="kpi-target">Target: Maintain 4.0x+</div>
+                    <div class="kpi-status on-track">✓ Exceeding Target</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">DQ Qualifier</div>
+                    <div class="kpi-value">25%</div>
+                    <div class="kpi-trend down">↓ -7 pts vs. Sept (32%)</div>
+                    <div class="kpi-target">Target: &lt; 80%</div>
+                    <div class="kpi-status on-track">✓ Well Below Target</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Target Bookings (Nov)</div>
+                    <div class="kpi-value">$2.44M</div>
+                    <div class="kpi-trend">Target for November</div>
+                    <div class="kpi-target">Dec Target: $2.30M</div>
+                    <div class="kpi-status warning">⏳ In Progress</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Avg Open Pipeline</div>
+                    <div class="kpi-value">$9.95M</div>
+                    <div class="kpi-trend">Oct: $9.95M</div>
+                    <div class="kpi-target">Sept: $9.99M</div>
+                    <div class="kpi-status on-track">✓ Stable</div>
+                </div>
+            </div>
+        </div>
         
         <!-- Executive Dashboards -->
         <div class="section-title">Executive Dashboards</div>
@@ -768,7 +1006,18 @@
             <a href="open_pipeline_account_score_latest.html" class="dashboard-card" data-standalone="true">
                 <div class="card-icon">🎯</div>
                 <div class="card-title">Open Pipeline Account Scoring</div>
+                <div class="card-priority important">Important</div>
                 <div class="card-description">Predictive scoring analysis based on 2-year historical Closed Won data (Jan 2024 - Present). Scores opportunities and accounts using Speed to Close, Deal Size, Product Mix, Upsell History, Win Rate, and Recency. Analysis only (not in Salesforce) until stakeholder review.</div>
+                <div class="card-metrics">
+                    <div class="card-metric">📊 $1.5M in High-Score Opps</div>
+                    <div class="card-metric">📈 11 opportunities (≥75 score)</div>
+                    <div class="card-metric"><span class="trend up">↑</span> 15% vs. last month</div>
+                </div>
+                <div class="card-actions">
+                    <span class="card-action">Review Top 10</span>
+                    <span class="card-action">Coach Low Scores</span>
+                </div>
+                <div class="card-updated">Updated: 3 hours ago</div>
                 <div class="card-meta">
                     <div class="status-badge">Active</div>
                 </div>

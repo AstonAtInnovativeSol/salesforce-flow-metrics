@@ -6,13 +6,15 @@
 
 **The Solution:** Build a feedback loop that:
 1. Tracks opportunities from Pipeline → Closed Won/Lost
-2. Compares predicted scores vs. actual outcomes
-3. Identifies patterns in high-scored opportunities that lost
-4. Refines the model weights based on real results
+2. **Reverse scores historical Closed Won/Lost deals** using current methodology (validates model on known outcomes)
+3. Compares predicted scores vs. actual outcomes
+4. Identifies patterns in high-scored opportunities that lost
+5. Refines the model weights based on real results
+6. Iterates until model accuracy is proven before building into Salesforce
 
 **Why This Works:** Machine learning models improve through feedback. By analyzing which high-scored opportunities actually closed vs. which ones lost, we can identify what factors truly predict success and adjust our scoring weights accordingly.
 
-**Timeline:** 2-3 weeks to build, then continuous improvement as more data flows through.
+**Timeline:** 2-3 weeks to build, then continuous improvement as more data flows through. May take several iterations to refine methodology and weighting before building into Salesforce.
 
 **Confidence Level:** High - This is standard ML practice used by every major tech company (Netflix, Amazon, etc.) for recommendation and prediction systems.
 
@@ -42,7 +44,18 @@ Implement a feedback loop system that tracks opportunities from the Open Pipelin
      - Calculates time-to-close for won deals
 
 #### Phase 2: Analysis & Pattern Detection
-1. **Closed Won Analysis Report**
+1. **Historical Reverse Scoring Analysis**
+   - **Key Concept**: Score historical Closed Won/Lost deals using current methodology
+   - Create a table of Closed Won and Closed Lost YTD with "reverse scoring"
+   - For each historical deal:
+     - Apply current scoring methodology retroactively
+     - Calculate what the score would have been at pipeline stage
+     - Compare predicted score vs. actual outcome
+   - This validates the model's predictive power on known outcomes
+   - Example: "Deal X closed won with a score of 85 - model correctly predicted success"
+   - Example: "Deal Y closed lost with a score of 90 - model incorrectly predicted success (false positive)"
+
+2. **Closed Won Analysis Report**
    - Compare predicted score vs. actual outcome
    - Identify:
      - High-scored opportunities that won (validates model)
@@ -53,7 +66,7 @@ Implement a feedback loop system that tracks opportunities from the Open Pipelin
      - Recall: % of won deals that were high-scored
      - F1 Score: Balanced accuracy metric
 
-2. **Closed Lost Analysis Report**
+3. **Closed Lost Analysis Report**
    - Focus on high-scored opportunities that lost
    - Identify common patterns:
      - Which component scores were misleading?
@@ -122,10 +135,19 @@ class OpportunityOutcome:
    - Matches against snapshots
    - Records outcomes
 
-3. **`analyze_model_accuracy.py`**
+3. **`reverse_score_historical_deals.py`**
+   - **Core validation script**: Applies current scoring methodology to historical Closed Won/Lost deals
+   - Queries all Closed Won/Lost deals YTD
+   - For each deal, calculates what the score would have been at pipeline stage
+   - Creates comparison table: Predicted Score vs. Actual Outcome
+   - Identifies false positives (high score, lost) and false negatives (low score, won)
+   - Generates HTML report showing reverse scoring results
+
+4. **`analyze_model_accuracy.py`**
    - Generates Closed Won/Lost analysis reports
    - Calculates precision/recall metrics
    - Identifies patterns in misclassified opportunities
+   - Uses reverse scoring data to validate model accuracy
 
 4. **`refine_model_weights.py`**
    - Analyzes outcome data
@@ -144,6 +166,14 @@ class OpportunityOutcome:
      - High-scored opportunities that lost
      - Common failure patterns
      - Recommendations for model refinement
+
+7. **`historical_reverse_scoring_report.py`**
+   - HTML dashboard showing:
+     - Table of Closed Won/Lost YTD with reverse scores
+     - Predicted Score vs. Actual Outcome comparison
+     - Accuracy metrics by score range
+     - Pattern analysis: "What did high-scored losers have in common?"
+   - **Key Feature**: Shows how current model would have performed on historical data
 
 ### Technical Approach
 

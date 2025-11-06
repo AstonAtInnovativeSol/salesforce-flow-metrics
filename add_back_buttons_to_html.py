@@ -13,19 +13,19 @@ from typing import List
 BACK_BUTTON_CSS = """
         .back-btn {
             position: absolute;
-            left: 24px;
+            right: 24px;
             top: 50%;
             transform: translateY(-50%);
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            padding: 8px 16px;
+            gap: 4px;
+            padding: 6px 12px;
             background: var(--panel);
             border: 1px solid var(--border);
             border-radius: 8px;
             color: var(--ink);
             text-decoration: none;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
             transition: all 0.2s ease;
             z-index: 10;
@@ -35,13 +35,13 @@ BACK_BUTTON_CSS = """
             background: var(--brand);
             color: white;
             border-color: var(--brand);
-            transform: translateY(-50%) translateX(-2px);
+            transform: translateY(-50%) translateX(2px);
             box-shadow: 0 2px 8px rgba(75, 123, 236, 0.3);
         }
         
         .back-btn svg {
-            width: 16px;
-            height: 16px;
+            width: 14px;
+            height: 14px;
         }
 """
 
@@ -50,7 +50,7 @@ BACK_BUTTON_HTML = """        <a href="index.html" class="back-btn">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M19 12H5M12 19l-7-7 7-7"/>
             </svg>
-            Back to Dashboard
+            Back
         </a>
 """
 
@@ -67,7 +67,7 @@ def find_html_files(directory: Path) -> List[Path]:
 
 def has_back_button(html_content: str) -> bool:
     """Check if HTML already has a back button"""
-    return "back-btn" in html_content or "Back to Dashboard" in html_content
+    return "back-btn" in html_content or "Back" in html_content or "Back to Dashboard" in html_content
 
 def ensure_header_relative(html_content: str) -> str:
     """Ensure header has position: relative for absolute positioning"""

@@ -278,6 +278,16 @@
             color: var(--error);
         }
         
+        /* Special case: Sales Cycle Time DOWN is GOOD (green) */
+        .kpi-card[data-metric="cycle-time"] .kpi-trend {
+            color: var(--success) !important;
+        }
+        
+        /* Special case: DQ Qualifier DOWN is GOOD (green) - lower is better */
+        .kpi-card[data-metric="dq-qualifier"] .kpi-trend {
+            color: var(--success) !important;
+        }
+        
         .kpi-target {
             font-size: 11px;
             color: var(--muted);
@@ -858,7 +868,7 @@
             }
             
             .logo-symbol {
-                height: 40px;
+                height: 64px;
                 width: auto;
                 flex-shrink: 0;
             }
@@ -898,29 +908,72 @@
                 margin-top: 0;
             }
             
-            /* Mobile: Executive Summary */
+            /* Mobile: Executive Summary - Compact Horizontal Scroll */
             .exec-summary {
-                padding: 16px;
-                margin-bottom: 24px;
+                padding: 12px;
+                margin-bottom: 16px;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: thin;
+            }
+            
+            .exec-summary::-webkit-scrollbar {
+                height: 4px;
+            }
+            
+            .exec-summary::-webkit-scrollbar-track {
+                background: var(--accent);
+                border-radius: 2px;
+            }
+            
+            .exec-summary::-webkit-scrollbar-thumb {
+                background: var(--brand);
+                border-radius: 2px;
             }
             
             .exec-summary-title {
-                font-size: 18px;
-                margin-bottom: 16px;
+                font-size: 16px;
+                margin-bottom: 12px;
                 flex-wrap: wrap;
             }
             
             .kpi-grid {
-                grid-template-columns: 1fr;
-                gap: 12px;
+                display: flex;
+                flex-direction: row;
+                gap: 10px;
+                min-width: max-content;
             }
             
             .kpi-card {
-                padding: 14px;
+                padding: 12px;
+                min-width: 160px;
+                flex-shrink: 0;
+            }
+            
+            .kpi-label {
+                font-size: 10px;
+                margin-bottom: 6px;
             }
             
             .kpi-value {
                 font-size: 20px;
+                margin-bottom: 3px;
+            }
+            
+            .kpi-trend {
+                font-size: 11px;
+                margin-bottom: 4px;
+            }
+            
+            .kpi-target {
+                font-size: 10px;
+                margin-top: 4px;
+            }
+            
+            .kpi-status {
+                font-size: 9px;
+                padding: 2px 6px;
+                margin-top: 4px;
             }
             
             /* Mobile: Cards */
@@ -1138,10 +1191,10 @@
                     <div class="kpi-target">Target: $7.0M (Nov)</div>
                     <div class="kpi-status on-track">✓ Exceeded Oct Target by +9%</div>
                 </div>
-                <div class="kpi-card">
+                <div class="kpi-card" data-metric="cycle-time">
                     <div class="kpi-label">Sales Cycle Time</div>
                     <div class="kpi-value">38 days</div>
-                    <div class="kpi-trend down">↓ -10% vs. Sept (42 days)</div>
+                    <div class="kpi-trend up">↓ -10% vs. Sept (42 days)</div>
                     <div class="kpi-target">Target: Reduce cycle time</div>
                     <div class="kpi-status on-track">✓ On Track</div>
                 </div>
@@ -1152,7 +1205,7 @@
                     <div class="kpi-target">Target: Maintain 4.0x+</div>
                     <div class="kpi-status on-track">✓ Exceeding Target</div>
                 </div>
-                <div class="kpi-card">
+                <div class="kpi-card" data-metric="dq-qualifier">
                     <div class="kpi-label">DQ Qualifier</div>
                     <div class="kpi-value">25%</div>
                     <div class="kpi-trend down">↓ -7 pts vs. Sept (32%)</div>

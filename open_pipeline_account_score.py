@@ -782,18 +782,20 @@ def generate_html_dashboard(scored_opps: List[OpportunityScore], profiles: Dict[
             background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
             border: 1px solid rgba(148, 163, 184, 0.2);
             border-radius: 10px;
-            padding: 16px 20px;
+            padding: 14px 18px;
             margin-top: 12px;
+            margin-left: auto;
+            max-width: 680px;
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
         }}
         
         .methodology-compact {{
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px 20px;
+            gap: 8px 16px;
             font-size: 11px;
             color: var(--muted);
-            line-height: 1.5;
+            line-height: 1.4;
         }}
         
         .methodology-item {{

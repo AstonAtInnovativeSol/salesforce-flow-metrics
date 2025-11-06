@@ -670,17 +670,29 @@ def generate_html_dashboard(scored_opps: List[OpportunityScore], profiles: Dict[
     <style>
         :root {{
             --bg: #ffffff;
-            --ink: #101418;
-            --muted: #6b7280;
-            --line: #e5e7eb;
-            --panel: #fafafa;
-            --brand: #4b7bec;
+            --ink: #0b0f14;
+            --muted: #667085;
+            --line: #e6eaf0;
+            --panel: #f7f9fc;
+            --accent: #eef2f7;
+            --brand: #2463eb;
             --brand-2: #6b5af9;
-            --accent: #f8fafc;
             --border: #e2e8f0;
-            --success: #10b981;
-            --warning: #f59e0b;
+            --success: #15b79e;
+            --warning: #f59f00;
             --error: #ef4444;
+            
+            /* Typography scale */
+            --fs-xs: 11.5px;
+            --fs-sm: 12.5px;
+            --fs-md: 14px;
+            --fs-lg: clamp(18px, 2.2vw, 22px);
+            --fs-xl: clamp(24px, 3.2vw, 32px);
+            
+            --radius: 12px;
+            --radius-sm: 9px;
+            --shadow-1: 0 .5px 0 rgba(13, 16, 23, .04), 0 6px 16px rgba(13,16,23,.06);
+            --shadow-2: 0 10px 30px rgba(13,16,23,.08);
         }}
         
         * {{
@@ -705,12 +717,21 @@ def generate_html_dashboard(scored_opps: List[OpportunityScore], profiles: Dict[
         .hdr {{
             position: sticky;
             top: 0;
-            z-index: 20;
-            backdrop-filter: saturate(180%) blur(8px);
-            background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.86));
+            z-index: 40;
+            backdrop-filter: saturate(180%) blur(10px);
+            background: color-mix(in oklab, var(--bg) 92%, transparent);
             border-bottom: 1px solid var(--line);
-            padding: 20px 24px;
-            margin: -24px -24px 24px -24px;
+            padding: 18px 24px;
+            margin: -24px -24px 28px -24px;
+        }}
+        
+        .hdr-inner {{
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            gap: 24px;
+            align-items: center;
+            position: relative;
         }}
         
         .back-btn {{
@@ -751,95 +772,111 @@ def generate_html_dashboard(scored_opps: List[OpportunityScore], profiles: Dict[
             font-weight: 700;
         }}
         
-        .hdr-content {{
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            max-width: 1600px;
-            margin: 0 auto;
-            position: relative;
-            width: 100%;
-            gap: 24px;
-        }}
-        
-        .hdr-left {{
+        .hdr-title-section {{
             flex: 1;
             min-width: 0;
         }}
         
-        .hdr-right {{
-            flex-shrink: 0;
-            text-align: right;
-        }}
-        
         .title {{
-            font-size: 36px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            margin-top: -8px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            font-size: var(--fs-xl);
+            line-height: 1.1;
             color: var(--ink);
-            letter-spacing: -0.03em;
-            line-height: 1.2;
+            margin-bottom: 4px;
         }}
         
         .subtitle {{
             color: var(--muted);
-            font-size: 15px;
-            line-height: 1.6;
-            margin: 0 0 2px 0;
-        }}
-        
-        .methodology-panel {{
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-            border: 1px solid rgba(148, 163, 184, 0.2);
-            border-radius: 10px;
-            padding: 16px 20px;
-            margin-top: 2px;
-            margin-left: auto;
-            max-width: 680px;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-        }}
-        
-        .methodology-panel-title {{
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--ink);
-            margin-bottom: 12px;
-            letter-spacing: 0.01em;
-        }}
-        
-        .methodology-compact {{
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px 16px;
-            font-size: 11px;
-            color: var(--muted);
+            font-size: var(--fs-sm);
             line-height: 1.4;
         }}
         
-        .methodology-item {{
+        .toolbar {{
+            margin-left: auto;
             display: flex;
-            align-items: flex-start;
-            gap: 6px;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
         }}
         
-        .methodology-item strong {{
+        .btn {{
+            appearance: none;
+            border: 1px solid var(--line);
+            background: var(--bg);
             color: var(--ink);
+            border-radius: 999px;
+            padding: 8px 14px;
             font-weight: 600;
-            white-space: nowrap;
-            flex-shrink: 0;
+            font-size: var(--fs-sm);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-1);
         }}
         
-        .methodology-item span {{
+        .btn:hover {{
+            border-color: var(--brand);
+            transform: translateY(-1px);
+        }}
+        
+        .btn[aria-pressed="true"] {{
+            background: var(--brand);
+            color: #fff;
+            border-color: var(--brand);
+            box-shadow: 0 4px 12px rgba(36, 99, 235, 0.28);
+        }}
+        
+        /* Methodology Dialog */
+        dialog {{
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            padding: 0;
+            width: min(720px, 92vw);
+            max-height: 90vh;
+            box-shadow: var(--shadow-2);
+        }}
+        
+        dialog::backdrop {{
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+        }}
+        
+        .dialog-header {{
+            padding: 18px 20px;
+            border-bottom: 1px solid var(--line);
+            font-weight: 800;
+            font-size: var(--fs-md);
+            color: var(--ink);
+        }}
+        
+        .dialog-body {{
+            padding: 20px;
             color: var(--muted);
-            flex: 1;
+            font-size: var(--fs-md);
+            display: grid;
+            gap: 12px;
+            max-height: 60vh;
+            overflow-y: auto;
         }}
         
-        @media (max-width: 768px) {{
-            .methodology-compact {{
-                grid-template-columns: 1fr;
-                gap: 8px;
-            }}
+        .dialog-body > div {{
+            line-height: 1.6;
+        }}
+        
+        .dialog-body b {{
+            color: var(--ink);
+            font-weight: 700;
+        }}
+        
+        .dialog-footer {{
+            padding: 14px 20px;
+            border-top: 1px solid var(--line);
+            display: flex;
+            justify-content: flex-end;
+        }}
+        
+        .dialog-footer .btn {{
+            margin: 0;
         }}
         
         .panel {{
@@ -1019,54 +1056,41 @@ def generate_html_dashboard(scored_opps: List[OpportunityScore], profiles: Dict[
 </head>
 <body>
     <div class="hdr">
-        <a href="index.html" class="back-btn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M19 12H5M12 19l-7-7 7-7"/>
-            </svg>
-            Back
-        </a>
-        <div class="hdr-content">
-            <div class="hdr-left">
+        <div class="hdr-inner">
+            <div class="hdr-title-section">
                 <div class="title">Open Pipeline Account Score</div>
                 <div class="subtitle">Predictive scoring based on 2-year historical Closed Won data (Jan 2024 - Present)</div>
-                <div class="methodology-panel">
-                    <div class="methodology-panel-title">Methodology + Weighting</div>
-                    <div class="methodology-compact">
-                        <div class="methodology-item">
-                            <strong>Speed to Close (15%):</strong>
-                            <span>Historical avg days to close</span>
-                        </div>
-                        <div class="methodology-item">
-                            <strong>Largest Deal (20%):</strong>
-                            <span>Max deal value per account</span>
-                        </div>
-                        <div class="methodology-item">
-                            <strong>Product Mix (15%):</strong>
-                            <span>Diversity of products/services</span>
-                        </div>
-                        <div class="methodology-item">
-                            <strong>Upsell Instances (25%):</strong>
-                            <span>Accounts with multiple purchases</span>
-                        </div>
-                        <div class="methodology-item">
-                            <strong>Win Rate (20%):</strong>
-                            <span>Historical win rate percentage</span>
-                        </div>
-                        <div class="methodology-item">
-                            <strong>Recency (5%):</strong>
-                            <span>Days since last close</span>
-                        </div>
-                    </div>
-                    <div style="font-size: 10px; color: var(--muted); margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(148, 163, 184, 0.15); font-style: italic; text-align: center;">
-                        Analysis only (not in Salesforce) • Custom fields after stakeholder review
-                    </div>
-                </div>
             </div>
-            <div class="hdr-right">
-                <!-- Right side reserved for future content if needed -->
+            <div class="toolbar">
+                <button class="btn" id="methodologyBtn" aria-haspopup="dialog" aria-controls="methodologyDialog">Methodology</button>
+                <a href="index.html" class="btn" style="text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;">
+                        <path d="M19 12H5M12 19l-7-7 7-7"/>
+                    </svg>
+                    Back
+                </a>
             </div>
         </div>
     </div>
+    
+    <!-- Methodology Dialog -->
+    <dialog id="methodologyDialog">
+        <div class="dialog-header">Methodology + Weighting</div>
+        <div class="dialog-body">
+            <div><b>Largest Deal (20%)</b> · Max historical deal value per account</div>
+            <div><b>Upsell Instances (25%)</b> · Number of separate purchases (expansion potential)</div>
+            <div><b>Win Rate (20%)</b> · Historical win percentage</div>
+            <div><b>Speed to Close (15%)</b> · Average days to close</div>
+            <div><b>Product Mix (15%)</b> · Diversity of products/services</div>
+            <div><b>Recency (5%)</b> · Days since last close</div>
+            <p style="margin-top: 12px; font-size: var(--fs-sm); font-style: italic; color: var(--muted);">
+                Analysis only (not in Salesforce). Custom fields will be added after stakeholder review and feedback.
+            </p>
+        </div>
+        <div class="dialog-footer">
+            <button class="btn" onclick="document.getElementById('methodologyDialog').close()">Close</button>
+        </div>
+    </dialog>
     
     <div class="wrap">
         <div class="panel">
@@ -1243,6 +1267,15 @@ def generate_html_dashboard(scored_opps: List[OpportunityScore], profiles: Dict[
                         '<td style="font-size: 11px; color: var(--muted); max-width: 300px;">' + explanation + '</td>' +
                         '</tr>';
                 }}).join('');
+            }}
+            
+            // Methodology dialog
+            const methodologyBtn = document.getElementById('methodologyBtn');
+            const methodologyDialog = document.getElementById('methodologyDialog');
+            if (methodologyBtn && methodologyDialog) {{
+                methodologyBtn.addEventListener('click', () => {{
+                    methodologyDialog.showModal();
+                }});
             }}
             
             // Initialize when DOM is ready

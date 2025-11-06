@@ -732,6 +732,11 @@ def generate_html_dashboard(scored_opps: List[OpportunityScore], profiles: Dict[
             height: 16px;
         }}
         
+        .close-date-past {{
+            color: var(--error);
+            font-weight: 700;
+        }}
+        
         .hdr-content {{
             display: flex;
             justify-content: flex-end;
@@ -1047,9 +1052,18 @@ def generate_html_dashboard(scored_opps: List[OpportunityScore], profiles: Dict[
                     const scoreClass = opp.opportunity_score >= 75 ? 'score-high' : (opp.opportunity_score >= 50 ? 'score-medium' : 'score-low');
                     const badgeClass = opp.confidence_level === 'High' ? 'badge-high' : (opp.confidence_level === 'Medium' ? 'badge-medium' : 'badge-low');
                     let closeDate = 'N/A';
+                    let closeDateClass = '';
                     if (opp.close_date) {{
                         const date = new Date(opp.close_date);
                         closeDate = date.toLocaleDateString('en-US', {{ month: 'short', day: 'numeric', year: 'numeric' }});
+                        // Check if date is in the past
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        const closeDateObj = new Date(date);
+                        closeDateObj.setHours(0, 0, 0, 0);
+                        if (closeDateObj < today) {{
+                            closeDateClass = 'close-date-past';
+                        }}
                     }}
                     
                     const oppName = opp.opportunity_name.length > 50 ? opp.opportunity_name.substring(0, 50) + '...' : opp.opportunity_name;
@@ -1065,7 +1079,7 @@ def generate_html_dashboard(scored_opps: List[OpportunityScore], profiles: Dict[
                         '<td>$' + amount + '</td>' +
                         '<td>' + opp.stage + '</td>' +
                         '<td>' + commit + '</td>' +
-                        '<td>' + closeDate + '</td>' +
+                        '<td class="' + closeDateClass + '">' + closeDate + '</td>' +
                         '<td>' + opp.owner_name + '</td>' +
                         '<td class="score-cell ' + scoreClass + '">' + opp.opportunity_score + '</td>' +
                         '<td class="score-cell ' + scoreClass + '">' + opp.account_score + '</td>' +

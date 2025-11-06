@@ -212,12 +212,12 @@
         
         /* Executive Summary Section */
         .exec-summary {
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            background: var(--panel);
             border: 1px solid var(--border);
             border-radius: 16px;
             padding: 24px;
             margin-bottom: 32px;
-            box-shadow: 0 2px 8px rgba(0,0,0,.04);
+            box-shadow: 0 2px 8px rgba(0,0,0,.2);
         }
         
         .exec-summary-title {
@@ -238,11 +238,11 @@
         }
         
         .kpi-card {
-            background: var(--bg);
+            background: rgba(255, 255, 255, 0.03);
             border: 1px solid var(--border);
             border-radius: 12px;
             padding: 16px;
-            box-shadow: 0 1px 3px rgba(0,0,0,.05);
+            box-shadow: 0 1px 3px rgba(0,0,0,.1);
         }
         
         .kpi-label {
@@ -306,17 +306,17 @@
         }
         
         .kpi-status.on-track {
-            background: rgba(21, 183, 158, 0.1);
+            background: rgba(21, 183, 158, 0.15);
             color: var(--success);
         }
         
         .kpi-status.at-risk {
-            background: rgba(239, 68, 68, 0.1);
+            background: rgba(239, 68, 68, 0.15);
             color: var(--error);
         }
         
         .kpi-status.warning {
-            background: rgba(245, 158, 11, 0.1);
+            background: rgba(245, 158, 11, 0.15);
             color: var(--warning);
         }
         

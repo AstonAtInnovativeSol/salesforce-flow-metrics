@@ -61,6 +61,29 @@
             width: 100%;
         }
         
+        /* When showing standalone reports, center and raise content */
+        .wrap.showing-standalone {
+            padding-top: 0 !important;
+            padding-bottom: 0;
+        }
+        
+        .wrap.showing-standalone::before {
+            content: none;
+        }
+        
+        .wrap.showing-standalone .dashboard-grid {
+            grid-template-columns: 1fr;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            margin-top: 0 !important;
+            margin-bottom: 0;
+        }
+        
+        .wrap.showing-standalone > .dashboard-grid:first-child {
+            margin-top: 0;
+        }
+        
         .hdr {
             position: sticky;
             top: 0;
@@ -215,6 +238,7 @@
             margin-top: 8px;
             margin-bottom: 8px;
         }
+        
         
         .dashboard-card {
             background: var(--panel);
@@ -740,6 +764,15 @@
                     <div class="status-badge">Active</div>
                 </div>
             </a>
+            
+            <a href="open_pipeline_account_score_latest.html" class="dashboard-card" data-standalone="true">
+                <div class="card-icon">🎯</div>
+                <div class="card-title">Open Pipeline Account Scoring</div>
+                <div class="card-description">Predictive scoring analysis based on 2-year historical Closed Won data (Jan 2024 - Present). Scores opportunities and accounts using Speed to Close, Deal Size, Product Mix, Upsell History, Win Rate, and Recency. Analysis only (not in Salesforce) until stakeholder review.</div>
+                <div class="card-meta">
+                    <div class="status-badge">Active</div>
+                </div>
+            </a>
         </div>
         
         <div class="foot">
@@ -795,9 +828,17 @@
             const filterStandalone = document.getElementById('filterStandalone');
             const dashboardCards = document.querySelectorAll('.dashboard-card');
             const sectionTitles = document.querySelectorAll('.section-title');
-            
+            const wrap = document.querySelector('.wrap');
+                
             function filterDashboardsByType() {
                 const showStandalone = filterStandalone.checked;
+                
+                // Add/remove class to center standalone cards
+                if (showStandalone) {
+                    wrap.classList.add('showing-standalone');
+                } else {
+                    wrap.classList.remove('showing-standalone');
+                }
                 
                 // Filter dashboard cards
                 dashboardCards.forEach(card => {

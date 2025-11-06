@@ -320,6 +320,13 @@
             color: var(--warning);
         }
         
+        .section-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 24px 0 20px 0;
+            width: 100%;
+        }
+        
         .section-title {
             font-size: 16px;
             font-weight: 800;
@@ -590,18 +597,11 @@
         }
         
         .kpi-value {
-            animation: countUp 1s ease-out 0.3s both;
+            animation: fadeInScale 0.5s ease-out 0.3s both;
         }
         
-        @keyframes countUp {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .kpi-value[data-count] {
+            font-variant-numeric: tabular-nums;
         }
         
         .kpi-trend {
@@ -752,6 +752,14 @@
         .brandmark {
             font-weight: 900;
             letter-spacing: .08em;
+        }
+        
+        .controls-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: flex-end;
+            flex-shrink: 0;
         }
         
         .filter-controls {
@@ -1245,28 +1253,31 @@
                 <div class="title">Sales Ops Analytics</div>
                 <div class="subtitle">Select a dashboard below to view detailed metrics and insights.</div>
             </div>
-            <!-- Filter Controls -->
-            <div class="filter-controls">
-                <div class="filter-label">View:</div>
-                <div class="filter-radio-group">
-                    <input type="radio" id="filterDashboards" name="dashboardFilter" class="filter-radio filter-dashboards" checked>
-                    <label for="filterDashboards" class="filter-radio-label">Dashboards</label>
-                    <input type="radio" id="filterStandalone" name="dashboardFilter" class="filter-radio filter-standalone">
-                    <label for="filterStandalone" class="filter-radio-label">Stand Alone Reports</label>
+            <!-- Controls Group -->
+            <div class="controls-group">
+                <!-- Filter Controls -->
+                <div class="filter-controls">
+                    <div class="filter-label">View:</div>
+                    <div class="filter-radio-group">
+                        <input type="radio" id="filterDashboards" name="dashboardFilter" class="filter-radio filter-dashboards" checked>
+                        <label for="filterDashboards" class="filter-radio-label">Dashboards</label>
+                        <input type="radio" id="filterStandalone" name="dashboardFilter" class="filter-radio filter-standalone">
+                        <label for="filterStandalone" class="filter-radio-label">Stand Alone Reports</label>
+                    </div>
                 </div>
-            </div>
-            <!-- Script Runner Controls -->
-            <div class="filter-controls" style="margin-top: 8px;">
-                <div class="filter-label">Run Script:</div>
-                <div class="filter-radio-group">
-                    <button id="runSnapshotSummary" class="script-runner-btn" data-script="snapshot-summary">
-                        <span class="script-btn-text">Snapshot Summary</span>
-                        <span class="script-btn-loader" style="display: none;">⏳</span>
-                    </button>
-                    <button id="runTrailing6" class="script-runner-btn" data-script="trailing-6">
-                        <span class="script-btn-text">Trailing 6 Week</span>
-                        <span class="script-btn-loader" style="display: none;">⏳</span>
-                    </button>
+                <!-- Script Runner Controls -->
+                <div class="filter-controls">
+                    <div class="filter-label">Run Script:</div>
+                    <div class="filter-radio-group">
+                        <button id="runSnapshotSummary" class="script-runner-btn" data-script="snapshot-summary">
+                            <span class="script-btn-text">Snapshot Summary</span>
+                            <span class="script-btn-loader" style="display: none;">⏳</span>
+                        </button>
+                        <button id="runTrailing6" class="script-runner-btn" data-script="trailing-6">
+                            <span class="script-btn-text">Trailing 6 Week</span>
+                            <span class="script-btn-loader" style="display: none;">⏳</span>
+                        </button>
+                    </div>
                 </div>
                 <div id="scriptStatus" class="script-status" style="display: none;"></div>
             </div>
@@ -1343,6 +1354,7 @@
         </div>
         
         <!-- Executive Dashboards -->
+        <div class="section-divider"></div>
         <div class="section-title">Executive Dashboards</div>
         <div class="dashboard-grid">
             <a href="exec_pipeline_dashboard - PoC.html" class="dashboard-card" data-standalone="false">
@@ -1360,30 +1372,6 @@
                     <span class="card-action">Export Report</span>
                 </div>
                 <div class="card-updated">Updated: 1 hour ago</div>
-                <div class="card-meta">
-                    <div class="status-badge">Active</div>
-                </div>
-            </a>
-        </div>
-        
-        <!-- Velocity Dashboards -->
-        <div class="section-title">Velocity & Performance</div>
-        <div class="dashboard-grid">
-            <a href="boca_velocity_latest.html" class="dashboard-card" data-standalone="false">
-                <div class="card-icon">📊</div>
-                <div class="card-title">Boca Sales Velocity</div>
-                <div class="card-priority important">Important</div>
-                <div class="card-description">DGR Sales Velocity report tracking meetings, opportunity dollars, and closed won metrics by rep. Includes week-over-week comparisons and 6-week trailing averages.</div>
-                <div class="card-metrics">
-                    <div class="card-metric">📊 43 deals/week</div>
-                    <div class="card-metric">📈 44 days avg cycle</div>
-                    <div class="card-metric"><span class="trend up">↑</span> +15.3% WoW</div>
-                </div>
-                <div class="card-actions">
-                    <span class="card-action">View Report</span>
-                    <span class="card-action">Compare Reps</span>
-                </div>
-                <div class="card-updated">Updated: 3 hours ago</div>
                 <div class="card-meta">
                     <div class="status-badge">Active</div>
                 </div>
@@ -1408,7 +1396,28 @@
                     <div class="status-badge">Active</div>
                 </div>
             </a>
+            
+            <a href="boca_velocity_latest.html" class="dashboard-card" data-standalone="false">
+                <div class="card-icon">📊</div>
+                <div class="card-title">Boca Sales Velocity</div>
+                <div class="card-priority important">Important</div>
+                <div class="card-description">DGR Sales Velocity report tracking meetings, opportunity dollars, and closed won metrics by rep. Includes week-over-week comparisons and 6-week trailing averages.</div>
+                <div class="card-metrics">
+                    <div class="card-metric">📊 43 deals/week</div>
+                    <div class="card-metric">📈 44 days avg cycle</div>
+                    <div class="card-metric"><span class="trend up">↑</span> +15.3% WoW</div>
+                </div>
+                <div class="card-actions">
+                    <span class="card-action">View Report</span>
+                    <span class="card-action">Compare Reps</span>
+                </div>
+                <div class="card-updated">Updated: 3 hours ago</div>
+                <div class="card-meta">
+                    <div class="status-badge">Active</div>
+                </div>
+            </a>
         </div>
+        
         
         <!-- Featured Dashboards -->
         <div class="section-title">Featured Dashboards</div>
@@ -1716,6 +1725,91 @@
             runTrailing6.addEventListener('click', () => {
                 runScript('trailing-6', runTrailing6);
             });
+            
+            // Count-up animation for KPI values
+            function animateValue(element, start, end, duration, format) {
+                let startTimestamp = null;
+                const step = (timestamp) => {
+                    if (!startTimestamp) startTimestamp = timestamp;
+                    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                    const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+                    const current = start + (end - start) * easeOutQuart;
+                    
+                    // Format based on type
+                    if (format.type === 'currency') {
+                        const value = current / (format.isMillion ? 1000000 : 1000);
+                        element.textContent = '$' + value.toFixed(2) + (format.isMillion ? 'M' : 'K');
+                    } else if (format.type === 'percent') {
+                        element.textContent = Math.round(current) + '%';
+                    } else if (format.type === 'multiplier') {
+                        element.textContent = current.toFixed(1) + 'x';
+                    } else if (format.type === 'days') {
+                        element.textContent = Math.round(current) + ' days';
+                    } else {
+                        element.textContent = Math.round(current) + (format.suffix || '');
+                    }
+                    
+                    if (progress < 1) {
+                        window.requestAnimationFrame(step);
+                    } else {
+                        // Ensure final value matches original exactly
+                        element.textContent = format.original;
+                    }
+                };
+                window.requestAnimationFrame(step);
+            }
+            
+            // Initialize count-up animations for KPI values
+            function initCountUpAnimations() {
+                const kpiValues = document.querySelectorAll('.kpi-value');
+                
+                kpiValues.forEach((element, index) => {
+                    const originalText = element.textContent.trim();
+                    const delay = 300 + (index * 100); // Stagger animations
+                    
+                    setTimeout(() => {
+                        let format = { original: originalText };
+                        
+                        // Parse the value based on format
+                        if (originalText.includes('$')) {
+                            const numStr = originalText.replace(/[$,MK]/g, '');
+                            const num = parseFloat(numStr);
+                            const isMillion = originalText.includes('M');
+                            const targetValue = isMillion ? num * 1000000 : num * 1000;
+                            format.type = 'currency';
+                            format.isMillion = isMillion;
+                            animateValue(element, 0, targetValue, 1500, format);
+                        } else if (originalText.includes('%')) {
+                            const num = parseFloat(originalText.replace('%', ''));
+                            format.type = 'percent';
+                            animateValue(element, 0, num, 1200, format);
+                        } else if (originalText.includes('x')) {
+                            const num = parseFloat(originalText.replace('x', ''));
+                            format.type = 'multiplier';
+                            animateValue(element, 0, num, 1200, format);
+                        } else if (originalText.includes('days')) {
+                            const num = parseFloat(originalText.replace(' days', ''));
+                            format.type = 'days';
+                            animateValue(element, 0, num, 1200, format);
+                        } else {
+                            // For other numeric values - skip animation if we can't parse
+                            const num = parseFloat(originalText.replace(/[^\d.]/g, ''));
+                            if (!isNaN(num)) {
+                                format.type = 'number';
+                                format.suffix = originalText.replace(/[\d.]/g, '');
+                                animateValue(element, 0, num, 1200, format);
+                            }
+                        }
+                    }, delay);
+                });
+            }
+            
+            // Start animations when page loads
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initCountUpAnimations);
+            } else {
+                initCountUpAnimations();
+            }
         })();
     </script>
 </body>

@@ -1,0 +1,1817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Ops Analytics</title>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --ink: #101418;
+            --muted: #6b7280;
+            --line: #e5e7eb;
+            --panel: #fafafa;
+            --brand: #4b7bec;
+            --brand-2: #6b5af9;
+            --accent: #f8fafc;
+            --border: #e2e8f0;
+            --glass: rgba(255,255,255,.65);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+        }
+        
+        [data-theme="dark"] {
+            --bg: #0a0e13;
+            --ink: #f5f7fa;
+            --muted: #9ca3af;
+            --line: #1f2937;
+            --panel: #111827;
+            --brand: #5b8ef7;
+            --brand-2: #7c6cf9;
+            --accent: #1a1f2e;
+            --border: #2d3748;
+            --glass: rgba(10,14,19,.85);
+            --success: #34d399;
+            --warning: #fbbf24;
+            --error: #f87171;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                        color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                        border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        html, body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--ink);
+            font: 15px/1.4 -apple-system, BlinkMacSystemFont, Inter, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            overflow-x: hidden;
+        }
+        
+        .wrap {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 16px 24px;
+            width: 100%;
+        }
+        
+        /* When showing standalone reports, center and raise content */
+        .wrap.showing-standalone {
+            padding-top: 0 !important;
+            padding-bottom: 0;
+        }
+        
+        .wrap.showing-standalone::before {
+            content: none;
+        }
+        
+        .wrap.showing-standalone .dashboard-grid {
+            grid-template-columns: 1fr;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            margin-top: 0 !important;
+            margin-bottom: 0;
+        }
+        
+        .wrap.showing-standalone > .dashboard-grid:first-child {
+            margin-top: 0;
+        }
+        
+        .hdr {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            backdrop-filter: saturate(180%) blur(8px);
+            -webkit-backdrop-filter: saturate(180%) blur(8px);
+            background: var(--glass);
+            border-bottom: 1px solid var(--line);
+            padding: 16px 24px;
+            margin: 0;
+            margin-bottom: 20px;
+        }
+        
+        [data-theme="dark"] .hdr {
+            background: linear-gradient(180deg, rgba(10,14,19,.95), rgba(10,14,19,.92) 60%, rgba(10,14,19,.88));
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-shrink: 0;
+            margin-right: 28px;
+        }
+        
+        .logo-symbol {
+            flex-shrink: 0;
+            height: 48px;
+            width: auto;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+            object-fit: contain;
+        }
+        
+        /* Invert logo for dark mode */
+        [data-theme="dark"] .logo-symbol {
+            filter: invert(1) brightness(1.2);
+        }
+        
+        .title {
+            font-size: 28px;
+            font-weight: 800;
+            line-height: 1.2;
+            margin: 0 0 6px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .subtitle {
+            color: var(--muted);
+            font-size: 13px;
+            max-width: 960px;
+            line-height: 1.4;
+            margin: 0;
+        }
+        
+        .hdr-inner {
+            display: flex;
+            gap: 18px;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        
+        .hdr-title-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .theme-toggle {
+            flex-shrink: 0;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--panel);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .theme-toggle:hover {
+            background: var(--accent);
+            border-color: var(--brand);
+            transform: scale(1.05);
+        }
+        
+        .theme-toggle:active {
+            transform: scale(0.98);
+        }
+        
+        .theme-toggle-icon {
+            width: 20px;
+            height: 20px;
+            position: absolute;
+            transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                        transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .theme-toggle-icon.sun {
+            opacity: 1;
+            transform: rotate(0deg) scale(1);
+        }
+        
+        .theme-toggle-icon.moon {
+            opacity: 0;
+            transform: rotate(-90deg) scale(0.8);
+        }
+        
+        [data-theme="dark"] .theme-toggle-icon.sun {
+            opacity: 0;
+            transform: rotate(90deg) scale(0.8);
+        }
+        
+        [data-theme="dark"] .theme-toggle-icon.moon {
+            opacity: 1;
+            transform: rotate(0deg) scale(1);
+        }
+        
+        /* Executive Summary Section */
+        .exec-summary {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 32px;
+            box-shadow: 0 2px 8px rgba(0,0,0,.04);
+        }
+        
+        .exec-summary-title {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            color: var(--ink);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .kpi-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,.05);
+        }
+        
+        .kpi-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+        
+        .kpi-value {
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--ink);
+            margin-bottom: 4px;
+            font-variant-numeric: tabular-nums;
+        }
+        
+        .kpi-trend {
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .kpi-trend.up {
+            color: var(--success);
+        }
+        
+        .kpi-trend.down {
+            color: var(--error);
+        }
+        
+        /* Special case: Sales Cycle Time DOWN is GOOD (green) */
+        .kpi-card[data-metric="cycle-time"] .kpi-trend {
+            color: var(--success) !important;
+        }
+        
+        /* Special case: DQ Qualifier DOWN is GOOD (green) - lower is better */
+        .kpi-card[data-metric="dq-qualifier"] .kpi-trend {
+            color: var(--success) !important;
+        }
+        
+        .kpi-target {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 6px;
+        }
+        
+        .kpi-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 700;
+            margin-top: 6px;
+        }
+        
+        .kpi-status.on-track {
+            background: rgba(21, 183, 158, 0.1);
+            color: var(--success);
+        }
+        
+        .kpi-status.at-risk {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+        }
+        
+        .kpi-status.warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+        
+        .section-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 24px 0 20px 0;
+            width: 100%;
+        }
+        
+        .section-title {
+            font-size: 16px;
+            font-weight: 800;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            color: var(--ink);
+            text-transform: uppercase;
+            letter-spacing: .05em;
+        }
+        
+        .section-title:first-of-type {
+            margin-top: 0;
+            margin-bottom: 8px;
+        }
+        
+        /* Ensure all sections fit in viewport */
+        body {
+            max-height: 100vh;
+            overflow-y: auto;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 8px;
+            margin-bottom: 8px;
+        }
+        
+        
+        .dashboard-card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,.05), 0 1px 2px rgba(0,0,0,.08);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        
+        .dashboard-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+        
+        .dashboard-card:hover::before {
+            left: 100%;
+        }
+        
+        .dashboard-card:hover {
+            transform: translateY(-4px) scale(1.01);
+            box-shadow: 0 8px 24px rgba(0,0,0,.12), 0 4px 8px rgba(0,0,0,.08);
+            border-color: var(--brand);
+        }
+        
+        .dashboard-card:active {
+            transform: translateY(-2px) scale(0.99);
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .dashboard-card:nth-child(1) { animation-delay: 0.05s; }
+        .dashboard-card:nth-child(2) { animation-delay: 0.1s; }
+        .dashboard-card:nth-child(3) { animation-delay: 0.15s; }
+        .dashboard-card:nth-child(4) { animation-delay: 0.2s; }
+        .dashboard-card:nth-child(5) { animation-delay: 0.25s; }
+        .dashboard-card:nth-child(6) { animation-delay: 0.3s; }
+        .dashboard-card:nth-child(7) { animation-delay: 0.35s; }
+        .dashboard-card:nth-child(8) { animation-delay: 0.4s; }
+        .dashboard-card:nth-child(9) { animation-delay: 0.45s; }
+        .dashboard-card:nth-child(10) { animation-delay: 0.5s; }
+        
+        .card-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+            display: inline-block;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .dashboard-card:hover .card-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+        
+        .card-title {
+            font-size: 16px;
+            font-weight: 800;
+            margin-bottom: 6px;
+            color: var(--ink);
+            line-height: 1.2;
+        }
+        
+        .card-description {
+            font-size: 12px;
+            color: var(--muted);
+            line-height: 1.4;
+            margin-bottom: 10px;
+        }
+        
+        .card-metrics {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: var(--accent);
+            border-radius: 8px;
+        }
+        
+        .card-metric {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--ink);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .card-metric .trend {
+            font-size: 10px;
+        }
+        
+        .card-metric .trend.up {
+            color: var(--success);
+        }
+        
+        .card-metric .trend.down {
+            color: var(--error);
+        }
+        
+        .card-priority {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-right: 6px;
+        }
+        
+        .card-priority.critical {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+        }
+        
+        .card-priority.important {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+        
+        .card-priority.informational {
+            background: rgba(21, 183, 158, 0.1);
+            color: var(--success);
+        }
+        
+        .card-updated {
+            font-size: 9px;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+        
+        .card-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .card-action {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--brand);
+            text-decoration: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: var(--accent);
+            transition: all 0.2s;
+        }
+        
+        .card-action:hover {
+            background: var(--brand);
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(75, 123, 236, 0.3);
+        }
+        
+        .card-action:active {
+            transform: translateY(0);
+        }
+        
+        .card-priority {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .card-priority.critical {
+            animation: pulseCritical 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        
+        @keyframes pulseCritical {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            50% { opacity: 0.9; box-shadow: 0 0 0 4px rgba(239, 68, 68, 0); }
+        }
+        
+        .card-metrics {
+            animation: slideIn 0.4s ease-out 0.2s both;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .kpi-card {
+            animation: fadeInScale 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            opacity: 0;
+        }
+        
+        .kpi-card:nth-child(1) { animation-delay: 0.1s; }
+        .kpi-card:nth-child(2) { animation-delay: 0.15s; }
+        .kpi-card:nth-child(3) { animation-delay: 0.2s; }
+        .kpi-card:nth-child(4) { animation-delay: 0.25s; }
+        .kpi-card:nth-child(5) { animation-delay: 0.3s; }
+        .kpi-card:nth-child(6) { animation-delay: 0.35s; }
+        
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .kpi-value {
+            animation: fadeInScale 0.5s ease-out 0.3s both;
+        }
+        
+        .kpi-value[data-count] {
+            font-variant-numeric: tabular-nums;
+        }
+        
+        .kpi-trend {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            animation: slideInRight 0.4s ease-out 0.5s both;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        /* Reduced Motion Support */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+        
+        /* Smooth Scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* Touch Optimizations */
+        @media (hover: none) and (pointer: coarse) {
+            .dashboard-card:hover {
+                transform: none;
+            }
+            
+            .dashboard-card:active {
+                transform: scale(0.98);
+                background: var(--accent);
+            }
+            
+            .card-action:active {
+                transform: scale(0.95);
+            }
+        }
+        
+        /* Loading State */
+        .dashboard-card.loading {
+            pointer-events: none;
+            opacity: 0.6;
+        }
+        
+        .dashboard-card.loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin: -10px 0 0 -10px;
+            border: 2px solid var(--brand);
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Focus States for Accessibility */
+        .dashboard-card:focus-visible {
+            outline: 2px solid var(--brand);
+            outline-offset: 2px;
+        }
+        
+        .card-action:focus-visible {
+            outline: 2px solid var(--brand);
+            outline-offset: 2px;
+        }
+        
+        .card-meta {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            padding-top: 8px;
+            border-top: 1px solid var(--line);
+        }
+        
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            color: var(--muted);
+        }
+        
+        .meta-icon {
+            width: 14px;
+            height: 14px;
+            opacity: 0.7;
+        }
+        
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            border-radius: 999px;
+            background: var(--accent);
+            border: 1px solid var(--border);
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--success);
+        }
+        
+        .status-badge::before {
+            content: "✓";
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--success);
+            color: white;
+            text-align: center;
+            line-height: 10px;
+            font-size: 7px;
+        }
+        
+        .foot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid var(--line);
+            color: var(--muted);
+            font-size: 11px;
+        }
+        
+        .brandmark {
+            font-weight: 900;
+            letter-spacing: .08em;
+        }
+        
+        .controls-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: flex-end;
+            flex-shrink: 0;
+        }
+        
+        .filter-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        
+        .filter-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            margin-right: 4px;
+        }
+        
+        .filter-radio-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .filter-radio {
+            display: none;
+        }
+        
+        .filter-radio-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
+        }
+        
+        .filter-radio-label:hover {
+            background: var(--accent);
+            border-color: var(--brand);
+        }
+        
+        .filter-radio:checked + .filter-radio-label {
+            background: var(--brand);
+            color: white;
+            border-color: var(--brand);
+        }
+        
+        /* Script Runner Buttons */
+        .script-runner-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
+            font-family: inherit;
+        }
+        
+        .script-runner-btn:hover:not(:disabled) {
+            background: var(--accent);
+            border-color: var(--brand);
+            color: var(--brand);
+        }
+        
+        .script-runner-btn:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+        
+        .script-runner-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .script-runner-btn.running {
+            background: var(--brand);
+            color: white;
+            border-color: var(--brand);
+        }
+        
+        .script-runner-btn.success {
+            background: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+        
+        .script-runner-btn.error {
+            background: var(--error);
+            color: white;
+            border-color: var(--error);
+        }
+        
+        .script-btn-loader {
+            display: inline-block;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .script-status {
+            margin-top: 8px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        .script-status.success {
+            background: rgba(21, 183, 158, 0.1);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+        
+        .script-status.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+            border: 1px solid var(--error);
+        }
+        
+        .script-status.info {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--brand);
+            border: 1px solid var(--brand);
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        @media (max-width: 1200px) {
+            .dashboard-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            html, body {
+                font-size: 14px;
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+            }
+            
+            .wrap {
+                padding: 12px 16px;
+                max-width: 100%;
+            }
+            
+            .hdr {
+                padding: 8px 16px;
+                margin: 0;
+                margin-bottom: 12px;
+                position: sticky;
+                top: 0;
+                border-bottom: 1px solid var(--line);
+            }
+            
+            [data-theme="dark"] .hdr {
+                background: linear-gradient(180deg, rgba(10,14,19,.98), rgba(10,14,19,.96));
+            }
+            
+            .theme-toggle {
+                width: 40px;
+                height: 40px;
+            }
+            
+            .hdr-inner {
+                flex-direction: row;
+                align-items: center;
+                gap: 12px;
+            }
+            
+            .hdr-title-group {
+                flex: 1;
+                min-width: 0;
+                display: flex;
+                flex-direction: column;
+                gap: 2px;
+            }
+            
+            .logo-container {
+                margin-right: 0;
+                gap: 14px;
+                flex-shrink: 0;
+            }
+            
+            .logo-symbol {
+                height: 64px;
+                width: auto;
+                flex-shrink: 0;
+            }
+            
+            .logo-text {
+                font-size: 18px;
+                letter-spacing: .06em;
+            }
+            
+            .title {
+                font-size: 20px;
+                font-weight: 700;
+                margin: 0;
+                line-height: 1.2;
+                color: var(--ink);
+            }
+            
+            .subtitle {
+                font-size: 11px;
+                line-height: 1.4;
+                margin-top: 0;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                color: var(--muted);
+            }
+            
+            .section-title {
+                font-size: 13px;
+                margin-top: 16px;
+                margin-bottom: 8px;
+                letter-spacing: .03em;
+            }
+            
+            .section-title:first-of-type {
+                margin-top: 0;
+            }
+            
+            /* Mobile: Executive Summary - Compact Horizontal Scroll */
+            .exec-summary {
+                padding: 12px;
+                margin-bottom: 16px;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: thin;
+            }
+            
+            .exec-summary::-webkit-scrollbar {
+                height: 4px;
+            }
+            
+            .exec-summary::-webkit-scrollbar-track {
+                background: var(--accent);
+                border-radius: 2px;
+            }
+            
+            .exec-summary::-webkit-scrollbar-thumb {
+                background: var(--brand);
+                border-radius: 2px;
+            }
+            
+            .exec-summary-title {
+                font-size: 16px;
+                margin-bottom: 12px;
+                flex-wrap: wrap;
+            }
+            
+            .kpi-grid {
+                display: flex;
+                flex-direction: row;
+                gap: 10px;
+                min-width: max-content;
+            }
+            
+            .kpi-card {
+                padding: 12px;
+                min-width: 160px;
+                flex-shrink: 0;
+            }
+            
+            .kpi-label {
+                font-size: 10px;
+                margin-bottom: 6px;
+            }
+            
+            .kpi-value {
+                font-size: 20px;
+                margin-bottom: 3px;
+            }
+            
+            .kpi-trend {
+                font-size: 11px;
+                margin-bottom: 4px;
+            }
+            
+            .kpi-target {
+                font-size: 10px;
+                margin-top: 4px;
+            }
+            
+            .kpi-status {
+                font-size: 9px;
+                padding: 2px 6px;
+                margin-top: 4px;
+            }
+            
+            /* Mobile: Cards */
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            
+            .dashboard-card {
+                padding: 14px;
+            }
+            
+            .card-metrics {
+                flex-direction: column;
+                gap: 6px;
+            }
+            
+            .card-actions {
+                flex-direction: column;
+            }
+            
+            .card-action {
+                width: 100%;
+                text-align: center;
+            }
+            
+            .hdr-inner {
+                gap: 12px;
+            }
+            
+            .filter-controls {
+                order: 3;
+                width: 100%;
+                justify-content: center;
+                margin-top: 8px;
+            }
+            
+            .filter-label {
+                font-size: 10px;
+            }
+            
+            .filter-radio-label {
+                padding: 4px 8px;
+                font-size: 10px;
+            }
+            
+            .script-runner-btn {
+                padding: 4px 8px;
+                font-size: 10px;
+            }
+            
+            .script-status {
+                font-size: 10px;
+                padding: 6px 10px;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+                margin-top: 8px;
+                margin-bottom: 8px;
+            }
+            
+            .dashboard-card {
+                padding: 14px;
+                border-radius: 10px;
+            }
+            
+            .card-icon {
+                font-size: 28px;
+                margin-bottom: 10px;
+            }
+            
+            .card-title {
+                font-size: 16px;
+                margin-bottom: 6px;
+            }
+            
+            .card-description {
+                font-size: 12px;
+                line-height: 1.5;
+                margin-bottom: 10px;
+            }
+            
+            .card-meta {
+                gap: 8px;
+                padding-top: 10px;
+            }
+            
+            .meta-item {
+                font-size: 10px;
+            }
+            
+            .status-badge {
+                font-size: 10px;
+                padding: 3px 8px;
+            }
+            
+            .foot {
+                margin-top: 16px;
+                padding-top: 12px;
+                font-size: 10px;
+                flex-direction: column;
+                gap: 8px;
+                align-items: flex-start;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .wrap {
+                padding: 12px;
+            }
+            
+            .hdr {
+                padding: 10px 12px;
+                margin: 0;
+                margin-bottom: 14px;
+            }
+            
+            .theme-toggle {
+                width: 36px;
+                height: 36px;
+            }
+            
+            .theme-toggle-icon {
+                width: 18px;
+                height: 18px;
+            }
+            
+            .logo-container {
+                gap: 8px;
+            }
+            
+            .logo-symbol {
+                width: 28px;
+                height: 28px;
+            }
+            
+            .logo-text {
+                font-size: 16px;
+                letter-spacing: .05em;
+            }
+            
+            .title {
+                font-size: 18px;
+                font-weight: 700;
+            }
+            
+            .subtitle {
+                font-size: 10px;
+                margin-top: 1px;
+            }
+            
+            .dashboard-card {
+                padding: 12px;
+            }
+            
+            .card-icon {
+                font-size: 24px;
+            }
+            
+            .card-title {
+                font-size: 15px;
+            }
+            
+            .card-description {
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="hdr">
+        <div class="wrap hdr-inner">
+            <!-- Innovative Logo -->
+            <div class="logo-container">
+                <!-- Innovative logo from website -->
+                <img class="logo-symbol" src="innovLogo-black.png" alt="Innovative" />
+            </div>
+            <div class="hdr-title-group">
+                <div class="title">Sales Ops Analytics</div>
+                <div class="subtitle">Select a dashboard below to view detailed metrics and insights.</div>
+            </div>
+            <!-- Controls Group -->
+            <div class="controls-group">
+                <!-- Filter Controls -->
+                <div class="filter-controls">
+                    <div class="filter-label">View:</div>
+                    <div class="filter-radio-group">
+                        <input type="radio" id="filterDashboards" name="dashboardFilter" class="filter-radio filter-dashboards" checked>
+                        <label for="filterDashboards" class="filter-radio-label">Dashboards</label>
+                        <input type="radio" id="filterStandalone" name="dashboardFilter" class="filter-radio filter-standalone">
+                        <label for="filterStandalone" class="filter-radio-label">Stand Alone Reports</label>
+                    </div>
+                </div>
+                <!-- Script Runner Controls -->
+                <div class="filter-controls">
+                    <div class="filter-label">Run Script:</div>
+                    <div class="filter-radio-group">
+                        <button id="runSnapshotSummary" class="script-runner-btn" data-script="snapshot-summary">
+                            <span class="script-btn-text">Snapshot Summary</span>
+                            <span class="script-btn-loader" style="display: none;">⏳</span>
+                        </button>
+                        <button id="runTrailing6" class="script-runner-btn" data-script="trailing-6">
+                            <span class="script-btn-text">Trailing 6 Week</span>
+                            <span class="script-btn-loader" style="display: none;">⏳</span>
+                        </button>
+                    </div>
+                </div>
+                <div id="scriptStatus" class="script-status" style="display: none;"></div>
+            </div>
+            <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light theme">
+                <svg class="theme-toggle-icon sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+                <svg class="theme-toggle-icon moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+    
+    <div class="wrap">
+        <!-- Executive Summary - Q4 2025 KPIs -->
+        <div class="exec-summary">
+            <div class="exec-summary-title">
+                📊 Q4 2025 Executive Summary
+                <span style="font-size: 12px; font-weight: 600; color: var(--muted); margin-left: auto;">Updated: Nov 6, 2025</span>
+            </div>
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-label">Net New Pipeline Created</div>
+                    <div class="kpi-value">$7.11M</div>
+                    <div class="kpi-trend up">↑ +17% vs. Sept</div>
+                    <div class="kpi-target">Target: $7.0M (Nov)</div>
+                    <div class="kpi-status on-track">✓ Exceeded Oct Target by +9%</div>
+                </div>
+                <div class="kpi-card" data-metric="cycle-time">
+                    <div class="kpi-label">Sales Cycle Time</div>
+                    <div class="kpi-value">38 days</div>
+                    <div class="kpi-trend up">↓ -10% vs. Sept (42 days)</div>
+                    <div class="kpi-target">Target: Reduce cycle time</div>
+                    <div class="kpi-status on-track">✓ On Track</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Pipeline Multiple</div>
+                    <div class="kpi-value">4.2x</div>
+                    <div class="kpi-trend up">↑ +10% vs. Sept (3.8x)</div>
+                    <div class="kpi-target">Target: Maintain 4.0x+</div>
+                    <div class="kpi-status on-track">✓ Exceeding Target</div>
+                </div>
+                <div class="kpi-card" data-metric="dq-qualifier">
+                    <div class="kpi-label">DQ Qualifier</div>
+                    <div class="kpi-value">25%</div>
+                    <div class="kpi-trend down">↓ -7 pts vs. Sept (32%)</div>
+                    <div class="kpi-target">Target: &lt; 80%</div>
+                    <div class="kpi-status on-track">✓ Well Below Target</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Target Bookings (Nov)</div>
+                    <div class="kpi-value">$2.44M</div>
+                    <div class="kpi-trend">Target for November</div>
+                    <div class="kpi-target">Dec Target: $2.30M</div>
+                    <div class="kpi-status warning">⏳ In Progress</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Avg Open Pipeline</div>
+                    <div class="kpi-value">$9.95M</div>
+                    <div class="kpi-trend">Oct: $9.95M</div>
+                    <div class="kpi-target">Sept: $9.99M</div>
+                    <div class="kpi-status on-track">✓ Stable</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Executive Dashboards -->
+        <div class="section-divider"></div>
+        <div class="section-title">Executive Dashboards</div>
+        <div class="dashboard-grid">
+            <a href="exec_pipeline_dashboard - PoC.html" class="dashboard-card" data-standalone="false">
+                <div class="card-icon">🎯</div>
+                <div class="card-title">Executive Pipeline Dashboard</div>
+                <div class="card-priority important">Important</div>
+                <div class="card-description">Comprehensive executive-level pipeline analysis combining data from multiple sources. Includes high-level metrics, elite pipeline analysis, and strategic insights.</div>
+                <div class="card-metrics">
+                    <div class="card-metric">📊 $9.95M Open Pipeline</div>
+                    <div class="card-metric">📈 1,614 opportunities</div>
+                    <div class="card-metric"><span class="trend up">↑</span> 76.3% Data Confidence</div>
+                </div>
+                <div class="card-actions">
+                    <span class="card-action">View Dashboard</span>
+                    <span class="card-action">Export Report</span>
+                </div>
+                <div class="card-updated">Updated: 1 hour ago</div>
+                <div class="card-meta">
+                    <div class="status-badge">Active</div>
+                </div>
+            </a>
+            
+            <a href="pipeline_velocity_latest.html" class="dashboard-card" data-standalone="false">
+                <div class="card-icon">⚡</div>
+                <div class="card-title">Pipeline Velocity</div>
+                <div class="card-priority important">Important</div>
+                <div class="card-description">Comprehensive pipeline velocity analysis tracking pipeline creation, accounts owned, open opportunities, win rates, and average deal metrics by rep.</div>
+                <div class="card-metrics">
+                    <div class="card-metric">📊 1,614 open opps</div>
+                    <div class="card-metric">📈 38 days avg age</div>
+                    <div class="card-metric"><span class="trend down">↓</span> -10% vs. Sept</div>
+                </div>
+                <div class="card-actions">
+                    <span class="card-action">View Analysis</span>
+                    <span class="card-action">Rep Rankings</span>
+                </div>
+                <div class="card-updated">Updated: 4 hours ago</div>
+                <div class="card-meta">
+                    <div class="status-badge">Active</div>
+                </div>
+            </a>
+            
+            <a href="boca_velocity_latest.html" class="dashboard-card" data-standalone="false">
+                <div class="card-icon">📊</div>
+                <div class="card-title">Boca Sales Velocity</div>
+                <div class="card-priority important">Important</div>
+                <div class="card-description">DGR Sales Velocity report tracking meetings, opportunity dollars, and closed won metrics by rep. Includes week-over-week comparisons and 6-week trailing averages.</div>
+                <div class="card-metrics">
+                    <div class="card-metric">📊 43 deals/week</div>
+                    <div class="card-metric">📈 44 days avg cycle</div>
+                    <div class="card-metric"><span class="trend up">↑</span> +15.3% WoW</div>
+                </div>
+                <div class="card-actions">
+                    <span class="card-action">View Report</span>
+                    <span class="card-action">Compare Reps</span>
+                </div>
+                <div class="card-updated">Updated: 3 hours ago</div>
+                <div class="card-meta">
+                    <div class="status-badge">Active</div>
+                </div>
+            </a>
+        </div>
+        
+        
+        <!-- Featured Dashboards -->
+        <div class="section-title">Featured Dashboards</div>
+        <div class="dashboard-grid">
+            <a href="flow_slack_metrics_ghost_pipeline_latest.html" class="dashboard-card" data-standalone="false">
+                <div class="card-icon">👻</div>
+                <div class="card-title">Ghost Pipeline</div>
+                <div class="card-priority critical">Critical</div>
+                <div class="card-description">Track opportunities that have been in the pipeline for extended periods without activity. Monitor alerts sent, response times, and closed-out value to identify and address stalled deals.</div>
+                <div class="card-metrics">
+                    <div class="card-metric">📊 $2.4M at risk</div>
+                    <div class="card-metric">📈 23 opportunities</div>
+                    <div class="card-metric"><span class="trend up">↑</span> 5 new alerts</div>
+                </div>
+                <div class="card-actions">
+                    <span class="card-action">Review Top 10</span>
+                    <span class="card-action">Export List</span>
+                </div>
+                <div class="card-updated">Updated: 2 hours ago</div>
+                <div class="card-meta">
+                    <div class="meta-item">
+                        <svg class="meta-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor">
+                            <path d="M3 3h10v10H3zM6 6h4v4H6z"/>
+                        </svg>
+                        <span>Flow ID: 301PQ00000iX6QRYA0</span>
+                    </div>
+                    <div class="status-badge">Active</div>
+                </div>
+            </a>
+            
+            <a href="flow_slack_metrics_past_due_closed_date_latest.html" class="dashboard-card" data-standalone="false">
+                <div class="card-icon">📅</div>
+                <div class="card-title">Past Due Closed Date</div>
+                <div class="card-priority critical">Critical</div>
+                <div class="card-description">Monitor opportunities with past due close dates. Track compliance metrics, alert frequency, and response times to ensure timely deal closure.</div>
+                <div class="card-metrics">
+                    <div class="card-metric">📊 $890K overdue</div>
+                    <div class="card-metric">📈 12 opportunities</div>
+                    <div class="card-metric"><span class="trend down">↓</span> -3 vs. last week</div>
+                </div>
+                <div class="card-actions">
+                    <span class="card-action">Contact Owners</span>
+                    <span class="card-action">Update Forecast</span>
+                </div>
+                <div class="card-updated">Updated: 1 hour ago</div>
+                <div class="card-meta">
+                    <div class="meta-item">
+                        <svg class="meta-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor">
+                            <path d="M3 3h10v10H3zM6 6h4v4H6z"/>
+                        </svg>
+                        <span>Flow ID: 301PQ00000iMEFuYAO</span>
+                    </div>
+                    <div class="status-badge">Active</div>
+                </div>
+            </a>
+            
+            <a href="touchpoint_intelligence_latest.html" class="dashboard-card" data-standalone="false">
+                <div class="card-icon">🔍</div>
+                <div class="card-title">Touchpoint Intelligence Report</div>
+                <div class="card-priority important">Important</div>
+                <div class="card-description">Highlights high-signal accounts (multiple active touchpoints + recent engagement) before opportunities are created. Early-signal detection for proactive pipeline creation.</div>
+                <div class="card-metrics">
+                    <div class="card-metric">📊 45 high-signal accounts</div>
+                    <div class="card-metric">📈 3+ touchpoints each</div>
+                    <div class="card-metric"><span class="trend up">↑</span> 8 new this week</div>
+                </div>
+                <div class="card-actions">
+                    <span class="card-action">Review Accounts</span>
+                    <span class="card-action">Create Opps</span>
+                </div>
+                <div class="card-updated">Updated: 5 hours ago</div>
+                <div class="card-meta">
+                    <div class="status-badge">Active</div>
+                </div>
+            </a>
+        </div>
+        
+        <!-- Stand Alone Reports (no section title - cards only) -->
+        <div class="dashboard-grid">
+            <a href="ghost_pipeline_comparison_latest.html" class="dashboard-card" data-standalone="true">
+                <div class="card-icon">📊</div>
+                <div class="card-title">Ghost Pipeline Comparison</div>
+                <div class="card-priority important">Important</div>
+                <div class="card-description">Compare opportunities with and without Ghost Pipeline alerts. Analyze win rates, sales cycle velocity, and loss reasons over the last 90 days.</div>
+                <div class="card-metrics">
+                    <div class="card-metric">📊 90-day analysis</div>
+                    <div class="card-metric">📈 Win rate comparison</div>
+                    <div class="card-metric"><span class="trend up">↑</span> Velocity insights</div>
+                </div>
+                <div class="card-actions">
+                    <span class="card-action">View Comparison</span>
+                    <span class="card-action">Export Data</span>
+                </div>
+                <div class="card-updated">Updated: 6 hours ago</div>
+                <div class="card-meta">
+                    <div class="status-badge">Active</div>
+                </div>
+            </a>
+            
+            <a href="open_pipeline_account_score_latest.html" class="dashboard-card" data-standalone="true">
+                <div class="card-icon">🎯</div>
+                <div class="card-title">Open Pipeline Account Scoring</div>
+                <div class="card-priority important">Important</div>
+                <div class="card-description">Predictive scoring analysis based on 2-year historical Closed Won data (Jan 2024 - Present). Scores opportunities and accounts using Speed to Close, Deal Size, Product Mix, Upsell History, Win Rate, and Recency. Analysis only (not in Salesforce) until stakeholder review.</div>
+                <div class="card-metrics">
+                    <div class="card-metric">📊 $1.5M in High-Score Opps</div>
+                    <div class="card-metric">📈 11 opportunities (≥75 score)</div>
+                    <div class="card-metric"><span class="trend up">↑</span> 15% vs. last month</div>
+                </div>
+                <div class="card-actions">
+                    <span class="card-action">Review Top 10</span>
+                    <span class="card-action">Coach Low Scores</span>
+                </div>
+                <div class="card-updated">Updated: 3 hours ago</div>
+                <div class="card-meta">
+                    <div class="status-badge">Active</div>
+                </div>
+            </a>
+        </div>
+        
+        <div class="foot">
+            <div class="brandmark">INNOVATIVE • SALES OPS</div>
+        </div>
+        </div>
+    </div>
+    
+    <script>
+        (function() {
+            // Theme management
+            const themeToggle = document.getElementById('themeToggle');
+            const html = document.documentElement;
+            
+            // Get saved theme or default to light
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const initialTheme = savedTheme === 'auto' ? (prefersDark ? 'dark' : 'light') : savedTheme;
+            
+            // Apply initial theme
+            if (initialTheme === 'dark') {
+                html.setAttribute('data-theme', 'dark');
+            }
+            
+            // Theme toggle handler
+            themeToggle.addEventListener('click', function() {
+                const currentTheme = html.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                
+                if (newTheme === 'dark') {
+                    html.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    html.removeAttribute('data-theme');
+                    localStorage.setItem('theme', 'light');
+                }
+            });
+            
+            // Listen for system theme changes
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+                const savedTheme = localStorage.getItem('theme');
+                if (savedTheme === 'auto' || !savedTheme) {
+                    if (e.matches) {
+                        html.setAttribute('data-theme', 'dark');
+                    } else {
+                        html.removeAttribute('data-theme');
+                    }
+                }
+            });
+            
+            // Dashboard filter functionality
+            const filterDashboards = document.getElementById('filterDashboards');
+            const filterStandalone = document.getElementById('filterStandalone');
+            const dashboardCards = document.querySelectorAll('.dashboard-card');
+            const sectionTitles = document.querySelectorAll('.section-title');
+            const wrap = document.querySelector('.wrap');
+                
+            function filterDashboardsByType() {
+                const showStandalone = filterStandalone.checked;
+                
+                // Add/remove class to center standalone cards
+                if (showStandalone) {
+                    wrap.classList.add('showing-standalone');
+                } else {
+                    wrap.classList.remove('showing-standalone');
+                }
+                
+                // Filter dashboard cards
+                dashboardCards.forEach(card => {
+                    const isStandalone = card.getAttribute('data-standalone') === 'true';
+                    
+                    if (showStandalone) {
+                        // Show only standalone reports
+                        if (isStandalone) {
+                            card.classList.remove('hidden');
+                        } else {
+                            card.classList.add('hidden');
+                        }
+                    } else {
+                        // Show only regular dashboards
+                        if (isStandalone) {
+                            card.classList.add('hidden');
+                        } else {
+                            card.classList.remove('hidden');
+                        }
+                    }
+                });
+                
+                // Hide/show section titles based on filter
+                sectionTitles.forEach(title => {
+                    if (showStandalone) {
+                        // Hide all section titles when showing standalone reports
+                        title.classList.add('hidden');
+                    } else {
+                        // Show all section titles when showing regular dashboards
+                        title.classList.remove('hidden');
+                    }
+                });
+            }
+            
+            // Initialize filter on page load
+            filterDashboardsByType();
+            
+            // Add event listeners
+            filterDashboards.addEventListener('change', filterDashboardsByType);
+            filterStandalone.addEventListener('change', filterDashboardsByType);
+            
+            // Script Runner Functionality
+            const runSnapshotSummary = document.getElementById('runSnapshotSummary');
+            const runTrailing6 = document.getElementById('runTrailing6');
+            const scriptStatus = document.getElementById('scriptStatus');
+            
+            const API_BASE_URL = 'http://localhost:5000'; // Flask server URL
+            
+            function showStatus(message, type = 'info') {
+                scriptStatus.textContent = message;
+                scriptStatus.className = `script-status ${type}`;
+                scriptStatus.style.display = 'block';
+                
+                if (type === 'success' || type === 'error') {
+                    setTimeout(() => {
+                        scriptStatus.style.display = 'none';
+                    }, 5000);
+                }
+            }
+            
+            function setButtonState(button, state) {
+                const text = button.querySelector('.script-btn-text');
+                const loader = button.querySelector('.script-btn-loader');
+                
+                button.className = `script-runner-btn ${state}`;
+                button.disabled = state === 'running';
+                
+                if (state === 'running') {
+                    text.style.display = 'none';
+                    loader.style.display = 'inline-block';
+                } else {
+                    text.style.display = 'inline';
+                    loader.style.display = 'none';
+                }
+            }
+            
+            async function runScript(scriptName, button) {
+                try {
+                    setButtonState(button, 'running');
+                    showStatus(`Running ${scriptName}...`, 'info');
+                    
+                    const response = await fetch(`${API_BASE_URL}/run-script`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ script: scriptName }),
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok && data.success) {
+                        setButtonState(button, 'success');
+                        showStatus(`✅ ${data.message || 'Script completed successfully!'}`, 'success');
+                        
+                        setTimeout(() => {
+                            setButtonState(button, '');
+                        }, 2000);
+                    } else {
+                        setButtonState(button, 'error');
+                        showStatus(`❌ ${data.error || 'Script execution failed'}`, 'error');
+                        
+                        setTimeout(() => {
+                            setButtonState(button, '');
+                        }, 3000);
+                    }
+                } catch (error) {
+                    setButtonState(button, 'error');
+                    showStatus(`❌ Connection error: ${error.message}. Make sure the Flask server is running.`, 'error');
+                    
+                    setTimeout(() => {
+                        setButtonState(button, '');
+                    }, 3000);
+                }
+            }
+            
+            runSnapshotSummary.addEventListener('click', () => {
+                runScript('snapshot-summary', runSnapshotSummary);
+            });
+            
+            runTrailing6.addEventListener('click', () => {
+                runScript('trailing-6', runTrailing6);
+            });
+            
+            // Count-up animation for KPI values
+            function animateValue(element, start, end, duration, format) {
+                let startTimestamp = null;
+                const step = (timestamp) => {
+                    if (!startTimestamp) startTimestamp = timestamp;
+                    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                    const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+                    const current = start + (end - start) * easeOutQuart;
+                    
+                    // Format based on type
+                    if (format.type === 'currency') {
+                        const value = current / (format.isMillion ? 1000000 : 1000);
+                        element.textContent = '$' + value.toFixed(2) + (format.isMillion ? 'M' : 'K');
+                    } else if (format.type === 'percent') {
+                        element.textContent = Math.round(current) + '%';
+                    } else if (format.type === 'multiplier') {
+                        element.textContent = current.toFixed(1) + 'x';
+                    } else if (format.type === 'days') {
+                        element.textContent = Math.round(current) + ' days';
+                    } else {
+                        element.textContent = Math.round(current) + (format.suffix || '');
+                    }
+                    
+                    if (progress < 1) {
+                        window.requestAnimationFrame(step);
+                    } else {
+                        // Ensure final value matches original exactly
+                        element.textContent = format.original;
+                    }
+                };
+                window.requestAnimationFrame(step);
+            }
+            
+            // Initialize count-up animations for KPI values
+            function initCountUpAnimations() {
+                const kpiValues = document.querySelectorAll('.kpi-value');
+                
+                kpiValues.forEach((element, index) => {
+                    const originalText = element.textContent.trim();
+                    const delay = 300 + (index * 100); // Stagger animations
+                    
+                    setTimeout(() => {
+                        let format = { original: originalText };
+                        
+                        // Parse the value based on format
+                        if (originalText.includes('$')) {
+                            const numStr = originalText.replace(/[$,MK]/g, '');
+                            const num = parseFloat(numStr);
+                            const isMillion = originalText.includes('M');
+                            const targetValue = isMillion ? num * 1000000 : num * 1000;
+                            format.type = 'currency';
+                            format.isMillion = isMillion;
+                            animateValue(element, 0, targetValue, 1500, format);
+                        } else if (originalText.includes('%')) {
+                            const num = parseFloat(originalText.replace('%', ''));
+                            format.type = 'percent';
+                            animateValue(element, 0, num, 1200, format);
+                        } else if (originalText.includes('x')) {
+                            const num = parseFloat(originalText.replace('x', ''));
+                            format.type = 'multiplier';
+                            animateValue(element, 0, num, 1200, format);
+                        } else if (originalText.includes('days')) {
+                            const num = parseFloat(originalText.replace(' days', ''));
+                            format.type = 'days';
+                            animateValue(element, 0, num, 1200, format);
+                        } else {
+                            // For other numeric values - skip animation if we can't parse
+                            const num = parseFloat(originalText.replace(/[^\d.]/g, ''));
+                            if (!isNaN(num)) {
+                                format.type = 'number';
+                                format.suffix = originalText.replace(/[\d.]/g, '');
+                                animateValue(element, 0, num, 1200, format);
+                            }
+                        }
+                    }, delay);
+                });
+            }
+            
+            // Start animations when page loads
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initCountUpAnimations);
+            } else {
+                initCountUpAnimations();
+            }
+        })();
+    </script>
+</body>
+</html>
+

@@ -1545,6 +1545,30 @@
     </div>
     
     <script>
+        // Universal Theme Persistence - Apply theme on all pages
+        (function() {
+            const html = document.documentElement;
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const initialTheme = savedTheme === 'auto' ? (prefersDark ? 'dark' : 'light') : savedTheme;
+            
+            if (initialTheme === 'dark') {
+                html.setAttribute('data-theme', 'dark');
+            }
+            
+            // Listen for theme changes from other tabs/windows
+            window.addEventListener('storage', function(e) {
+                if (e.key === 'theme') {
+                    const newTheme = e.newValue;
+                    if (newTheme === 'dark') {
+                        html.setAttribute('data-theme', 'dark');
+                    } else {
+                        html.removeAttribute('data-theme');
+                    }
+                }
+            });
+        })();
+        
         (function() {
             // Theme management
             const themeToggle = document.getElementById('themeToggle');
@@ -1572,6 +1596,13 @@
                     html.removeAttribute('data-theme');
                     localStorage.setItem('theme', 'light');
                 }
+                
+                // Broadcast theme change to other tabs/windows
+                window.dispatchEvent(new StorageEvent('storage', {
+                    key: 'theme',
+                    newValue: newTheme,
+                    oldValue: currentTheme
+                }));
             });
             
             // Listen for system theme changes
@@ -1595,6 +1626,9 @@
                 
             function filterDashboardsByType() {
                 const showStandalone = filterStandalone.checked;
+                
+                // Store current view state
+                localStorage.setItem('dashboardView', showStandalone ? 'standalone' : 'dashboards');
                 
                 // Add/remove class to center standalone cards
                 if (showStandalone) {
@@ -1634,6 +1668,29 @@
                         title.classList.remove('hidden');
                     }
                 });
+            }
+            
+            // Update card links to preserve view state
+            dashboardCards.forEach(card => {
+                card.addEventListener('click', function(e) {
+                    const isStandalone = this.getAttribute('data-standalone') === 'true';
+                    const currentView = filterStandalone.checked ? 'standalone' : 'dashboards';
+                    
+                    // Store the view state we're coming from
+                    if (isStandalone) {
+                        localStorage.setItem('fromView', 'standalone');
+                    } else {
+                        localStorage.setItem('fromView', currentView);
+                    }
+                });
+            });
+            
+            // Restore view state on page load (check hash or localStorage)
+            const hash = window.location.hash;
+            const savedView = hash === '#standalone' || localStorage.getItem('dashboardView') === 'standalone';
+            if (savedView) {
+                filterStandalone.checked = true;
+                filterDashboardsByType();
             }
             
             // Initialize filter on page load

@@ -807,6 +807,94 @@
             border-color: var(--brand);
         }
         
+        /* Script Runner Buttons */
+        .script-runner-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
+            font-family: inherit;
+        }
+        
+        .script-runner-btn:hover:not(:disabled) {
+            background: var(--accent);
+            border-color: var(--brand);
+            color: var(--brand);
+        }
+        
+        .script-runner-btn:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+        
+        .script-runner-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .script-runner-btn.running {
+            background: var(--brand);
+            color: white;
+            border-color: var(--brand);
+        }
+        
+        .script-runner-btn.success {
+            background: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+        
+        .script-runner-btn.error {
+            background: var(--error);
+            color: white;
+            border-color: var(--error);
+        }
+        
+        .script-btn-loader {
+            display: inline-block;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .script-status {
+            margin-top: 8px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        .script-status.success {
+            background: rgba(21, 183, 158, 0.1);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+        
+        .script-status.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+            border: 1px solid var(--error);
+        }
+        
+        .script-status.info {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--brand);
+            border: 1px solid var(--brand);
+        }
+        
         .hidden {
             display: none !important;
         }
@@ -1020,6 +1108,16 @@
                 font-size: 10px;
             }
             
+            .script-runner-btn {
+                padding: 4px 8px;
+                font-size: 10px;
+            }
+            
+            .script-status {
+                font-size: 10px;
+                padding: 6px 10px;
+            }
+            
             .dashboard-grid {
                 grid-template-columns: 1fr;
                 gap: 12px;
@@ -1156,6 +1254,21 @@
                     <input type="radio" id="filterStandalone" name="dashboardFilter" class="filter-radio filter-standalone">
                     <label for="filterStandalone" class="filter-radio-label">Stand Alone Reports</label>
                 </div>
+            </div>
+            <!-- Script Runner Controls -->
+            <div class="filter-controls" style="margin-top: 8px;">
+                <div class="filter-label">Run Script:</div>
+                <div class="filter-radio-group">
+                    <button id="runSnapshotSummary" class="script-runner-btn" data-script="snapshot-summary">
+                        <span class="script-btn-text">Snapshot Summary</span>
+                        <span class="script-btn-loader" style="display: none;">⏳</span>
+                    </button>
+                    <button id="runTrailing6" class="script-runner-btn" data-script="trailing-6">
+                        <span class="script-btn-text">Trailing 6 Week</span>
+                        <span class="script-btn-loader" style="display: none;">⏳</span>
+                    </button>
+                </div>
+                <div id="scriptStatus" class="script-status" style="display: none;"></div>
             </div>
             <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light theme">
                 <svg class="theme-toggle-icon sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1520,6 +1633,89 @@
             // Add event listeners
             filterDashboards.addEventListener('change', filterDashboardsByType);
             filterStandalone.addEventListener('change', filterDashboardsByType);
+            
+            // Script Runner Functionality
+            const runSnapshotSummary = document.getElementById('runSnapshotSummary');
+            const runTrailing6 = document.getElementById('runTrailing6');
+            const scriptStatus = document.getElementById('scriptStatus');
+            
+            const API_BASE_URL = 'http://localhost:5000'; // Flask server URL
+            
+            function showStatus(message, type = 'info') {
+                scriptStatus.textContent = message;
+                scriptStatus.className = `script-status ${type}`;
+                scriptStatus.style.display = 'block';
+                
+                if (type === 'success' || type === 'error') {
+                    setTimeout(() => {
+                        scriptStatus.style.display = 'none';
+                    }, 5000);
+                }
+            }
+            
+            function setButtonState(button, state) {
+                const text = button.querySelector('.script-btn-text');
+                const loader = button.querySelector('.script-btn-loader');
+                
+                button.className = `script-runner-btn ${state}`;
+                button.disabled = state === 'running';
+                
+                if (state === 'running') {
+                    text.style.display = 'none';
+                    loader.style.display = 'inline-block';
+                } else {
+                    text.style.display = 'inline';
+                    loader.style.display = 'none';
+                }
+            }
+            
+            async function runScript(scriptName, button) {
+                try {
+                    setButtonState(button, 'running');
+                    showStatus(`Running ${scriptName}...`, 'info');
+                    
+                    const response = await fetch(`${API_BASE_URL}/run-script`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ script: scriptName }),
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok && data.success) {
+                        setButtonState(button, 'success');
+                        showStatus(`✅ ${data.message || 'Script completed successfully!'}`, 'success');
+                        
+                        setTimeout(() => {
+                            setButtonState(button, '');
+                        }, 2000);
+                    } else {
+                        setButtonState(button, 'error');
+                        showStatus(`❌ ${data.error || 'Script execution failed'}`, 'error');
+                        
+                        setTimeout(() => {
+                            setButtonState(button, '');
+                        }, 3000);
+                    }
+                } catch (error) {
+                    setButtonState(button, 'error');
+                    showStatus(`❌ Connection error: ${error.message}. Make sure the Flask server is running.`, 'error');
+                    
+                    setTimeout(() => {
+                        setButtonState(button, '');
+                    }, 3000);
+                }
+            }
+            
+            runSnapshotSummary.addEventListener('click', () => {
+                runScript('snapshot-summary', runSnapshotSummary);
+            });
+            
+            runTrailing6.addEventListener('click', () => {
+                runScript('trailing-6', runTrailing6);
+            });
         })();
     </script>
 </body>

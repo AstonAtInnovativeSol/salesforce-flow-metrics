@@ -744,12 +744,23 @@ def generate_html_dashboard(scored_opps: List[OpportunityScore], profiles: Dict[
         
         .hdr-content {{
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between;
             align-items: flex-start;
-            flex-direction: column;
             max-width: 1600px;
             margin: 0 auto;
             position: relative;
+            width: 100%;
+            gap: 24px;
+        }}
+        
+        .hdr-left {{
+            flex: 1;
+            min-width: 0;
+        }}
+        
+        .hdr-right {{
+            flex-shrink: 0;
+            text-align: right;
         }}
         
         .title {{
@@ -758,15 +769,34 @@ def generate_html_dashboard(scored_opps: List[OpportunityScore], profiles: Dict[
             margin-bottom: 6px;
             color: var(--ink);
             letter-spacing: -0.01em;
-            text-align: right;
         }}
         
         .subtitle {{
             color: var(--muted);
             font-size: 13px;
             line-height: 1.5;
-            margin: 0;
-            text-align: right;
+            margin: 0 0 8px 0;
+        }}
+        
+        .methodology-compact {{
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 16px;
+            margin-top: 8px;
+            font-size: 11px;
+            color: var(--muted);
+            line-height: 1.4;
+        }}
+        
+        .methodology-item {{
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }}
+        
+        .methodology-item strong {{
+            color: var(--ink);
+            font-weight: 600;
         }}
         
         .panel {{
@@ -879,26 +909,6 @@ def generate_html_dashboard(scored_opps: List[OpportunityScore], profiles: Dict[
         .badge-medium {{ background: #fef3c7; color: #92400e; }}
         .badge-low {{ background: #fee2e2; color: #991b1b; }}
         
-        .methodology {{
-            background: linear-gradient(135deg, #f6f9ff, #f0f4ff);
-            border: 2px solid var(--brand);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 24px;
-        }}
-        
-        .methodology h3 {{
-            color: var(--brand);
-            font-size: 16px;
-            font-weight: 800;
-            margin-bottom: 12px;
-        }}
-        
-        .methodology ul {{
-            margin-left: 20px;
-            color: var(--muted);
-            line-height: 1.8;
-        }}
         
         .filter-btn {{
             padding: 8px 16px;

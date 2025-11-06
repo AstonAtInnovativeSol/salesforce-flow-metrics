@@ -67,7 +67,37 @@ def find_html_files(directory: Path) -> List[Path]:
 
 def has_back_button(html_content: str) -> bool:
     """Check if HTML already has a back button"""
-    return "back-btn" in html_content or "Back" in html_content or "Back to Dashboard" in html_content
+    return "back-btn" in html_content or "Back to Dashboard" in html_content
+
+def replace_existing_back_button(html_content: str) -> str:
+    """Replace existing back button with new right-aligned version"""
+    # Remove old back button HTML (multiple patterns to catch all variations)
+    patterns = [
+        r'<a[^>]*class=["\']back-btn["\'][^>]*>.*?</a>',
+        r'<a[^>]*href=["\']index\.html["\'][^>]*>.*?Back.*?</a>',
+        r'<a[^>]*>.*?Back to Dashboard.*?</a>',
+        r'<a[^>]*>.*?← Back.*?</a>',
+    ]
+    
+    for pattern in patterns:
+        html_content = re.sub(pattern, '', html_content, flags=re.DOTALL | re.IGNORECASE)
+    
+    # Remove old back button CSS (catch both left: and right: versions, but always replace)
+    old_css_patterns = [
+        r'\.back-btn\s*\{[^}]*?\}[^}]*?\.back-btn:hover\s*\{[^}]*?\}[^}]*?\.back-btn svg\s*\{[^}]*?\}',
+        r'\.back-btn\s*\{[^}]*?\}',
+        r'\.back-btn:hover\s*\{[^}]*?\}',
+        r'\.back-btn svg\s*\{[^}]*?\}',
+    ]
+    
+    for pattern in old_css_patterns:
+        html_content = re.sub(pattern, '', html_content, flags=re.DOTALL)
+    
+    # Also replace any left: 24px with right positioning
+    html_content = re.sub(r'left:\s*24px', 'right: 24px', html_content)
+    html_content = re.sub(r'translateX\(-2px\)', 'translateX(2px)', html_content)
+    
+    return html_content
 
 def ensure_header_relative(html_content: str) -> str:
     """Ensure header has position: relative for absolute positioning"""
@@ -90,8 +120,25 @@ def ensure_header_relative(html_content: str) -> str:
 
 def add_back_button_css(html_content: str) -> str:
     """Add back button CSS to style section"""
-    if "back-btn" in html_content:
-        return html_content  # CSS already exists
+    # Remove old back-btn CSS if it exists (multiple patterns)
+    old_css_patterns = [
+        r'\.back-btn\s*\{[^}]*?\}[^}]*?\.back-btn:hover\s*\{[^}]*?\}[^}]*?\.back-btn svg\s*\{[^}]*?\}',
+        r'\.back-btn\s*\{[^}]*?\}',
+        r'\.back-btn:hover\s*\{[^}]*?\}',
+        r'\.back-btn svg\s*\{[^}]*?\}',
+    ]
+    
+    for pattern in old_css_patterns:
+        html_content = re.sub(pattern, '', html_content, flags=re.DOTALL)
+    
+    # Check if new CSS already exists (right-aligned version)
+    if 'right: 24px' in html_content and 'back-btn' in html_content and 'Back' in html_content:
+        # Verify it's the right version - if not, we'll add it
+        if 'left: 24px' in html_content:
+            # Still has old left version, remove it
+            html_content = re.sub(r'left:\s*24px', 'right: 24px', html_content)
+            return html_content
+        return html_content  # New CSS already exists
     
     # Find the closing </style> tag
     style_end = html_content.rfind("</style>")
@@ -142,18 +189,18 @@ def process_html_file(html_file: Path) -> bool:
         with open(html_file, 'r', encoding='utf-8') as f:
             content = f.read()
         
-        # Check if already has back button
+        # Always replace existing back button if present (to ensure uniformity)
         if has_back_button(content):
-            print(f"  ✓ Already has back button, skipping")
-            return False
+            print(f"  ↻ Replacing existing back button with new right-aligned version")
+            content = replace_existing_back_button(content)
         
         # Ensure header has position: relative
         content = ensure_header_relative(content)
         
-        # Add CSS
+        # Always add/update CSS (removes old, adds new)
         content = add_back_button_css(content)
         
-        # Add HTML
+        # Always add HTML (will replace if old one exists)
         content = add_back_button_html(content)
         
         # Write back

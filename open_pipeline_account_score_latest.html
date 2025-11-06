@@ -405,15 +405,22 @@
                     let closeDate = 'N/A';
                     let closeDateClass = '';
                     if (opp.close_date) {
-                        const date = new Date(opp.close_date);
-                        closeDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-                        // Check if date is in the past
-                        const today = new Date();
-                        today.setHours(0, 0, 0, 0);
-                        const closeDateObj = new Date(date);
-                        closeDateObj.setHours(0, 0, 0, 0);
-                        if (closeDateObj < today) {
-                            closeDateClass = 'close-date-past';
+                        // Parse date string (format: YYYY-MM-DD)
+                        const dateParts = opp.close_date.split('-');
+                        if (dateParts.length === 3) {
+                            const date = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
+                            closeDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                            
+                            // Check if date is in the past (before today)
+                            const today = new Date();
+                            today.setHours(0, 0, 0, 0);
+                            const closeDateObj = new Date(date);
+                            closeDateObj.setHours(0, 0, 0, 0);
+                            
+                            // Compare dates (if close date is before today, it's past due)
+                            if (closeDateObj < today) {
+                                closeDateClass = 'close-date-past';
+                            }
                         }
                     }
                     
@@ -454,7 +461,7 @@
         <div class="foot">
             <div>INNOVATIVE • SALES OPS</div>
             <div style="margin-top: 8px; font-size: 10px;">
-                Generated: 2025-11-05 20:37:40
+                Generated: 2025-11-05 20:41:09
             </div>
         </div>
     </div>

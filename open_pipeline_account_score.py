@@ -778,25 +778,47 @@ def generate_html_dashboard(scored_opps: List[OpportunityScore], profiles: Dict[
             margin: 0 0 8px 0;
         }}
         
+        .methodology-panel {{
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin-top: 12px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+        }}
+        
         .methodology-compact {{
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px 16px;
-            margin-top: 8px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px 20px;
             font-size: 11px;
             color: var(--muted);
-            line-height: 1.4;
+            line-height: 1.5;
         }}
         
         .methodology-item {{
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
         }}
         
         .methodology-item strong {{
             color: var(--ink);
             font-weight: 600;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }}
+        
+        .methodology-item span {{
+            color: var(--muted);
+            flex: 1;
+        }}
+        
+        @media (max-width: 768px) {{
+            .methodology-compact {{
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }}
         }}
         
         .panel {{
@@ -957,16 +979,36 @@ def generate_html_dashboard(scored_opps: List[OpportunityScore], profiles: Dict[
             <div class="hdr-left">
                 <div class="title">Open Pipeline Account Score</div>
                 <div class="subtitle">Predictive scoring based on 2-year historical Closed Won data (Jan 2024 - Present)</div>
-                <div class="methodology-compact">
-                    <span class="methodology-item"><strong>Speed to Close (15%):</strong> Historical avg days to close</span>
-                    <span class="methodology-item"><strong>Largest Deal (20%):</strong> Max deal value per account</span>
-                    <span class="methodology-item"><strong>Product Mix (15%):</strong> Diversity of products/services</span>
-                    <span class="methodology-item"><strong>Upsell Instances (25%):</strong> Accounts with multiple purchases</span>
-                    <span class="methodology-item"><strong>Win Rate (20%):</strong> Historical win rate percentage</span>
-                    <span class="methodology-item"><strong>Recency (5%):</strong> Days since last close</span>
-                </div>
-                <div style="font-size: 10px; color: var(--muted); margin-top: 6px; font-style: italic;">
-                    Analysis only (not in Salesforce) • Custom fields after stakeholder review
+                <div class="methodology-panel">
+                    <div class="methodology-compact">
+                        <div class="methodology-item">
+                            <strong>Speed to Close (15%):</strong>
+                            <span>Historical avg days to close</span>
+                        </div>
+                        <div class="methodology-item">
+                            <strong>Largest Deal (20%):</strong>
+                            <span>Max deal value per account</span>
+                        </div>
+                        <div class="methodology-item">
+                            <strong>Product Mix (15%):</strong>
+                            <span>Diversity of products/services</span>
+                        </div>
+                        <div class="methodology-item">
+                            <strong>Upsell Instances (25%):</strong>
+                            <span>Accounts with multiple purchases</span>
+                        </div>
+                        <div class="methodology-item">
+                            <strong>Win Rate (20%):</strong>
+                            <span>Historical win rate percentage</span>
+                        </div>
+                        <div class="methodology-item">
+                            <strong>Recency (5%):</strong>
+                            <span>Days since last close</span>
+                        </div>
+                    </div>
+                    <div style="font-size: 10px; color: var(--muted); margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(148, 163, 184, 0.15); font-style: italic; text-align: center;">
+                        Analysis only (not in Salesforce) • Custom fields after stakeholder review
+                    </div>
                 </div>
             </div>
             <div class="hdr-right">

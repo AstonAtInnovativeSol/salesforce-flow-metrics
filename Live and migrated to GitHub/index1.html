@@ -1727,7 +1727,7 @@
             });
             
             // Count-up animation for KPI values
-            function animateValue(element, start, end, duration, format) {
+            function animateValue(element, start, end, duration, suffix = '') {
                 let startTimestamp = null;
                 const step = (timestamp) => {
                     if (!startTimestamp) startTimestamp = timestamp;
@@ -1735,25 +1735,34 @@
                     const easeOutQuart = 1 - Math.pow(1 - progress, 4);
                     const current = start + (end - start) * easeOutQuart;
                     
-                    // Format based on type
-                    if (format.type === 'currency') {
-                        const value = current / (format.isMillion ? 1000000 : 1000);
-                        element.textContent = '$' + value.toFixed(2) + (format.isMillion ? 'M' : 'K');
-                    } else if (format.type === 'percent') {
-                        element.textContent = Math.round(current) + '%';
-                    } else if (format.type === 'multiplier') {
-                        element.textContent = current.toFixed(1) + 'x';
-                    } else if (format.type === 'days') {
-                        element.textContent = Math.round(current) + ' days';
+                    if (suffix.includes('$')) {
+                        element.textContent = suffix.replace('$', '$' + current.toFixed(2) + (current >= 1000000 ? 'M' : 'K'));
+                    } else if (suffix.includes('%')) {
+                        element.textContent = current.toFixed(0) + suffix;
+                    } else if (suffix.includes('x')) {
+                        element.textContent = current.toFixed(1) + suffix;
+                    } else if (suffix.includes('days')) {
+                        element.textContent = Math.round(current) + ' ' + suffix;
                     } else {
-                        element.textContent = Math.round(current) + (format.suffix || '');
+                        element.textContent = current.toFixed(0) + suffix;
                     }
                     
                     if (progress < 1) {
                         window.requestAnimationFrame(step);
                     } else {
-                        // Ensure final value matches original exactly
-                        element.textContent = format.original;
+                        // Ensure final value is exact
+                        if (suffix.includes('$')) {
+                            const finalValue = end >= 1000000 ? (end / 1000000).toFixed(2) + 'M' : (end / 1000).toFixed(2) + 'K';
+                            element.textContent = '$' + finalValue;
+                        } else if (suffix.includes('%')) {
+                            element.textContent = end.toFixed(0) + suffix;
+                        } else if (suffix.includes('x')) {
+                            element.textContent = end.toFixed(1) + suffix;
+                        } else if (suffix.includes('days')) {
+                            element.textContent = Math.round(end) + ' ' + suffix;
+                        } else {
+                            element.textContent = end.toFixed(0) + suffix;
+                        }
                     }
                 };
                 window.requestAnimationFrame(step);
@@ -1764,40 +1773,31 @@
                 const kpiValues = document.querySelectorAll('.kpi-value');
                 
                 kpiValues.forEach((element, index) => {
-                    const originalText = element.textContent.trim();
+                    const originalText = element.textContent;
                     const delay = 300 + (index * 100); // Stagger animations
                     
                     setTimeout(() => {
-                        let format = { original: originalText };
-                        
                         // Parse the value based on format
                         if (originalText.includes('$')) {
                             const numStr = originalText.replace(/[$,MK]/g, '');
                             const num = parseFloat(numStr);
                             const isMillion = originalText.includes('M');
                             const targetValue = isMillion ? num * 1000000 : num * 1000;
-                            format.type = 'currency';
-                            format.isMillion = isMillion;
-                            animateValue(element, 0, targetValue, 1500, format);
+                            animateValue(element, 0, targetValue, 1500, '$');
                         } else if (originalText.includes('%')) {
                             const num = parseFloat(originalText.replace('%', ''));
-                            format.type = 'percent';
-                            animateValue(element, 0, num, 1200, format);
+                            animateValue(element, 0, num, 1200, '%');
                         } else if (originalText.includes('x')) {
                             const num = parseFloat(originalText.replace('x', ''));
-                            format.type = 'multiplier';
-                            animateValue(element, 0, num, 1200, format);
+                            animateValue(element, 0, num, 1200, 'x');
                         } else if (originalText.includes('days')) {
                             const num = parseFloat(originalText.replace(' days', ''));
-                            format.type = 'days';
-                            animateValue(element, 0, num, 1200, format);
+                            animateValue(element, 0, num, 1200, 'days');
                         } else {
-                            // For other numeric values - skip animation if we can't parse
+                            // For other numeric values
                             const num = parseFloat(originalText.replace(/[^\d.]/g, ''));
                             if (!isNaN(num)) {
-                                format.type = 'number';
-                                format.suffix = originalText.replace(/[\d.]/g, '');
-                                animateValue(element, 0, num, 1200, format);
+                                animateValue(element, 0, num, 1200, originalText.replace(/[\d.]/g, ''));
                             }
                         }
                     }, delay);
@@ -1815,3 +1815,4 @@
 </body>
 </html>
 
+<!-- Force rebuild Thu Nov  6 15:11:51 EST 2025 -->

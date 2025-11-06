@@ -944,28 +944,28 @@ def generate_html_dashboard(scored_opps: List[OpportunityScore], profiles: Dict[
             Back
         </a>
         <div class="hdr-content">
-            <div class="title">Open Pipeline Account Score</div>
-            <div class="subtitle">Predictive scoring based on 2-year historical Closed Won data (Jan 2024 - Present)</div>
+            <div class="hdr-left">
+                <div class="title">Open Pipeline Account Score</div>
+                <div class="subtitle">Predictive scoring based on 2-year historical Closed Won data (Jan 2024 - Present)</div>
+                <div class="methodology-compact">
+                    <span class="methodology-item"><strong>Speed to Close (15%):</strong> Historical avg days to close</span>
+                    <span class="methodology-item"><strong>Largest Deal (20%):</strong> Max deal value per account</span>
+                    <span class="methodology-item"><strong>Product Mix (15%):</strong> Diversity of products/services</span>
+                    <span class="methodology-item"><strong>Upsell Instances (25%):</strong> Accounts with multiple purchases</span>
+                    <span class="methodology-item"><strong>Win Rate (20%):</strong> Historical win rate percentage</span>
+                    <span class="methodology-item"><strong>Recency (5%):</strong> Days since last close</span>
+                </div>
+                <div style="font-size: 10px; color: var(--muted); margin-top: 6px; font-style: italic;">
+                    Analysis only (not in Salesforce) • Custom fields after stakeholder review
+                </div>
+            </div>
+            <div class="hdr-right">
+                <!-- Right side reserved for future content if needed -->
+            </div>
         </div>
     </div>
     
     <div class="wrap">
-        <div class="methodology">
-            <h3>📊 Methodology</h3>
-            <ul>
-                <li><strong>Speed to Close (15%):</strong> Historical average days from creation to close (faster = higher score)</li>
-                <li><strong>Largest Deal Size (20%):</strong> Maximum deal value per account (larger = higher score)</li>
-                <li><strong>Product Mix (15%):</strong> Diversity of products/services purchased (more products = higher score)</li>
-                <li><strong>Upsell Instances (25%):</strong> Accounts with multiple purchases (more purchases = higher score)</li>
-                <li><strong>Win Rate (20%):</strong> Historical win rate percentage (higher = higher score)</li>
-                <li><strong>Recency (5%):</strong> Days since last close (more recent = higher score)</li>
-            </ul>
-            <p style="margin-top: 12px; font-size: 12px; color: var(--muted);">
-                <strong>Note:</strong> Scores are calculated in this analysis only (not in Salesforce). 
-                Custom fields will be added after stakeholder review and feedback.
-            </p>
-        </div>
-        
         <div class="panel">
             <h3 style="margin-bottom: 16px; font-size: 16px; font-weight: 800;">Summary Statistics</h3>
             <div class="metric-grid">

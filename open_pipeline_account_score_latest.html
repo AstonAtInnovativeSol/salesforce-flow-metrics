@@ -39,7 +39,8 @@
             padding: 24px;
         }
         
-        .hdr {
+        .hdr {position: relative;
+            
             position: sticky;
             top: 0;
             z-index: 20;
@@ -50,38 +51,7 @@
             margin: -24px -24px 24px -24px;
         }
         
-        .back-btn {
-            position: absolute;
-            right: 24px;
-            top: 50%;
-            transform: translateY(-50%);
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 6px 12px;
-            background: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: var(--ink);
-            text-decoration: none;
-            font-size: 12px;
-            font-weight: 600;
-            transition: all 0.2s ease;
-            z-index: 10;
-        }
         
-        .back-btn:hover {
-            background: var(--brand);
-            color: white;
-            border-color: var(--brand);
-            transform: translateY(-50%) translateX(2px);
-            box-shadow: 0 2px 8px rgba(75, 123, 236, 0.3);
-        }
-        
-        .back-btn svg {
-            width: 16px;
-            height: 16px;
-        }
         
         .close-date-past {
             color: var(--error);
@@ -279,7 +249,40 @@
             font-size: 11px;
             text-align: center;
         }
-    </style>
+    
+        .back-btn {
+            position: absolute;
+            right: 24px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 12px;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--ink);
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            z-index: 10;
+        }
+        
+        .back-btn:hover {
+            background: var(--brand);
+            color: white;
+            border-color: var(--brand);
+            transform: translateY(-50%) translateX(2px);
+            box-shadow: 0 2px 8px rgba(75, 123, 236, 0.3);
+        }
+        
+        .back-btn svg {
+            width: 14px;
+            height: 14px;
+        }
+</style>
 </head>
 <body>
     <div class="hdr">
@@ -289,6 +292,8 @@
             </svg>
             Back
         </a>
+
+        
         <div class="hdr-content">
             <div class="title">Open Pipeline Account Score</div>
             <div class="subtitle">Predictive scoring based on 2-year historical Closed Won data (Jan 2024 - Present)</div>

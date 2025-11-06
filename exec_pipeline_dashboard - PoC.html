@@ -674,12 +674,64 @@
       color: var(--ink-tertiary);
       font-size: var(--text-sm);
     }
-  </style>
+  
+        
+
+        
+
+        
+
+        .back-btn {
+            position: absolute;
+            right: 24px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 12px;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--ink);
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            z-index: 10;
+        }
+        
+        .back-btn:hover {
+            background: var(--brand);
+            color: white;
+            border-color: var(--brand);
+            transform: translateY(-50%) translateX(2px);
+            box-shadow: 0 2px 8px rgba(75, 123, 236, 0.3);
+        }
+        
+        .back-btn svg {
+            width: 14px;
+            height: 14px;
+        }
+</style>
 </head>
 <body>
   <div class="dashboard-container">
     <!-- Header -->
     <header class="header">
+        <a href="index.html" class="back-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            Back
+        </a>
+
+        
+
+        
+
+        
+
       <div class="header-left">
         <a href="#" class="logo">
           <div class="logo-icon">

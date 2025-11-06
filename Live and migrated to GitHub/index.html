@@ -320,6 +320,13 @@
             color: var(--warning);
         }
         
+        .section-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 24px 0 20px 0;
+            width: 100%;
+        }
+        
         .section-title {
             font-size: 16px;
             font-weight: 800;
@@ -752,6 +759,14 @@
         .brandmark {
             font-weight: 900;
             letter-spacing: .08em;
+        }
+        
+        .controls-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: flex-end;
+            flex-shrink: 0;
         }
         
         .filter-controls {
@@ -1245,28 +1260,31 @@
                 <div class="title">Sales Ops Analytics</div>
                 <div class="subtitle">Select a dashboard below to view detailed metrics and insights.</div>
             </div>
-            <!-- Filter Controls -->
-            <div class="filter-controls">
-                <div class="filter-label">View:</div>
-                <div class="filter-radio-group">
-                    <input type="radio" id="filterDashboards" name="dashboardFilter" class="filter-radio filter-dashboards" checked>
-                    <label for="filterDashboards" class="filter-radio-label">Dashboards</label>
-                    <input type="radio" id="filterStandalone" name="dashboardFilter" class="filter-radio filter-standalone">
-                    <label for="filterStandalone" class="filter-radio-label">Stand Alone Reports</label>
+            <!-- Controls Group -->
+            <div class="controls-group">
+                <!-- Filter Controls -->
+                <div class="filter-controls">
+                    <div class="filter-label">View:</div>
+                    <div class="filter-radio-group">
+                        <input type="radio" id="filterDashboards" name="dashboardFilter" class="filter-radio filter-dashboards" checked>
+                        <label for="filterDashboards" class="filter-radio-label">Dashboards</label>
+                        <input type="radio" id="filterStandalone" name="dashboardFilter" class="filter-radio filter-standalone">
+                        <label for="filterStandalone" class="filter-radio-label">Stand Alone Reports</label>
+                    </div>
                 </div>
-            </div>
-            <!-- Script Runner Controls -->
-            <div class="filter-controls" style="margin-top: 8px;">
-                <div class="filter-label">Run Script:</div>
-                <div class="filter-radio-group">
-                    <button id="runSnapshotSummary" class="script-runner-btn" data-script="snapshot-summary">
-                        <span class="script-btn-text">Snapshot Summary</span>
-                        <span class="script-btn-loader" style="display: none;">⏳</span>
-                    </button>
-                    <button id="runTrailing6" class="script-runner-btn" data-script="trailing-6">
-                        <span class="script-btn-text">Trailing 6 Week</span>
-                        <span class="script-btn-loader" style="display: none;">⏳</span>
-                    </button>
+                <!-- Script Runner Controls -->
+                <div class="filter-controls">
+                    <div class="filter-label">Run Script:</div>
+                    <div class="filter-radio-group">
+                        <button id="runSnapshotSummary" class="script-runner-btn" data-script="snapshot-summary">
+                            <span class="script-btn-text">Snapshot Summary</span>
+                            <span class="script-btn-loader" style="display: none;">⏳</span>
+                        </button>
+                        <button id="runTrailing6" class="script-runner-btn" data-script="trailing-6">
+                            <span class="script-btn-text">Trailing 6 Week</span>
+                            <span class="script-btn-loader" style="display: none;">⏳</span>
+                        </button>
+                    </div>
                 </div>
                 <div id="scriptStatus" class="script-status" style="display: none;"></div>
             </div>
@@ -1343,6 +1361,7 @@
         </div>
         
         <!-- Executive Dashboards -->
+        <div class="section-divider"></div>
         <div class="section-title">Executive Dashboards</div>
         <div class="dashboard-grid">
             <a href="exec_pipeline_dashboard - PoC.html" class="dashboard-card" data-standalone="false">
@@ -1360,6 +1379,26 @@
                     <span class="card-action">Export Report</span>
                 </div>
                 <div class="card-updated">Updated: 1 hour ago</div>
+                <div class="card-meta">
+                    <div class="status-badge">Active</div>
+                </div>
+            </a>
+            
+            <a href="pipeline_velocity_latest.html" class="dashboard-card" data-standalone="false">
+                <div class="card-icon">⚡</div>
+                <div class="card-title">Pipeline Velocity</div>
+                <div class="card-priority important">Important</div>
+                <div class="card-description">Comprehensive pipeline velocity analysis tracking pipeline creation, accounts owned, open opportunities, win rates, and average deal metrics by rep.</div>
+                <div class="card-metrics">
+                    <div class="card-metric">📊 1,614 open opps</div>
+                    <div class="card-metric">📈 38 days avg age</div>
+                    <div class="card-metric"><span class="trend down">↓</span> -10% vs. Sept</div>
+                </div>
+                <div class="card-actions">
+                    <span class="card-action">View Analysis</span>
+                    <span class="card-action">Rep Rankings</span>
+                </div>
+                <div class="card-updated">Updated: 4 hours ago</div>
                 <div class="card-meta">
                     <div class="status-badge">Active</div>
                 </div>
@@ -1384,26 +1423,6 @@
                     <span class="card-action">Compare Reps</span>
                 </div>
                 <div class="card-updated">Updated: 3 hours ago</div>
-                <div class="card-meta">
-                    <div class="status-badge">Active</div>
-                </div>
-            </a>
-            
-            <a href="pipeline_velocity_latest.html" class="dashboard-card" data-standalone="false">
-                <div class="card-icon">⚡</div>
-                <div class="card-title">Pipeline Velocity</div>
-                <div class="card-priority important">Important</div>
-                <div class="card-description">Comprehensive pipeline velocity analysis tracking pipeline creation, accounts owned, open opportunities, win rates, and average deal metrics by rep.</div>
-                <div class="card-metrics">
-                    <div class="card-metric">📊 1,614 open opps</div>
-                    <div class="card-metric">📈 38 days avg age</div>
-                    <div class="card-metric"><span class="trend down">↓</span> -10% vs. Sept</div>
-                </div>
-                <div class="card-actions">
-                    <span class="card-action">View Analysis</span>
-                    <span class="card-action">Rep Rankings</span>
-                </div>
-                <div class="card-updated">Updated: 4 hours ago</div>
                 <div class="card-meta">
                     <div class="status-badge">Active</div>
                 </div>

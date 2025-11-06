@@ -764,29 +764,38 @@ def generate_html_dashboard(scored_opps: List[OpportunityScore], profiles: Dict[
         }}
         
         .title {{
-            font-size: 20px;
+            font-size: 28px;
             font-weight: 700;
-            margin-bottom: 6px;
+            margin-bottom: 10px;
             color: var(--ink);
-            letter-spacing: -0.01em;
+            letter-spacing: -0.02em;
+            line-height: 1.3;
         }}
         
         .subtitle {{
             color: var(--muted);
-            font-size: 13px;
-            line-height: 1.5;
-            margin: 0 0 8px 0;
+            font-size: 15px;
+            line-height: 1.6;
+            margin: 0 0 4px 0;
         }}
         
         .methodology-panel {{
             background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
             border: 1px solid rgba(148, 163, 184, 0.2);
             border-radius: 10px;
-            padding: 14px 18px;
-            margin-top: 12px;
+            padding: 16px 20px;
+            margin-top: 6px;
             margin-left: auto;
             max-width: 680px;
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+        }}
+        
+        .methodology-panel-title {{
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--ink);
+            margin-bottom: 12px;
+            letter-spacing: 0.01em;
         }}
         
         .methodology-compact {{
@@ -982,6 +991,7 @@ def generate_html_dashboard(scored_opps: List[OpportunityScore], profiles: Dict[
                 <div class="title">Open Pipeline Account Score</div>
                 <div class="subtitle">Predictive scoring based on 2-year historical Closed Won data (Jan 2024 - Present)</div>
                 <div class="methodology-panel">
+                    <div class="methodology-panel-title">Methodology + Weighting</div>
                     <div class="methodology-compact">
                         <div class="methodology-item">
                             <strong>Speed to Close (15%):</strong>

@@ -55,3 +55,4 @@ logs/
 .DS_Store
 Thumbs.db
 
+!index1.html

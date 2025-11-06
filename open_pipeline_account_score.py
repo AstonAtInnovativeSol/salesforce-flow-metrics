@@ -614,7 +614,7 @@ def score_open_opportunities(
 # HTML GENERATION
 # =========================
 
-def generate_html_dashboard(scored_opps: List[OpportunityScore], profiles: Dict[str, AccountScoringProfile], stats: Dict) -> str:
+def generate_html_dashboard(scored_opps: List[OpportunityScore], profiles: Dict[str, AccountScoringProfile], stats: Dict, instance_url: str) -> str:
     """Generate HTML dashboard with scoring analysis"""
     
     # Sort by opportunity score (highest first) - already sorted, but ensure it
@@ -635,8 +635,15 @@ def generate_html_dashboard(scored_opps: List[OpportunityScore], profiles: Dict[
     high_score_value = sum(s.amount for s in scored_opps if s.opportunity_score >= 75)
     
     # Prepare all opportunities data for JavaScript (for Top 10/50/100 filtering)
+    # Get unique owners with counts
+    owner_counts = {}
+    for opp in scored_opps_sorted:
+        owner = opp.owner_name
+        owner_counts[owner] = owner_counts.get(owner, 0) + 1
+    
     opportunities_json = json.dumps([
         {
+            "opportunity_id": opp.opportunity_id,
             "opportunity_name": opp.opportunity_name,
             "account_name": opp.account_name,
             "amount": opp.amount,
@@ -651,6 +658,8 @@ def generate_html_dashboard(scored_opps: List[OpportunityScore], profiles: Dict[
         }
         for opp in scored_opps_sorted
     ], default=str)
+    
+    owners_json = json.dumps([{"name": owner, "count": count} for owner, count in sorted(owner_counts.items())], default=str)
     
     html = f"""<!DOCTYPE html>
 <html lang="en">
@@ -764,19 +773,20 @@ def generate_html_dashboard(scored_opps: List[OpportunityScore], profiles: Dict[
         }}
         
         .title {{
-            font-size: 28px;
+            font-size: 36px;
             font-weight: 700;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
+            margin-top: -8px;
             color: var(--ink);
-            letter-spacing: -0.02em;
-            line-height: 1.3;
+            letter-spacing: -0.03em;
+            line-height: 1.2;
         }}
         
         .subtitle {{
             color: var(--muted);
             font-size: 15px;
             line-height: 1.6;
-            margin: 0 0 4px 0;
+            margin: 0 0 2px 0;
         }}
         
         .methodology-panel {{
@@ -784,7 +794,7 @@ def generate_html_dashboard(scored_opps: List[OpportunityScore], profiles: Dict[
             border: 1px solid rgba(148, 163, 184, 0.2);
             border-radius: 10px;
             padding: 16px 20px;
-            margin-top: 6px;
+            margin-top: 2px;
             margin-left: auto;
             max-width: 680px;
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
@@ -968,6 +978,35 @@ def generate_html_dashboard(scored_opps: List[OpportunityScore], profiles: Dict[
             box-shadow: 0 2px 4px rgba(75, 123, 236, 0.2);
         }}
         
+        .owner-filter {{
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg);
+            color: var(--ink);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 200px;
+        }}
+        
+        .owner-filter:hover {{
+            border-color: var(--brand);
+        }}
+        
+        .opp-link {{
+            color: var(--brand);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s ease;
+        }}
+        
+        .opp-link:hover {{
+            color: var(--accent);
+            text-decoration: underline;
+        }}
+        
         .foot {{
             margin-top: 40px;
             padding-top: 20px;
@@ -1075,9 +1114,12 @@ def generate_html_dashboard(scored_opps: List[OpportunityScore], profiles: Dict[
         </div>
         
         <div class="panel">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
                 <h3 style="margin: 0; font-size: 16px; font-weight: 800;">Opportunities by Score</h3>
-                <div style="display: flex; gap: 8px;">
+                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                    <select id="ownerFilter" class="owner-filter" onchange="filterByOwner()">
+                        <option value="">All Owners</option>
+                    </select>
                     <button class="filter-btn active" data-limit="10" onclick="showTopOpportunities(10)">Top 10</button>
                     <button class="filter-btn" data-limit="50" onclick="showTopOpportunities(50)">Top 50</button>
                     <button class="filter-btn" data-limit="100" onclick="showTopOpportunities(100)">Top 100</button>
@@ -1110,8 +1152,30 @@ def generate_html_dashboard(scored_opps: List[OpportunityScore], profiles: Dict[
         <script>
             // Embed opportunities data for client-side filtering
             const allOpportunities = {opportunities_json};
+            const allOwners = {owners_json};
+            const sfInstanceUrl = '{instance_url}';
+            let currentOwnerFilter = '';
+            let currentLimit = 10;
+            
+            // Populate owner filter dropdown
+            function populateOwnerFilter() {{
+                const select = document.getElementById('ownerFilter');
+                allOwners.forEach(owner => {{
+                    const option = document.createElement('option');
+                    option.value = owner.name;
+                    option.textContent = owner.name + ' (' + owner.count + ' Opps)';
+                    select.appendChild(option);
+                }});
+            }}
+            
+            function filterByOwner() {{
+                const select = document.getElementById('ownerFilter');
+                currentOwnerFilter = select.value;
+                showTopOpportunities(currentLimit);
+            }}
             
             function showTopOpportunities(limit) {{
+                currentLimit = limit;
                 // Update active button
                 document.querySelectorAll('.filter-btn').forEach(btn => {{
                     btn.classList.remove('active');
@@ -1121,8 +1185,14 @@ def generate_html_dashboard(scored_opps: List[OpportunityScore], profiles: Dict[
                     }}
                 }});
                 
-                // Get opportunities to display
-                const opportunities = limit >= 9999 ? allOpportunities : allOpportunities.slice(0, limit);
+                // Filter by owner if selected
+                let filtered = allOpportunities;
+                if (currentOwnerFilter) {{
+                    filtered = allOpportunities.filter(opp => opp.owner_name === currentOwnerFilter);
+                }}
+                
+                // Get opportunities to display (sorted by score, then apply limit)
+                const opportunities = limit >= 9999 ? filtered : filtered.slice(0, limit);
                 
                 // Generate table rows
                 const tbody = document.getElementById('opportunitiesTableBody');
@@ -1157,9 +1227,10 @@ def generate_html_dashboard(scored_opps: List[OpportunityScore], profiles: Dict[
                     const amount = opp.amount.toLocaleString('en-US', {{minimumFractionDigits: 2, maximumFractionDigits: 2}});
                     
                     const commit = opp.commit || '';
+                    const oppUrl = sfInstanceUrl + '/lightning/r/Opportunity/' + opp.opportunity_id + '/view';
                     
                     return '<tr>' +
-                        '<td><strong>' + oppName + '</strong></td>' +
+                        '<td><a href="' + oppUrl + '" target="_blank" class="opp-link"><strong>' + oppName + '</strong></a></td>' +
                         '<td>' + acctName + '</td>' +
                         '<td>$' + amount + '</td>' +
                         '<td>' + opp.stage + '</td>' +
@@ -1174,12 +1245,14 @@ def generate_html_dashboard(scored_opps: List[OpportunityScore], profiles: Dict[
                 }}).join('');
             }}
             
-            // Initialize with Top 10 when DOM is ready
+            // Initialize when DOM is ready
             if (document.readyState === 'loading') {{
                 document.addEventListener('DOMContentLoaded', function() {{
+                    populateOwnerFilter();
                     showTopOpportunities(10);
                 }});
             }} else {{
+                populateOwnerFilter();
                 showTopOpportunities(10);
             }}
         </script>
@@ -1259,7 +1332,7 @@ def main():
     
     # Generate HTML
     print("\n[✓] Generating HTML dashboard...")
-    html = generate_html_dashboard(scored_opps, profiles, stats)
+    html = generate_html_dashboard(scored_opps, profiles, stats, token['instance_url'])
     
     # Save output
     output_dir = Path.home() / "Desktop" / "Final Python Scripts"

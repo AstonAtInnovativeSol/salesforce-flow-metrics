@@ -41,7 +41,8 @@
             width: 100%;
         }
         
-        .hdr {
+        .hdr {position: relative;
+            
             position: sticky;
             top: 0;
             z-index: 20;
@@ -341,7 +342,40 @@
         .count-up {
             font-variant-numeric: tabular-nums;
         }
-    </style>
+    
+        .back-btn {
+            position: absolute;
+            left: 24px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--ink);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            z-index: 10;
+        }
+        
+        .back-btn:hover {
+            background: var(--brand);
+            color: white;
+            border-color: var(--brand);
+            transform: translateY(-50%) translateX(-2px);
+            box-shadow: 0 2px 8px rgba(75, 123, 236, 0.3);
+        }
+        
+        .back-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+</style>
     <script>
         // Animation: Count up numbers from 0
         function animateValue(element, start, end, duration, formatFn) {
@@ -466,6 +500,13 @@
 </head>
 <body>
     <div class="hdr">
+        <a href="index.html" class="back-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            Back to Dashboard
+        </a>
+
         <div class="wrap hdr-inner">
             <div class="header-content-wrapper" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; flex-wrap: wrap;">
                 <div style="flex: 1 1 auto; min-width: 0;">

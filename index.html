@@ -342,6 +342,17 @@
             margin-bottom: 8px;
         }
         
+        .dashboard-grid-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .dashboard-grid-header .section-title {
+            margin: 0;
+        }
+        
         /* Ensure all sections fit in viewport */
         body {
             max-height: 100vh;
@@ -354,6 +365,7 @@
             gap: 12px;
             margin-top: 8px;
             margin-bottom: 8px;
+            align-items: stretch;
         }
         
         
@@ -367,11 +379,13 @@
             cursor: pointer;
             text-decoration: none;
             color: inherit;
-            display: block;
+            display: flex;
+            flex-direction: column;
             position: relative;
             overflow: hidden;
             opacity: 0;
             animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            height: 100%;
         }
         
         .dashboard-card::before {
@@ -435,7 +449,7 @@
         .card-title {
             font-size: 16px;
             font-weight: 800;
-            margin-bottom: 6px;
+            margin: 0;
             color: var(--ink);
             line-height: 1.2;
         }
@@ -478,6 +492,14 @@
             color: var(--error);
         }
         
+        .card-header-row {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
+            margin-bottom: 6px;
+        }
+        
         .card-priority {
             display: inline-flex;
             align-items: center;
@@ -487,7 +509,6 @@
             font-size: 9px;
             font-weight: 700;
             text-transform: uppercase;
-            margin-right: 6px;
         }
         
         .card-priority.critical {
@@ -538,24 +559,6 @@
         
         .card-action:active {
             transform: translateY(0);
-        }
-        
-        .card-priority {
-            animation: pulse 2s ease-in-out infinite;
-        }
-        
-        .card-priority.critical {
-            animation: pulseCritical 1.5s ease-in-out infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.8; }
-        }
-        
-        @keyframes pulseCritical {
-            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-            50% { opacity: 0.9; box-shadow: 0 0 0 4px rgba(239, 68, 68, 0); }
         }
         
         .card-metrics {
@@ -1004,6 +1007,17 @@
                 margin-top: 0;
             }
             
+            .dashboard-grid-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+                margin-bottom: 8px;
+            }
+            
+            .dashboard-grid-header .section-title {
+                margin: 0;
+            }
+            
             /* Mobile: Executive Summary - Compact Horizontal Scroll */
             .exec-summary {
                 padding: 12px;
@@ -1353,14 +1367,16 @@
             </div>
         </div>
         
-        <!-- Executive Dashboards -->
+        <!-- Executive Dashboard -->
         <div class="section-divider"></div>
-        <div class="section-title">Executive Dashboards</div>
+        <div class="section-title">Executive Dashboard</div>
         <div class="dashboard-grid">
             <a href="exec_pipeline_dashboard - PoC.html" class="dashboard-card" data-standalone="false">
                 <div class="card-icon">🎯</div>
-                <div class="card-title">Executive Pipeline Dashboard</div>
-                <div class="card-priority important">Important</div>
+                <div class="card-header-row">
+                    <div class="card-title">Executive Pipeline Dashboard</div>
+                    <div class="card-priority important">Important</div>
+                </div>
                 <div class="card-description">Comprehensive executive-level pipeline analysis combining data from multiple sources. Includes high-level metrics, elite pipeline analysis, and strategic insights.</div>
                 <div class="card-metrics">
                     <div class="card-metric">📊 $9.95M Open Pipeline</div>
@@ -1377,10 +1393,14 @@
                 </div>
             </a>
             
-            <a href="pipeline_velocity_latest.html" class="dashboard-card" data-standalone="false">
+            <div style="position: relative; display: flex; flex-direction: column;">
+                <div class="section-title" style="position: absolute; top: -30px; left: 0; margin: 0;">Velocity Reports</div>
+                <a href="pipeline_velocity_latest.html" class="dashboard-card" data-standalone="false" style="flex: 1; display: flex; flex-direction: column;">
                 <div class="card-icon">⚡</div>
-                <div class="card-title">Pipeline Velocity</div>
-                <div class="card-priority important">Important</div>
+                <div class="card-header-row">
+                    <div class="card-title">Pipeline Velocity</div>
+                    <div class="card-priority important">Important</div>
+                </div>
                 <div class="card-description">Comprehensive pipeline velocity analysis tracking pipeline creation, accounts owned, open opportunities, win rates, and average deal metrics by rep.</div>
                 <div class="card-metrics">
                     <div class="card-metric">📊 1,614 open opps</div>
@@ -1395,12 +1415,15 @@
                 <div class="card-meta">
                     <div class="status-badge">Active</div>
                 </div>
-            </a>
+                </a>
+            </div>
             
             <a href="boca_velocity_latest.html" class="dashboard-card" data-standalone="false">
                 <div class="card-icon">📊</div>
-                <div class="card-title">Boca Sales Velocity</div>
-                <div class="card-priority important">Important</div>
+                <div class="card-header-row">
+                    <div class="card-title">Boca Sales Velocity</div>
+                    <div class="card-priority important">Important</div>
+                </div>
                 <div class="card-description">DGR Sales Velocity report tracking meetings, opportunity dollars, and closed won metrics by rep. Includes week-over-week comparisons and 6-week trailing averages.</div>
                 <div class="card-metrics">
                     <div class="card-metric">📊 43 deals/week</div>
@@ -1424,8 +1447,10 @@
         <div class="dashboard-grid">
             <a href="flow_slack_metrics_ghost_pipeline_latest.html" class="dashboard-card" data-standalone="false">
                 <div class="card-icon">👻</div>
-                <div class="card-title">Ghost Pipeline</div>
-                <div class="card-priority critical">Critical</div>
+                <div class="card-header-row">
+                    <div class="card-title">Ghost Pipeline</div>
+                    <div class="card-priority critical">Critical</div>
+                </div>
                 <div class="card-description">Track opportunities that have been in the pipeline for extended periods without activity. Monitor alerts sent, response times, and closed-out value to identify and address stalled deals.</div>
                 <div class="card-metrics">
                     <div class="card-metric">📊 $2.4M at risk</div>
@@ -1450,8 +1475,10 @@
             
             <a href="flow_slack_metrics_past_due_closed_date_latest.html" class="dashboard-card" data-standalone="false">
                 <div class="card-icon">📅</div>
-                <div class="card-title">Past Due Closed Date</div>
-                <div class="card-priority critical">Critical</div>
+                <div class="card-header-row">
+                    <div class="card-title">Past Due Closed Date</div>
+                    <div class="card-priority critical">Critical</div>
+                </div>
                 <div class="card-description">Monitor opportunities with past due close dates. Track compliance metrics, alert frequency, and response times to ensure timely deal closure.</div>
                 <div class="card-metrics">
                     <div class="card-metric">📊 $890K overdue</div>
@@ -1476,8 +1503,10 @@
             
             <a href="touchpoint_intelligence_latest.html" class="dashboard-card" data-standalone="false">
                 <div class="card-icon">🔍</div>
-                <div class="card-title">Touchpoint Intelligence Report</div>
-                <div class="card-priority important">Important</div>
+                <div class="card-header-row">
+                    <div class="card-title">Touchpoint Intelligence Report</div>
+                    <div class="card-priority important">Important</div>
+                </div>
                 <div class="card-description">Highlights high-signal accounts (multiple active touchpoints + recent engagement) before opportunities are created. Early-signal detection for proactive pipeline creation.</div>
                 <div class="card-metrics">
                     <div class="card-metric">📊 45 high-signal accounts</div>
@@ -1499,8 +1528,10 @@
         <div class="dashboard-grid">
             <a href="ghost_pipeline_comparison_latest.html" class="dashboard-card" data-standalone="true">
                 <div class="card-icon">📊</div>
-                <div class="card-title">Ghost Pipeline Comparison</div>
-                <div class="card-priority important">Important</div>
+                <div class="card-header-row">
+                    <div class="card-title">Ghost Pipeline Comparison</div>
+                    <div class="card-priority important">Important</div>
+                </div>
                 <div class="card-description">Compare opportunities with and without Ghost Pipeline alerts. Analyze win rates, sales cycle velocity, and loss reasons over the last 90 days.</div>
                 <div class="card-metrics">
                     <div class="card-metric">📊 90-day analysis</div>
@@ -1519,8 +1550,10 @@
             
             <a href="open_pipeline_account_score_latest.html" class="dashboard-card" data-standalone="true">
                 <div class="card-icon">🎯</div>
-                <div class="card-title">Open Pipeline Account Scoring</div>
-                <div class="card-priority important">Important</div>
+                <div class="card-header-row">
+                    <div class="card-title">Open Pipeline Account Scoring</div>
+                    <div class="card-priority important">Important</div>
+                </div>
                 <div class="card-description">Predictive scoring analysis based on 2-year historical Closed Won data (Jan 2024 - Present). Scores opportunities and accounts using Speed to Close, Deal Size, Product Mix, Upsell History, Win Rate, and Recency. Analysis only (not in Salesforce) until stakeholder review.</div>
                 <div class="card-metrics">
                     <div class="card-metric">📊 $1.5M in High-Score Opps</div>

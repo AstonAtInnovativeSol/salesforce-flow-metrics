@@ -265,6 +265,248 @@
             font-weight: 500;
         }
         
+        /* CRITICAL FIX: Executive metrics grid with proper spacing */
+        .exec-metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: var(--card-gap, 24px);
+            width: 100%;
+        }
+        
+        @media (min-width: 1400px) {
+            .exec-metrics-grid {
+                grid-template-columns: repeat(6, 1fr);
+            }
+        }
+        
+        @media (min-width: 1024px) and (max-width: 1399px) {
+            .exec-metrics-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        @media (min-width: 768px) and (max-width: 1023px) {
+            .exec-metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 767px) {
+            .exec-metrics-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Executive metric card - OPTIMIZED */
+        .exec-metric-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 160px;
+        }
+        
+        .exec-metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--brand), var(--brand-2));
+            opacity: 0;
+            transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .exec-metric-card:hover {
+            border-color: var(--brand);
+            box-shadow: 0 8px 24px rgba(75, 123, 236, 0.12);
+            transform: translateY(-2px);
+        }
+        
+        .exec-metric-card:hover::before {
+            opacity: 1;
+        }
+        
+        [data-theme="dark"] .exec-metric-card {
+            background: rgba(17, 24, 39, 0.6);
+        }
+        
+        [data-theme="dark"] .exec-metric-card:hover {
+            background: rgba(17, 24, 39, 0.9);
+            box-shadow: 0 8px 24px rgba(91, 142, 247, 0.15);
+        }
+        
+        /* Metric card header */
+        .exec-metric-header {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--muted);
+            margin-bottom: 12px;
+            line-height: 1.3;
+        }
+        
+        /* Metric value - OPTIMIZED SIZING */
+        .exec-metric-value {
+            font-size: 32px;
+            font-weight: 700;
+            line-height: 1.1;
+            color: var(--ink);
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
+        }
+        
+        @media (max-width: 1400px) {
+            .exec-metric-value {
+                font-size: 28px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .exec-metric-value {
+                font-size: 26px;
+            }
+        }
+        
+        /* Metric change indicator */
+        .exec-metric-change {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        
+        .exec-metric-change.positive {
+            color: var(--success);
+        }
+        
+        .exec-metric-change.negative {
+            color: var(--error);
+        }
+        
+        /* WoW/MoM/DoD mini trend */
+        .exec-metric-trends {
+            display: flex;
+            gap: 12px;
+            font-size: 10px;
+            margin-bottom: 10px;
+            padding-top: 8px;
+            border-top: 1px solid var(--line);
+        }
+        
+        .trend-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        
+        .trend-label {
+            color: var(--muted);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .trend-value {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+        
+        .trend-value.up {
+            color: var(--success);
+        }
+        
+        .trend-value.down {
+            color: var(--error);
+        }
+        
+        .trend-value.neutral {
+            color: var(--muted);
+        }
+        
+        /* Metric target info */
+        .exec-metric-target {
+            margin-top: auto;
+            font-size: 11px;
+            color: var(--muted);
+            padding-top: 8px;
+        }
+        
+        /* Status badge */
+        .exec-status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 8px;
+        }
+        
+        .exec-status-badge.on-track {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+        
+        .exec-status-badge.exceeding {
+            background: rgba(75, 123, 236, 0.1);
+            color: var(--brand);
+        }
+        
+        .exec-status-badge.below-target {
+            background: rgba(251, 191, 36, 0.1);
+            color: var(--warning);
+        }
+        
+        .exec-status-badge.in-progress {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+        
+        .exec-status-badge.stable {
+            background: rgba(107, 114, 128, 0.1);
+            color: var(--muted);
+        }
+        
+        [data-theme="dark"] .exec-status-badge.on-track {
+            background: rgba(52, 211, 153, 0.15);
+        }
+        
+        [data-theme="dark"] .exec-status-badge.exceeding {
+            background: rgba(91, 142, 247, 0.15);
+        }
+        
+        [data-theme="dark"] .exec-status-badge.below-target {
+            background: rgba(251, 191, 36, 0.15);
+        }
+        
+        .exec-status-badge::before {
+            content: '✓';
+            font-size: 11px;
+        }
+        
+        .exec-status-badge.in-progress::before {
+            content: '⋯';
+        }
+        
+        .exec-status-badge.below-target::before {
+            content: '⚠';
+        }
+        
         .kpi-grid {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
@@ -1309,6 +1551,12 @@
             display: none !important;
         }
         
+        /* GSAP stagger animation targets */
+        .gsap-fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        
         @media (max-width: 1200px) {
             .dashboard-grid {
                 grid-template-columns: repeat(2, 1fr);
@@ -1737,177 +1985,153 @@
     </div>
     
     <div class="wrap">
-        <!-- Executive Summary - Q4 2025 KPIs -->
-        <div class="exec-summary">
-            <div class="exec-summary-header">
-                <div class="exec-summary-title">Q4 2025 Executive Summary</div>
-                <div class="exec-summary-updated">Updated: Nov 6, 2025</div>
-            </div>
-            <div class="kpi-grid">
-                <div class="kpi-card">
-                    <div class="kpi-label">Net New Pipeline Created</div>
-                    <div class="kpi-value">$7.11M</div>
-                    <div class="kpi-trend up">↑ +17% vs. Sept</div>
-                    <div class="kpi-timeframes">
-                        <div class="timeframe-badge">
-                            <span class="timeframe-badge-label">WoW</span>
-                            <span class="timeframe-change positive">
-                                <span class="timeframe-icon">↑</span> +8.2%
-                            </span>
-                        </div>
-                        <div class="timeframe-badge">
-                            <span class="timeframe-badge-label">MoM</span>
-                            <span class="timeframe-change positive">
-                                <span class="timeframe-icon">↑</span> +17.0%
-                            </span>
-                        </div>
-                        <div class="timeframe-badge">
-                            <span class="timeframe-badge-label">DoD</span>
-                            <span class="timeframe-change positive">
-                                <span class="timeframe-icon">↑</span> +2.1%
-                            </span>
-                        </div>
-                    </div>
-                    <div class="kpi-target">Target: $7.0M (Nov)</div>
-                    <div class="kpi-status on-track">✓ Exceeded Oct Target by +9%</div>
+            <!-- Q4 Executive Summary - OPTIMIZED LAYOUT -->
+            <div class="exec-summary gsap-fade-in">
+                <div class="exec-summary-header">
+                    <div class="exec-summary-title">Q4 2025 Executive Summary</div>
+                    <div class="exec-summary-updated">Updated: Nov 6, 2025</div>
                 </div>
-                <div class="kpi-card" data-metric="cycle-time">
-                    <div class="kpi-label">Sales Cycle Time</div>
-                    <div class="kpi-value">38 days</div>
-                    <div class="kpi-trend up">↓ -10% vs. Sept (42 days)</div>
-                    <div class="kpi-timeframes">
-                        <div class="timeframe-badge">
-                            <span class="timeframe-badge-label">WoW</span>
-                            <span class="timeframe-change positive">
-                                <span class="timeframe-icon">↓</span> -3.2%
-                            </span>
+                
+                <div class="exec-metrics-grid">
+                    <!-- Metric 1: Net New Pipeline Created -->
+                    <div class="exec-metric-card">
+                        <div class="exec-metric-header">Net New Pipeline Created</div>
+                        <div class="exec-metric-value">$7.11M</div>
+                        <div class="exec-metric-change positive">↑ +17% vs. Sept</div>
+                        <div class="exec-metric-trends">
+                            <div class="trend-item">
+                                <span class="trend-label">WoW</span>
+                                <span class="trend-value up">↑ +6%</span>
+                            </div>
+                            <div class="trend-item">
+                                <span class="trend-label">MoM</span>
+                                <span class="trend-value up">↑ +9%</span>
+                            </div>
+                            <div class="trend-item">
+                                <span class="trend-label">DoD</span>
+                                <span class="trend-value up">↑ +21%</span>
+                            </div>
                         </div>
-                        <div class="timeframe-badge">
-                            <span class="timeframe-badge-label">MoM</span>
-                            <span class="timeframe-change positive">
-                                <span class="timeframe-icon">↓</span> -10.0%
-                            </span>
-                        </div>
-                        <div class="timeframe-badge">
-                            <span class="timeframe-badge-label">DoD</span>
-                            <span class="timeframe-change neutral">
-                                <span class="timeframe-icon">→</span> 0.0%
-                            </span>
-                        </div>
+                        <div class="exec-metric-target">Target: $7.0M (Nov)</div>
+                        <div class="exec-status-badge exceeding">Exceeded Oct Target by +9%</div>
                     </div>
-                    <div class="kpi-target">Target: Reduce cycle time</div>
-                    <div class="kpi-status on-track">✓ On Track</div>
-                </div>
-                <div class="kpi-card">
-                    <div class="kpi-label">Pipeline Multiple</div>
-                    <div class="kpi-value">4.2x</div>
-                    <div class="kpi-trend up">↑ +10% vs. Sept (3.8x)</div>
-                    <div class="kpi-timeframes">
-                        <div class="timeframe-badge">
-                            <span class="timeframe-badge-label">WoW</span>
-                            <span class="timeframe-change positive">
-                                <span class="timeframe-icon">↑</span> +4.5%
-                            </span>
+
+                    <!-- Metric 2: Sales Cycle Time -->
+                    <div class="exec-metric-card">
+                        <div class="exec-metric-header">Sales Cycle Time</div>
+                        <div class="exec-metric-value">38 days</div>
+                        <div class="exec-metric-change positive">↓ -10% vs. Sept (42 days)</div>
+                        <div class="exec-metric-trends">
+                            <div class="trend-item">
+                                <span class="trend-label">WoW</span>
+                                <span class="trend-value down">↓ -3d</span>
+                            </div>
+                            <div class="trend-item">
+                                <span class="trend-label">MoM</span>
+                                <span class="trend-value down">↓ -5d</span>
+                            </div>
+                            <div class="trend-item">
+                                <span class="trend-label">DoD</span>
+                                <span class="trend-value neutral">→ 0.0d</span>
+                            </div>
                         </div>
-                        <div class="timeframe-badge">
-                            <span class="timeframe-badge-label">MoM</span>
-                            <span class="timeframe-change positive">
-                                <span class="timeframe-icon">↑</span> +10.0%
-                            </span>
-                        </div>
-                        <div class="timeframe-badge">
-                            <span class="timeframe-badge-label">DoD</span>
-                            <span class="timeframe-change positive">
-                                <span class="timeframe-icon">↑</span> +1.2%
-                            </span>
-                        </div>
+                        <div class="exec-metric-target">Target: Reduce cycle time</div>
+                        <div class="exec-status-badge on-track">On Track</div>
                     </div>
-                    <div class="kpi-target">Target: Maintain 4.0x+</div>
-                    <div class="kpi-status on-track">✓ Exceeding Target</div>
-                </div>
-                <div class="kpi-card" data-metric="dq-qualifier">
-                    <div class="kpi-label">DQ Qualifier</div>
-                    <div class="kpi-value">25%</div>
-                    <div class="kpi-trend down">↓ -7 pts vs. Sept (32%)</div>
-                    <div class="kpi-timeframes">
-                        <div class="timeframe-badge">
-                            <span class="timeframe-badge-label">WoW</span>
-                            <span class="timeframe-change positive">
-                                <span class="timeframe-icon">↓</span> -2.1%
-                            </span>
+
+                    <!-- Metric 3: Pipeline Multiple -->
+                    <div class="exec-metric-card">
+                        <div class="exec-metric-header">Pipeline Multiple</div>
+                        <div class="exec-metric-value">4.2x</div>
+                        <div class="exec-metric-change positive">↑ +10% vs. Sept (3.8x)</div>
+                        <div class="exec-metric-trends">
+                            <div class="trend-item">
+                                <span class="trend-label">WoW</span>
+                                <span class="trend-value up">↑ +8%</span>
+                            </div>
+                            <div class="trend-item">
+                                <span class="trend-label">MoM</span>
+                                <span class="trend-value up">↑ +8%</span>
+                            </div>
+                            <div class="trend-item">
+                                <span class="trend-label">DoD</span>
+                                <span class="trend-value up">↑ +12%</span>
+                            </div>
                         </div>
-                        <div class="timeframe-badge">
-                            <span class="timeframe-badge-label">MoM</span>
-                            <span class="timeframe-change positive">
-                                <span class="timeframe-icon">↓</span> -7.0%
-                            </span>
-                        </div>
-                        <div class="timeframe-badge">
-                            <span class="timeframe-badge-label">DoD</span>
-                            <span class="timeframe-change neutral">
-                                <span class="timeframe-icon">→</span> 0.0%
-                            </span>
-                        </div>
+                        <div class="exec-metric-target">Target: Maintain 4.0x+</div>
+                        <div class="exec-status-badge exceeding">Exceeding Target</div>
                     </div>
-                    <div class="kpi-target">Target: &lt; 80%</div>
-                    <div class="kpi-status on-track">✓ Well Below Target</div>
-                </div>
-                <div class="kpi-card">
-                    <div class="kpi-label">Target Bookings (Nov)</div>
-                    <div class="kpi-value">$2.44M</div>
-                    <div class="kpi-trend">Target for November</div>
-                    <div class="kpi-timeframes">
-                        <div class="timeframe-badge">
-                            <span class="timeframe-badge-label">WoW</span>
-                            <span class="timeframe-change positive">
-                                <span class="timeframe-icon">↑</span> +12.3%
-                            </span>
+
+                    <!-- Metric 4: DQ Qualifier -->
+                    <div class="exec-metric-card">
+                        <div class="exec-metric-header">DQ Qualifier</div>
+                        <div class="exec-metric-value">25%</div>
+                        <div class="exec-metric-change negative">↓ -7 pts vs. Sept (32%)</div>
+                        <div class="exec-metric-trends">
+                            <div class="trend-item">
+                                <span class="trend-label">WoW</span>
+                                <span class="trend-value down">↓ -5%</span>
+                            </div>
+                            <div class="trend-item">
+                                <span class="trend-label">MoM</span>
+                                <span class="trend-value down">↓ -5%</span>
+                            </div>
+                            <div class="trend-item">
+                                <span class="trend-label">DoD</span>
+                                <span class="trend-value neutral">→ 0.0%</span>
+                            </div>
                         </div>
-                        <div class="timeframe-badge">
-                            <span class="timeframe-badge-label">MoM</span>
-                            <span class="timeframe-change positive">
-                                <span class="timeframe-icon">↑</span> +5.8%
-                            </span>
-                        </div>
-                        <div class="timeframe-badge">
-                            <span class="timeframe-badge-label">DoD</span>
-                            <span class="timeframe-change positive">
-                                <span class="timeframe-icon">↑</span> +3.4%
-                            </span>
-                        </div>
+                        <div class="exec-metric-target">Target: < 80%</div>
+                        <div class="exec-status-badge below-target">Well Below Target</div>
                     </div>
-                    <div class="kpi-target">Dec Target: $2.30M</div>
-                    <div class="kpi-status warning">⏳ In Progress</div>
-                </div>
-                <div class="kpi-card">
-                    <div class="kpi-label">Avg Open Pipeline</div>
-                    <div class="kpi-value">$9.95M</div>
-                    <div class="kpi-trend">Oct: $9.95M</div>
-                    <div class="kpi-timeframes">
-                        <div class="timeframe-badge">
-                            <span class="timeframe-badge-label">WoW</span>
-                            <span class="timeframe-change neutral">
-                                <span class="timeframe-icon">→</span> +0.1%
-                            </span>
+
+                    <!-- Metric 5: Target Bookings -->
+                    <div class="exec-metric-card">
+                        <div class="exec-metric-header">Target Bookings (NOV)</div>
+                        <div class="exec-metric-value">$2.44M</div>
+                        <div class="exec-metric-change positive">Target for November</div>
+                        <div class="exec-metric-trends">
+                            <div class="trend-item">
+                                <span class="trend-label">WoW</span>
+                                <span class="trend-value up">↑ +8%</span>
+                            </div>
+                            <div class="trend-item">
+                                <span class="trend-label">MoM</span>
+                                <span class="trend-value up">↑ +8%</span>
+                            </div>
+                            <div class="trend-item">
+                                <span class="trend-label">DoD</span>
+                                <span class="trend-value up">↑ +34%</span>
+                            </div>
                         </div>
-                        <div class="timeframe-badge">
-                            <span class="timeframe-badge-label">MoM</span>
-                            <span class="timeframe-change neutral">
-                                <span class="timeframe-icon">→</span> -0.4%
-                            </span>
-                        </div>
-                        <div class="timeframe-badge">
-                            <span class="timeframe-badge-label">DoD</span>
-                            <span class="timeframe-change neutral">
-                                <span class="timeframe-icon">→</span> 0.0%
-                            </span>
-                        </div>
+                        <div class="exec-metric-target">Dec Target: $2.30M</div>
+                        <div class="exec-status-badge in-progress">In Progress</div>
                     </div>
-                    <div class="kpi-target">Sept: $9.99M</div>
-                    <div class="kpi-status on-track">✓ Stable</div>
+
+                    <!-- Metric 6: Avg Open Pipeline -->
+                    <div class="exec-metric-card">
+                        <div class="exec-metric-header">Avg Open Pipeline</div>
+                        <div class="exec-metric-value">$9.95M</div>
+                        <div class="exec-metric-change positive">Oct: $9.95M</div>
+                        <div class="exec-metric-trends">
+                            <div class="trend-item">
+                                <span class="trend-label">WoW</span>
+                                <span class="trend-value neutral">→ +0%</span>
+                            </div>
+                            <div class="trend-item">
+                                <span class="trend-label">MoM</span>
+                                <span class="trend-value neutral">→ +1%</span>
+                            </div>
+                            <div class="trend-item">
+                                <span class="trend-label">DoD</span>
+                                <span class="trend-value neutral">→ 0.0%</span>
+                            </div>
+                        </div>
+                        <div class="exec-metric-target">Sept: $9.99M</div>
+                        <div class="exec-status-badge stable">Stable</div>
+                    </div>
                 </div>
             </div>
-        </div>
         
         <!-- Operations Status - Stand Alone Reports Only -->
         <div class="section-divider" data-standalone-section="true"></div>

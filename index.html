@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sales Ops Analytics</title>
+    
+    <!-- GSAP for cinematic animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    
+    <!-- Barba.js for seamless page transitions -->
+    <script src="https://cdn.jsdelivr.net/npm/@barba/core@2.9.7/dist/barba.umd.js"></script>
+    
     <style>
         :root {
             --bg: #ffffff;
@@ -210,26 +217,52 @@
             transform: rotate(0deg) scale(1);
         }
         
-        /* Executive Summary Section */
+        /* Executive Summary Section - Tim Cook Level Polish */
         .exec-summary {
-            background: var(--bg);
+            background: linear-gradient(135deg, var(--panel) 0%, var(--accent) 100%);
             border: 1px solid var(--border);
             border-radius: 18px;
             padding: 28px;
             margin-bottom: 32px;
             box-shadow: 0 4px 20px rgba(0,0,0,.08), 0 1px 4px rgba(0,0,0,.06);
-            backdrop-filter: blur(10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        
+        [data-theme="dark"] .exec-summary {
+            background: linear-gradient(135deg, var(--panel) 0%, rgba(26, 31, 46, 0.8) 100%);
+            box-shadow: 0 4px 20px rgba(0,0,0,.2);
+        }
+        
+        .exec-summary-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--line);
         }
         
         .exec-summary-title {
             font-size: 22px;
-            font-weight: 800;
-            margin-bottom: 24px;
+            font-weight: 700;
             color: var(--ink);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             letter-spacing: -0.01em;
+        }
+        
+        .exec-summary-title::before {
+            content: '📊';
+            font-size: 24px;
+        }
+        
+        .exec-summary-updated {
+            font-size: 12px;
+            color: var(--muted);
+            font-weight: 500;
         }
         
         .kpi-grid {
@@ -250,12 +283,21 @@
             background: var(--bg);
             border: 1px solid var(--border);
             border-radius: 14px;
-            padding: 20px 18px;
+            padding: 20px;
             box-shadow: 0 2px 8px rgba(0,0,0,.06), 0 1px 3px rgba(0,0,0,.08);
             min-width: 0;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 160px;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        
+        [data-theme="dark"] .kpi-card {
+            background: rgba(17, 24, 39, 0.6);
         }
         
         .kpi-card::before {
@@ -267,13 +309,18 @@
             height: 3px;
             background: linear-gradient(90deg, var(--brand), var(--brand-2));
             opacity: 0;
-            transition: opacity 0.2s ease;
+            transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         .kpi-card:hover {
-            box-shadow: 0 4px 16px rgba(0,0,0,.1), 0 2px 6px rgba(0,0,0,.08);
-            transform: translateY(-2px);
             border-color: var(--brand);
+            box-shadow: 0 8px 24px rgba(75, 123, 236, 0.12);
+            transform: translateY(-2px);
+        }
+        
+        [data-theme="dark"] .kpi-card:hover {
+            background: rgba(17, 24, 39, 0.9);
+            box-shadow: 0 8px 24px rgba(91, 142, 247, 0.15);
         }
         
         .kpi-card:hover::before {
@@ -291,13 +338,25 @@
         }
         
         .kpi-value {
-            font-size: 28px;
-            font-weight: 800;
+            font-size: 32px;
+            font-weight: 700;
             color: var(--ink);
             margin-bottom: 10px;
             font-variant-numeric: tabular-nums;
             line-height: 1.1;
             letter-spacing: -0.02em;
+        }
+        
+        @media (max-width: 1400px) {
+            .kpi-value {
+                font-size: 28px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .kpi-value {
+                font-size: 26px;
+            }
         }
         
         .kpi-trend {
@@ -1672,9 +1731,9 @@
     <div class="wrap">
         <!-- Executive Summary - Q4 2025 KPIs -->
         <div class="exec-summary">
-            <div class="exec-summary-title">
-                📊 Q4 2025 Executive Summary
-                <span style="font-size: 12px; font-weight: 600; color: var(--muted); margin-left: auto;">Updated: Nov 6, 2025</span>
+            <div class="exec-summary-header">
+                <div class="exec-summary-title">Q4 2025 Executive Summary</div>
+                <div class="exec-summary-updated">Updated: Nov 6, 2025</div>
             </div>
             <div class="kpi-grid">
                 <div class="kpi-card">
@@ -2612,6 +2671,94 @@
             
             // Make function globally available for refresh button
             window.checkAutomationStatus = checkAutomationStatus;
+        })();
+    </script>
+    
+    <!-- GSAP Cinematic Animations -->
+    <script>
+        (function() {
+            // Wait for GSAP to load
+            if (typeof gsap === 'undefined') {
+                console.warn('GSAP not loaded, skipping animations');
+                return;
+            }
+
+            // Animate Executive Summary on load
+            gsap.to('.exec-summary', {
+                opacity: 1,
+                y: 0,
+                duration: 0.8,
+                ease: 'power3.out',
+                delay: 0.2
+            });
+
+            // Stagger animation for KPI cards
+            gsap.to('.kpi-card', {
+                opacity: 1,
+                y: 0,
+                duration: 0.6,
+                stagger: 0.08,
+                ease: 'power2.out',
+                delay: 0.4
+            });
+
+            // Animate metric cards on hover with GSAP
+            document.querySelectorAll('.kpi-card').forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    gsap.to(card, {
+                        scale: 1.02,
+                        duration: 0.3,
+                        ease: 'power2.out'
+                    });
+                });
+                
+                card.addEventListener('mouseleave', () => {
+                    gsap.to(card, {
+                        scale: 1,
+                        duration: 0.3,
+                        ease: 'power2.out'
+                    });
+                });
+            });
+
+            // Animate metric values on scroll into view
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const value = entry.target;
+                        gsap.from(value, {
+                            scale: 0.8,
+                            opacity: 0,
+                            duration: 0.6,
+                            ease: 'back.out(1.7)'
+                        });
+                        observer.unobserve(value);
+                    }
+                });
+            }, { threshold: 0.3 });
+
+            // Observe metric values
+            document.querySelectorAll('.kpi-value').forEach(value => {
+                observer.observe(value);
+            });
+
+            // Smooth scroll animations for page elements
+            const scrollElements = document.querySelectorAll('.dashboard-card, .section-title');
+            const scrollObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        gsap.from(entry.target, {
+                            opacity: 0,
+                            y: 30,
+                            duration: 0.6,
+                            ease: 'power2.out'
+                        });
+                        scrollObserver.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            scrollElements.forEach(el => scrollObserver.observe(el));
         })();
     </script>
 </body>

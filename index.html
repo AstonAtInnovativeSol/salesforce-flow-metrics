@@ -233,14 +233,14 @@
         .kpi-grid {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
-            gap: 16px;
+            gap: 12px;
             margin-bottom: 20px;
-            overflow-x: auto;
+            overflow-x: hidden;
         }
         
         @media (max-width: 1400px) {
             .kpi-grid {
-                grid-template-columns: repeat(6, minmax(200px, 1fr));
+                gap: 10px;
             }
         }
         
@@ -248,21 +248,22 @@
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 16px;
+            padding: 12px;
             box-shadow: 0 1px 3px rgba(0,0,0,.1);
+            min-width: 0;
         }
         
         .kpi-label {
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: .08em;
             color: var(--muted);
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
         
         .kpi-value {
-            font-size: 24px;
+            font-size: 20px;
             font-weight: 900;
             color: var(--ink);
             margin-bottom: 4px;
@@ -296,20 +297,20 @@
         }
         
         .kpi-target {
-            font-size: 11px;
+            font-size: 10px;
             color: var(--muted);
-            margin-top: 6px;
+            margin-top: 4px;
         }
         
         .kpi-status {
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            padding: 3px 8px;
+            padding: 2px 6px;
             border-radius: 6px;
-            font-size: 10px;
+            font-size: 9px;
             font-weight: 700;
-            margin-top: 6px;
+            margin-top: 4px;
         }
         
         .kpi-status.on-track {
@@ -330,9 +331,9 @@
         /* Multi-timeframe badges */
         .kpi-timeframes {
             display: flex;
-            gap: 8px;
-            margin-top: 12px;
-            margin-bottom: 8px;
+            gap: 6px;
+            margin-top: 10px;
+            margin-bottom: 6px;
             flex-wrap: nowrap;
         }
         
@@ -340,12 +341,12 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 6px;
-            padding: 6px 10px;
+            gap: 4px;
+            padding: 4px 8px;
             background: var(--accent);
             border: 1px solid var(--border);
             border-radius: 6px;
-            font-size: 10px;
+            font-size: 9px;
             font-weight: 600;
             flex: 1;
             min-width: 0;
@@ -358,7 +359,7 @@
         }
         
         .timeframe-badge-label {
-            font-size: 8px;
+            font-size: 7px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.05em;
@@ -369,10 +370,10 @@
         .timeframe-change {
             display: inline-flex;
             align-items: center;
-            gap: 3px;
-            font-size: 9px;
+            gap: 2px;
+            font-size: 8px;
             font-weight: 700;
-            padding: 2px 6px;
+            padding: 2px 5px;
             border-radius: 4px;
         }
         
@@ -815,10 +816,10 @@
         .automation-status-badge {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 11px;
+            gap: 4px;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 10px;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1040,20 +1041,20 @@
         .controls-group {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
             align-items: flex-end;
             flex-shrink: 0;
         }
         
         .filter-controls {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             align-items: center;
             flex-shrink: 0;
         }
         
         .filter-label {
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 700;
             color: var(--muted);
             text-transform: uppercase;
@@ -1075,12 +1076,12 @@
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            padding: 4px 10px;
+            padding: 3px 8px;
             border-radius: 6px;
             border: 1px solid var(--border);
             background: var(--bg);
             color: var(--muted);
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1102,13 +1103,13 @@
         .script-runner-btn {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            padding: 4px 10px;
+            gap: 4px;
+            padding: 3px 8px;
             border-radius: 6px;
             border: 1px solid var(--border);
             background: var(--bg);
             color: var(--muted);
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1561,8 +1562,15 @@
                 <div class="title">Sales Ops Analytics</div>
                 <div class="subtitle">Select a dashboard below to view detailed metrics and insights.</div>
             </div>
-            <!-- Controls Group -->
+            <!-- Controls Group - Stacked Vertically -->
             <div class="controls-group">
+                <!-- Operation Status -->
+                <div class="filter-controls">
+                    <div class="filter-label">Operation Status:</div>
+                    <a href="#automation-status" id="automationStatusBadge" class="automation-status-badge healthy" onclick="document.getElementById('automationStatusCard')?.scrollIntoView({behavior: 'smooth', block: 'start'}); return false;" title="Automation Status - Click to view details">
+                        <span>Automation</span>
+                    </a>
+                </div>
                 <!-- Filter Controls -->
                 <div class="filter-controls">
                     <div class="filter-label">View:</div>
@@ -1590,9 +1598,6 @@
                 <div id="scriptStatus" class="script-status" style="display: none;"></div>
             </div>
             <div style="display: flex; gap: 12px; align-items: center; flex-shrink: 0;">
-                <a href="#automation-status" id="automationStatusBadge" class="automation-status-badge healthy" onclick="document.getElementById('automationStatusCard')?.scrollIntoView({behavior: 'smooth', block: 'start'}); return false;" title="Automation Status - Click to view details">
-                    <span>Automation</span>
-                </a>
                 <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light theme">
                 <svg class="theme-toggle-icon sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="5"></circle>
@@ -1790,7 +1795,7 @@
         <div class="section-divider"></div>
         <div class="section-title">Operations</div>
         <div class="dashboard-grid">
-            <div id="automationStatusCard" class="dashboard-card automation-status-card healthy" data-standalone="false">
+            <div id="automationStatusCard" class="dashboard-card automation-status-card healthy" data-standalone="true">
                 <div class="card-icon">⚙️</div>
                 <div class="card-header-row">
                     <div class="card-title">Automation Status</div>

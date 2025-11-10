@@ -1,0 +1,36 @@
+{
+  "timestamp": "2025-11-10T14:52:35Z",
+  "jobs": [
+    {
+      "name": "com.user.daily-trailingProfServ",
+      "status": "loaded",
+      "health": "warning",
+      "stdout_log": {"exists":true,"size":33689,"modified":"2025-11-10T08:30:16","has_errors":false},
+      "stderr_log": {"exists":true,"size":5434,"modified":"2025-11-10T08:30:07","has_errors":true}
+    },
+    {
+      "name": "com.user.daily-SnapshotSummary",
+      "status": "loaded",
+      "health": "warning",
+      "stdout_log": {"exists":true,"size":34475,"modified":"2025-11-10T08:30:36","has_errors":false},
+      "stderr_log": {"exists":true,"size":1925,"modified":"2025-11-10T08:30:05","has_errors":true}
+    },
+    {
+      "name": "com.user.test-trailingProfServ",
+      "status": "not_loaded",
+      "health": "critical",
+      "stdout_log": {"exists":true,"size":3329,"modified":"2025-10-30T20:15:14","has_errors":false},
+      "stderr_log": {"exists":true,"size":1413,"modified":"2025-10-30T20:15:06","has_errors":true}
+    },
+    {
+      "name": "com.user.test-SnapshotSummary",
+      "status": "not_loaded",
+      "health": "critical",
+      "stdout_log": {"exists":true,"size":3789,"modified":"2025-10-30T20:15:29","has_errors":false},
+      "stderr_log": {"exists":true,"size":1190,"modified":"2025-10-30T20:15:04","has_errors":true}
+    }
+  ],
+  "overall_health": "critical",
+  "total_jobs": 4,
+  "healthy_jobs": 0
+}

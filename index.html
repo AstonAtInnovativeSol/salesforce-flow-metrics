@@ -248,7 +248,7 @@
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 12px;
+            padding: 18px 16px;
             box-shadow: 0 1px 3px rgba(0,0,0,.1);
             min-width: 0;
         }
@@ -259,14 +259,14 @@
             text-transform: uppercase;
             letter-spacing: .08em;
             color: var(--muted);
-            margin-bottom: 6px;
+            margin-bottom: 10px;
         }
         
         .kpi-value {
             font-size: 20px;
             font-weight: 900;
             color: var(--ink);
-            margin-bottom: 4px;
+            margin-bottom: 8px;
             font-variant-numeric: tabular-nums;
         }
         
@@ -276,6 +276,7 @@
             display: flex;
             align-items: center;
             gap: 4px;
+            margin-bottom: 10px;
         }
         
         .kpi-trend.up {
@@ -299,18 +300,19 @@
         .kpi-target {
             font-size: 10px;
             color: var(--muted);
-            margin-top: 4px;
+            margin-top: 0;
+            margin-bottom: 8px;
         }
         
         .kpi-status {
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            padding: 2px 6px;
+            padding: 4px 8px;
             border-radius: 6px;
             font-size: 9px;
             font-weight: 700;
-            margin-top: 4px;
+            margin-top: 0;
         }
         
         .kpi-status.on-track {
@@ -332,8 +334,8 @@
         .kpi-timeframes {
             display: flex;
             gap: 6px;
-            margin-top: 10px;
-            margin-bottom: 6px;
+            margin-top: 0;
+            margin-bottom: 12px;
             flex-wrap: nowrap;
         }
         
@@ -1791,10 +1793,10 @@
             </div>
         </div>
         
-        <!-- Operations Status -->
-        <div class="section-divider"></div>
-        <div class="section-title">Operations</div>
-        <div class="dashboard-grid">
+        <!-- Operations Status - Stand Alone Reports Only -->
+        <div class="section-divider" data-standalone-section="true"></div>
+        <div class="section-title" data-standalone-section="true">Operations</div>
+        <div class="dashboard-grid" data-standalone-section="true">
             <div id="automationStatusCard" class="dashboard-card automation-status-card healthy" data-standalone="true">
                 <div class="card-icon">⚙️</div>
                 <div class="card-header-row">
@@ -2144,14 +2146,61 @@
                     }
                 });
                 
-                // Hide/show section titles based on filter
+                // Hide/show section titles, dividers, and grids based on filter
                 sectionTitles.forEach(title => {
+                    const isStandaloneSection = title.getAttribute('data-standalone-section') === 'true';
                     if (showStandalone) {
-                        // Hide all section titles when showing standalone reports
-                        title.classList.add('hidden');
+                        // Show standalone sections, hide regular sections
+                        if (isStandaloneSection) {
+                            title.classList.remove('hidden');
+                        } else {
+                            title.classList.add('hidden');
+                        }
                     } else {
-                        // Show all section titles when showing regular dashboards
-                        title.classList.remove('hidden');
+                        // Show regular sections, hide standalone sections
+                        if (isStandaloneSection) {
+                            title.classList.add('hidden');
+                        } else {
+                            title.classList.remove('hidden');
+                        }
+                    }
+                });
+                
+                // Hide/show section dividers based on filter
+                const sectionDividers = document.querySelectorAll('.section-divider');
+                sectionDividers.forEach(divider => {
+                    const isStandaloneSection = divider.getAttribute('data-standalone-section') === 'true';
+                    if (showStandalone) {
+                        if (isStandaloneSection) {
+                            divider.classList.remove('hidden');
+                        } else {
+                            divider.classList.add('hidden');
+                        }
+                    } else {
+                        if (isStandaloneSection) {
+                            divider.classList.add('hidden');
+                        } else {
+                            divider.classList.remove('hidden');
+                        }
+                    }
+                });
+                
+                // Hide/show dashboard grids for standalone sections
+                const dashboardGrids = document.querySelectorAll('.dashboard-grid');
+                dashboardGrids.forEach(grid => {
+                    const isStandaloneSection = grid.getAttribute('data-standalone-section') === 'true';
+                    if (showStandalone) {
+                        if (isStandaloneSection) {
+                            grid.classList.remove('hidden');
+                        } else {
+                            grid.classList.add('hidden');
+                        }
+                    } else {
+                        if (isStandaloneSection) {
+                            grid.classList.add('hidden');
+                        } else {
+                            grid.classList.remove('hidden');
+                        }
                     }
                 });
             }

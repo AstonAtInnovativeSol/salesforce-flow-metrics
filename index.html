@@ -265,35 +265,44 @@
             font-weight: 500;
         }
         
-        /* CRITICAL FIX: Executive metrics grid with proper spacing */
+        /* CRITICAL FIX: Executive metrics grid with proper spacing and centering - ALL IN ONE ROW */
         .exec-metrics-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            grid-template-columns: repeat(5, 1fr);
             gap: var(--card-gap, 24px);
             width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
         }
         
         @media (min-width: 1400px) {
             .exec-metrics-grid {
-                grid-template-columns: repeat(6, 1fr);
+                grid-template-columns: repeat(5, 1fr);
+                max-width: calc(5 * 240px + 4 * 24px); /* 5 cards + 4 gaps */
+                margin: 0 auto;
             }
         }
         
         @media (min-width: 1024px) and (max-width: 1399px) {
             .exec-metrics-grid {
-                grid-template-columns: repeat(3, 1fr);
+                grid-template-columns: repeat(5, 1fr);
+                max-width: calc(5 * 220px + 4 * 20px); /* 5 cards + 4 gaps, slightly smaller */
+                margin: 0 auto;
             }
         }
         
         @media (min-width: 768px) and (max-width: 1023px) {
             .exec-metrics-grid {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: repeat(3, 1fr);
+                max-width: 100%;
             }
         }
         
         @media (max-width: 767px) {
             .exec-metrics-grid {
                 grid-template-columns: 1fr;
+                width: 100%;
+                max-width: 100%;
             }
         }
         
@@ -1988,7 +1997,7 @@
             <!-- Q4 Executive Summary - OPTIMIZED LAYOUT -->
             <div class="exec-summary gsap-fade-in">
                 <div class="exec-summary-header">
-                    <div class="exec-summary-title">Q4 2025 Executive Summary</div>
+                    <div class="exec-summary-title">Executive Summary</div>
                     <div class="exec-summary-updated">Updated: Nov 6, 2025</div>
                 </div>
                 
@@ -2016,27 +2025,27 @@
                         <div class="exec-status-badge exceeding">Exceeded Oct Target by +9%</div>
                     </div>
 
-                    <!-- Metric 2: Sales Cycle Time -->
+                    <!-- Metric 2: Committed Pipeline Value -->
                     <div class="exec-metric-card">
-                        <div class="exec-metric-header">Sales Cycle Time</div>
-                        <div class="exec-metric-value">38 days</div>
-                        <div class="exec-metric-change positive">↓ -10% vs. Sept (42 days)</div>
+                        <div class="exec-metric-header">Committed Pipeline Value</div>
+                        <div class="exec-metric-value">$5.21M</div>
+                        <div class="exec-metric-change positive">↑ +1% vs. Sept</div>
                         <div class="exec-metric-trends">
                             <div class="trend-item">
                                 <span class="trend-label">WoW</span>
-                                <span class="trend-value down">↓ -3d</span>
+                                <span class="trend-value up">↑ +2%</span>
                             </div>
                             <div class="trend-item">
                                 <span class="trend-label">MoM</span>
-                                <span class="trend-value down">↓ -5d</span>
+                                <span class="trend-value up">↑ +4%</span>
                             </div>
                             <div class="trend-item">
                                 <span class="trend-label">DoD</span>
-                                <span class="trend-value neutral">→ 0.0d</span>
+                                <span class="trend-value up">↑ +1%</span>
                             </div>
                         </div>
-                        <div class="exec-metric-target">Target: Reduce cycle time</div>
-                        <div class="exec-status-badge on-track">On Track</div>
+                        <div class="exec-metric-target">Target: $5.8M (Nov)</div>
+                        <div class="exec-status-badge exceeding">Exceeded Oct Target by +1%</div>
                     </div>
 
                     <!-- Metric 3: Pipeline Multiple -->
@@ -2060,29 +2069,6 @@
                         </div>
                         <div class="exec-metric-target">Target: Maintain 4.0x+</div>
                         <div class="exec-status-badge exceeding">Exceeding Target</div>
-                    </div>
-
-                    <!-- Metric 4: DQ Qualifier -->
-                    <div class="exec-metric-card">
-                        <div class="exec-metric-header">DQ Qualifier</div>
-                        <div class="exec-metric-value">25%</div>
-                        <div class="exec-metric-change negative">↓ -7 pts vs. Sept (32%)</div>
-                        <div class="exec-metric-trends">
-                            <div class="trend-item">
-                                <span class="trend-label">WoW</span>
-                                <span class="trend-value down">↓ -5%</span>
-                            </div>
-                            <div class="trend-item">
-                                <span class="trend-label">MoM</span>
-                                <span class="trend-value down">↓ -5%</span>
-                            </div>
-                            <div class="trend-item">
-                                <span class="trend-label">DoD</span>
-                                <span class="trend-value neutral">→ 0.0%</span>
-                            </div>
-                        </div>
-                        <div class="exec-metric-target">Target: < 80%</div>
-                        <div class="exec-status-badge below-target">Well Below Target</div>
                     </div>
 
                     <!-- Metric 5: Target Bookings -->
@@ -2995,4 +2981,3 @@
     </script>
 </body>
 </html>
-
